@@ -1,15 +1,5 @@
 #include "Frame.h"
 
-Frame::Frame()
-{
-    //
-}
-
-Frame::~Frame()
-{
-    //
-}
-
 void Frame::SetFlag(const Flag& flag) 
 {
     m_Flag = flag;
@@ -25,6 +15,11 @@ void Frame::SetCurrentTrialNumber(const Trial& trial)
     m_currentTrialNumber = trial;
 }
 
+void Frame::SetTrialPoints(const Trial& trial, const unsigned short points) 
+{
+    m_TrialPoints.at(static_cast<unsigned short>(trial)) = points;
+}
+
 Flag Frame::GetFlag() const
 {
     return m_Flag;
@@ -38,4 +33,9 @@ bool Frame::is10thFrame() const
 Trial Frame::GetCurrentTrialNumber() const
 {
     return m_currentTrialNumber;
+}
+
+unsigned short Frame::GetTrialPoints(const Trial& trial) const
+{
+    return m_TrialPoints.at(static_cast<unsigned short>(trial));
 }

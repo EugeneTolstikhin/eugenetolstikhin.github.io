@@ -12,8 +12,6 @@ file(GLOB SOURCES "src/*.cpp")
 
 add_executable(Bowling ${SOURCES})
 
+add_subdirectory (tests)
 enable_testing ()
-#add_test (NAME BowlingFrameTests COMMAND FrameTest)
-#add_test (NAME BowlingGameTests COMMAND GameTest)
-#add_test (NAME BowlingPlayerTests COMMAND PlayerTest)
-#add_test (NAME BowlingLaneTests COMMAND LaneTest)
+add_test (NAME BowlingTests COMMAND TestBase)

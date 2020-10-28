@@ -30,3 +30,5 @@
 - [ ] Implement each class according to the SOLID principles
 - [ ] Cover each class with proper unit test
 - [ ] Fill in readme
+
+- [ ] Refactor CMakeLists.txt for unit tests
