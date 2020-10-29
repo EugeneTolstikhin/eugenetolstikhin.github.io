@@ -10,10 +10,10 @@ class Lane : public ILane
 {
 public:
     Lane();
+    Lane(const std::vector<std::string>&);
     virtual ~Lane();
 
     virtual void Play();
-    virtual void AddPlayer(const IPlayer&);
 private:
 
     std::vector<std::unique_ptr<IPlayer>> m_Players;

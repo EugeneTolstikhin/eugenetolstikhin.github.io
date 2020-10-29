@@ -7,8 +7,7 @@ public:
     IPlayer() = default;
     virtual ~IPlayer() = default;
 
-    virtual void GetName() const = 0;
-    virtual void GetGame() const = 0;
+    virtual void Play() = 0;
 };
 
 #endif // __IPLAYER_H__
