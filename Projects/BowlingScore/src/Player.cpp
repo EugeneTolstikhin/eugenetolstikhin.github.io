@@ -18,10 +18,11 @@ Player::~Player()
 
 void Player::Play()
 {
-    m_Game->ThrowBall();
     while (m_Game->IsAnotherThrowAllowed())
     {
         m_Game->ThrowBall();
     }
-    m_Game->CloseFrame();
+    m_Game->CloseFrame([]{
+        //TODO: Implement game over functionality
+    });
 }

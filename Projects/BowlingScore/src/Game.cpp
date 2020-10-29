@@ -1,14 +1,14 @@
 #include "Game.h"
 #include "Frame.h"
 
-Game::Game() : m_Frames(MAX_FRAMES_AMOUNT)
+Game::Game()
 {
     for (auto iter = m_Frames.begin(); iter != m_Frames.end(); ++iter)
     {
-        m_Frames.emplace(iter, new Frame);
+        m_Frames.emplace_front(new Frame);
     }
 
-    m_currFrame = *(m_Frames.begin());
+    m_currFrame = std::make_pair(*(m_Frames.begin()), m_Frames.begin());
 }
 
 Game::~Game()
@@ -18,23 +18,27 @@ Game::~Game()
 
 void Game::ThrowBall()
 {
-    points = waitForPoints();
-    m_currFrame->SetTrialPoints()
+    auto points = waitForPoints();
+    m_currFrame.first->SetTrialPoints(points);
 }
 
-bool Game::IsAnotherThrowAllowed() 
+bool Game::IsAnotherThrowAllowed() const noexcept 
 {
-    //
+    m_currFrame.first->isAllowedThrow();
 }
 
-void Game::CloseFrame() 
+void Game::CloseFrame(std::function<void()> gameOver) 
 {
-    //
-}
+    m_currFrame.second = ++m_currFrame.second;
 
-void Game::GameOver()
-{
-    //
+    if (m_currFrame.second == m_Frames.end())
+    {
+        gameOver();
+    }
+    else
+    {
+        m_currFrame.first = *m_currFrame.second;
+    }
 }
 
 unsigned short Game::waitForPoints() 
