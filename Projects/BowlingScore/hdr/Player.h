@@ -9,12 +9,13 @@ class Player : public IPlayer
 {
 public:
     Player();
+    Player(const std::string &);
     virtual ~Player();
 
-    virtual void GetName() const;
-    virtual void GetGame() const;
-private:
+    virtual void Play();
 
+private:
+    std::string m_PlayerName;
     std::unique_ptr<IGame> m_Game;
 };
 
