@@ -1,6 +1,8 @@
 #ifndef __IGAME_H__
 #define __IGAME_H__
 
+#include <functional>
+
 class IGame
 {
 public:
@@ -8,9 +10,8 @@ public:
     virtual ~IGame() = default;
 
     virtual void ThrowBall() = 0;
-    virtual bool IsAnotherThrowAllowed() = 0;
-    virtual void CloseFrame() = 0;
-    virtual void GameOver() = 0;
+    virtual bool IsAnotherThrowAllowed() const noexcept = 0;
+    virtual void CloseFrame(std::function<void()>) = 0;
 };
 
 #endif // __IGAME_H__
