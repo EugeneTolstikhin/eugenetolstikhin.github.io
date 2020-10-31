@@ -10,13 +10,17 @@ include_directories(
 
 set (CMAKE_CXX_STANDARD 17)
 set (GTEST_INCLUDE gtest gtest_main pthread)
-set (FRAME_INC ../interface/IFrame.h ../hdr/Frame.h ../src/Frame.cpp)
+set (FRAME_INC ../interface/IFrame.h ../hdr/Frame.h ../src/Frame.cpp hdr/FrameTest.hpp src/FrameTest.cpp)
+set (GAME_INC ../interface/IGame.h ../hdr/Game.h ../src/Game.cpp hdr/GameTest.hpp src/GameTest.cpp)
+set (LANE_INC ../interface/ILane.h ../hdr/Lane.h ../src/Lane.cpp hdr/LaneTest.hpp src/LaneTest.cpp)
+set (PLAYER_INC ../interface/IPlayer.h ../hdr/Player.h ../src/Player.cpp hdr/PlayerTest.hpp src/PlayerTest.cpp)
 
 # Add test cpp file
 add_executable (TestBase
     ${FRAME_INC}
-    hdr/FrameTest.hpp
-    src/FrameTest.cpp
+    ${GAME_INC}
+    ${LANE_INC}
+    ${PLAYER_INC}
 )
 
 # Link test executable against gtest & gtest_main

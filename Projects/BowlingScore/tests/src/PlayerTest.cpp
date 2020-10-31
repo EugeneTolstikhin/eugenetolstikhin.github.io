@@ -2,7 +2,7 @@
 
 #include "Player.h"
 
-TEST(PlayerTest, InitPlayerTestCase)
+TEST(TestBase, InitPlayerTestCase)
 {
     Player player;
 }
