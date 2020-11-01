@@ -11,7 +11,7 @@ public:
 
     virtual void ThrowBall() = 0;
     virtual bool IsAnotherThrowAllowed() const noexcept = 0;
-    virtual void CloseFrame(std::function<void()>) = 0;
+    virtual void CloseFrame(std::function<void()> gameover) = 0;
 };
 
 #endif // __IGAME_H__

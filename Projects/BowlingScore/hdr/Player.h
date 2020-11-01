@@ -12,7 +12,7 @@ public:
     Player(const std::string &);
     virtual ~Player();
 
-    virtual void Play();
+    virtual void Play(std::function<void()> gameover);
 
 private:
     std::string m_PlayerName;

@@ -16,13 +16,14 @@ Player::~Player()
     //
 }
 
-void Player::Play()
+void Player::Play(std::function<void()> gameover)
 {
     while (m_Game->IsAnotherThrowAllowed())
     {
         m_Game->ThrowBall();
     }
-    m_Game->CloseFrame([]{
+    m_Game->CloseFrame([&gameover]{
         //TODO: Implement game over functionality
+        gameover();
     });
 }

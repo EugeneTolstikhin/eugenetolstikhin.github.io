@@ -19,10 +19,13 @@ Lane::~Lane()
     //
 }
 
-void Lane::Play()
+void Lane::Play(std::function<void()> gameover)
 {
     for (auto& player: m_Players)
     {
-        player->Play();
+        player->Play([&gameover]{
+            //TODO: Implement game over functionality
+            gameover();
+        });
     }
 }
