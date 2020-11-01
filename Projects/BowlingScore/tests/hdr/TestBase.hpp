@@ -1,3 +1,6 @@
+#ifndef __TESTBASE_H__
+#define __TESTBASE_H__
+
 #include <gtest/gtest.h>
 #include "FrameTest.hpp"
 #include "GameTest.hpp"
@@ -78,3 +81,4 @@ void TestBase::TearDownTestCase()
 	pLane = nullptr;
 	pPlayer = nullptr;
 }
+#endif // __TESTBASE_H__

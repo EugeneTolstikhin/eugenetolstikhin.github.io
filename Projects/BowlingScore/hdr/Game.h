@@ -14,7 +14,7 @@ public:
 
     virtual void ThrowBall() override;
     virtual bool IsAnotherThrowAllowed() const noexcept override;
-    virtual void CloseFrame(std::function<void()>) override;
+    virtual void CloseFrame(std::function<void()> gameover) override;
 
 private:
     unsigned short waitForPoints();

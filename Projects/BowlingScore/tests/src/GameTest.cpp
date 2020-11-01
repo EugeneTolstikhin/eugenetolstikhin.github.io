@@ -1,8 +1,6 @@
-#include <gtest/gtest.h>
+#include "GameTest.hpp"
 
-#include "Game.h"
-
-TEST(GameTest, InitGameTestCase)
+TEST(TestBase, InitGameTestCase)
 {
     Game game;
 }

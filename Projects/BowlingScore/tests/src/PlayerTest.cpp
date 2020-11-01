@@ -1,6 +1,4 @@
-#include <gtest/gtest.h>
-
-#include "Player.h"
+#include "PlayerTest.hpp"
 
 TEST(TestBase, InitPlayerTestCase)
 {

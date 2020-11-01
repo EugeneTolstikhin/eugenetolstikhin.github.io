@@ -1,8 +1,6 @@
-#include <gtest/gtest.h>
+#include "LaneTest.hpp"
 
-#include "Lane.h"
-
-TEST(LaneTest, InitLaneTestCase)
+TEST(TestBase, InitLaneTestCase)
 {
     Lane lane;
 }
