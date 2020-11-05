@@ -61,6 +61,12 @@ The client should never be forced to implement the interface that it doesn't use
 ***What does this mean for this project:***
 Each interface class should contains full list of the methods that need to be overriden and this list of methods should be as small as it is needed for the fully usage inside of each instance of thie class. No extra functions that will not be needed outside the interface should be included in that interface and overriden by all child classes, especially for BackupRestore and Logging classes
 
+## D (Dependency inversion principle)
+High level modules should not depend on low level modules, but on their abstractions. Abstractions should not depend on details. Details should depend on abstractions
+
+***What does this mean for this project:***
+Logging of Backup/Restore class should not depend on the specific logging way but only on the Logger interface. Each class should not depend on the low level of Backup/Restore implementation, but only on their interfaces
+
 # Design patterns
 
 ## TODO:
@@ -92,8 +98,9 @@ Define which patterns should be used for this project
 - [ ] Implement each class according to the SOLID principles
 - [ ] Implement the proper design patterns
 - [ ] Cover each class with proper unit test
-- [ ] Fill in readme
 - [ ] Refactor CMakeLists.txt for unit tests
+- [ ] Fill in readme
+- [ ] Fill in SOLID part of ReadMe with specific code examples
 
 - [ ] Create the process (independent app) relates for throwing the ball and calculating the points which will send the amount of points to the score app
 - [ ] Create the process (independent app) relates to lane management and other admin parts
