@@ -4,7 +4,7 @@
 
 In this section the architectures' principles will be described, which are used for this project
 
-### S.O.L.I.D. Principles
+## S.O.L.I.D. Principles
 
 S.O.L.I.D. - an acronym for 5 first Object Oriented Design (OOD) principles:
 S - Single responsibility principle
@@ -15,18 +15,25 @@ D - Dependency inversion principle
 
 Now, let's try to describe each principle with the examples scpecifically for this project.
 
-- # S (Single responsibility principle)
+## S (Single responsibility principle)
 Each class should have one and only one reason to change. That means that class should have only one job.
 
-What does this meas for this project:
+***What does this mean for this project:***
 - Eacn bowling hall can contain 1 or more bowling lanes -> The only one job - run the array of lanes
 - Each bowling lane can contain many players, who can throw the ball one-by-one. This lane contains only 1 score table. -> The only one job - run the score of the players
 - Each player, when he/she plays the game, has his/her own row in the score table -> The only one job - run his/her own game (row in the table)
 - Each game (row in the table) has the frames (in classical bowling, there are 10 frames) -> The only one job - run the array of the frames
 - Each frame has the score points, which are calculated according to the rules -> The only one job - proper calculating the points according to the bowling rules
 
-- TBD: The class for Backup/Restore the score (SOLID principles need to be taken into account)
-- TBD: The class for providing logs (SOLID principles need to be taken into account)
+- ***TDB:*** The class that listen network and accept the score of each ball throw -> The only one job - listen the network and accept the input data
+- ***TBD:*** The class for Backup/Restore the score (SOLID principles need to be taken into account) -> The only one job - provide the safe mechanism of keeping the data in case of unexpected crash
+- ***TBD:*** The class for providing logs (SOLID principles need to be taken into account) -> The ony one job - provide proper log format for aech class
+
+## O (Open-close principle)
+Object or entities should be open for extension, but closed for modification.
+
+***What does this mean for this project:***
+Each class that accept the input score data from the outside should override the abstract class (e.g. INetworkData), which should contain all the common interface functions described (pure virtual functions) and each class should all the common interface functions implement by itself 
 
 ### Design patterns
 
