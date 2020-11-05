@@ -27,7 +27,7 @@ Each class should have one and only one reason to change. That means that class 
 
 - ***TDB:*** The class that listen network and accept the score of each ball throw -> The only one job - listen the network and accept the input data
 - ***TBD:*** The class for Backup/Restore the score (SOLID principles need to be taken into account) -> The only one job - provide the safe mechanism of keeping the data in case of unexpected crash
-- ***TBD:*** The class for providing logs (SOLID principles need to be taken into account) -> The ony one job - provide proper log format for aech class
+- ***TBD:*** The class for providing logs (SOLID principles need to be taken into account) -> The ony one job - provide proper log format for each class
 
 ## O (Open-close principle)
 Object or entities should be open for extension, but closed for modification.
@@ -35,9 +35,29 @@ Object or entities should be open for extension, but closed for modification.
 ***What does this mean for this project:***
 Each class that accept the input score data from the outside should override the abstract class (e.g. INetworkData), which should contain all the common interface functions described (pure virtual functions) and each class should all the common interface functions implement by itself 
 
-### Design patterns
+## L (Liskov substitution principle)
+Object in the program should be replaceable with instances of their subtypes without altering the correctness of the program
 
-# TODO:
+***What does this mean for this project:***
+The Backup/Restore class for each database/file/etc. should be fully replaceable inside each class described above (should be overriden from the interface class, e.g. IBackupRestore, without any additional interface inside)
+
+Examples (all have the sxame interface as IBackupRestore, w/o any extensions):
+- BackupRestoreFile (IBackupRestoreFile)
+1) BackupRestoreXML
+2) BackupRestoreJSON
+3) etc.
+- BackupRestoreRDBMS (IBackupRestoreRDBMS)
+1) BackupRestoreSQLiteLocal
+2) BackupRestoreSQLiteServer
+3) etc.
+- BackupRestoreNoSQL (IBackupRestore)
+1) BackupRestoreMongoDBLocal
+2) BackupRestoreMongoDBServer
+3) etc.
+
+# Design patterns
+
+## TODO:
 Define which patterns should be used for this project
 
 ---
@@ -69,5 +89,5 @@ Define which patterns should be used for this project
 - [ ] Fill in readme
 - [ ] Refactor CMakeLists.txt for unit tests
 
-- [ ] Create the process (independent app) relates for thrwing the ball and calculating the points which will send the amount of points to the score app
+- [ ] Create the process (independent app) relates for throwing the ball and calculating the points which will send the amount of points to the score app
 - [ ] Create the process (independent app) relates to lane management and other admin parts
