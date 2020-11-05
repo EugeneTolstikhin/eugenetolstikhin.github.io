@@ -55,6 +55,12 @@ Examples (all have the sxame interface as IBackupRestore, w/o any extensions):
 2) BackupRestoreMongoDBServer
 3) etc.
 
+## I (Interface sagregation principle)
+The client should never be forced to implement the interface that it doesn't use or the client should never be forced to depend on the methods it doesn't use
+
+***What does this mean for this project:***
+Each interface class should contains full list of the methods that need to be overriden and this list of methods should be as small as it is needed for the fully usage inside of each instance of thie class. No extra functions that will not be needed outside the interface should be included in that interface and overriden by all child classes, especially for BackupRestore and Logging classes
+
 # Design patterns
 
 ## TODO:
