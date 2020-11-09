@@ -7,6 +7,7 @@
 #include "LaneTest.hpp"
 #include "PlayerTest.hpp"
 #include "ConsoleViewTest.hpp"
+#include "PointsListenerSimulationTest.hpp"
 #include "PointsListenerLocalTest.hpp"
 
 class TestBase : public testing::Test
@@ -30,6 +31,7 @@ public:
 	static TestLane* pLane;
 	static TestPlayer* pPlayer;
 	static TestConsoleView* pConsoleView;
+	static TestPointsListenerSimulation* pSimulationListener;
 	static TestPointsListenerLocal* pLocalListener;
 };
 
@@ -41,6 +43,7 @@ TestGame* TestBase::pGame = nullptr;
 TestLane* TestBase::pLane = nullptr;
 TestPlayer* TestBase::pPlayer = nullptr;
 TestConsoleView* TestBase::pConsoleView = nullptr;
+TestPointsListenerSimulation* TestBase::pSimulationListener = nullptr;
 TestPointsListenerLocal* TestBase::pLocalListener = nullptr;
 
 void TestBase::SetUpTestCase()
@@ -72,6 +75,11 @@ void TestBase::SetUpTestCase()
 		delete pConsoleView;
 	}
 
+	if ( pSimulationListener != nullptr )
+	{
+		delete pSimulationListener;
+	}
+
 	if ( pLocalListener != nullptr )
 	{
 		delete pLocalListener;
@@ -82,6 +90,7 @@ void TestBase::SetUpTestCase()
 	pLane = new TestLane;
 	pPlayer = new TestPlayer;
 	pConsoleView = new TestConsoleView;
+	pSimulationListener = new TestPointsListenerSimulation;
 	pLocalListener = new TestPointsListenerLocal;
 }
 
@@ -94,6 +103,7 @@ void TestBase::TearDownTestCase()
 	delete pLane;
 	delete pPlayer;
 	delete pConsoleView;
+	delete pSimulationListener;
 	delete pLocalListener;
 
     pFrame = nullptr;
@@ -101,6 +111,7 @@ void TestBase::TearDownTestCase()
 	pLane = nullptr;
 	pPlayer = nullptr;
 	pConsoleView = nullptr;
+	pSimulationListener = nullptr;
 	pLocalListener = nullptr;
 }
 #endif // __TESTBASE_H__
