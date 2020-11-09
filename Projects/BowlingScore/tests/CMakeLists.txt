@@ -15,6 +15,7 @@ set (GAME_INC ../interface/IGame.h ../hdr/Game.h ../src/Game.cpp hdr/GameTest.hp
 set (LANE_INC ../interface/ILane.h ../hdr/Lane.h ../src/Lane.cpp hdr/LaneTest.hpp src/LaneTest.cpp)
 set (PLAYER_INC ../interface/IPlayer.h ../hdr/Player.h ../src/Player.cpp hdr/PlayerTest.hpp src/PlayerTest.cpp)
 set (CONSOLE_VIEW_INC ../interface/IView.h ../hdr/ConsoleView.h ../src/ConsoleView.cpp hdr/ConsoleViewTest.hpp src/ConsoleViewTest.cpp)
+set (POINTS_LISTENER_LOCAL_INC ../interface/IPointListener.h ../hdr/PointsListenerLocal.h ../src/PointsListenerLocal.cpp hdr/PointsListenerLocalTest.hpp src/PointsListenerLocalTest.cpp)
 
 # Add test cpp file
 add_executable (TestBase
@@ -23,6 +24,7 @@ add_executable (TestBase
     ${LANE_INC}
     ${PLAYER_INC}
     ${CONSOLE_VIEW_INC}
+    ${POINTS_LISTENER_LOCAL_INC}
 )
 
 # Link test executable against gtest & gtest_main

@@ -7,6 +7,8 @@
 #include "LaneTest.hpp"
 #include "PlayerTest.hpp"
 
+#include "PointsListenerLocalTest.hpp"
+
 class TestBase : public testing::Test
 {
 public:
@@ -27,6 +29,8 @@ public:
 	static TestGame* pGame;
 	static TestLane* pLane;
 	static TestPlayer* pPlayer;
+
+	static TestPointsListenerLocal* pLocalListener;
 };
 
 int TestBase::mArgc = 0;
@@ -36,6 +40,8 @@ TestFrame* TestBase::pFrame = nullptr;
 TestGame* TestBase::pGame = nullptr;
 TestLane* TestBase::pLane = nullptr;
 TestPlayer* TestBase::pPlayer = nullptr;
+
+TestPointsListenerLocal* TestBase::pLocalListener = nullptr;
 
 void TestBase::SetUpTestCase()
 {
@@ -61,10 +67,20 @@ void TestBase::SetUpTestCase()
 		delete pPlayer;
 	}
 
+
+
+
+	if ( pLocalListener != nullptr )
+	{
+		delete pLocalListener;
+	}
+
 	pFrame = new TestFrame;
 	pGame = new TestGame;
 	pLane = new TestLane;
 	pPlayer = new TestPlayer;
+
+	pLocalListener = new TestPointsListenerLocal;
 }
 
 void TestBase::TearDownTestCase()
@@ -76,9 +92,13 @@ void TestBase::TearDownTestCase()
 	delete pLane;
 	delete pPlayer;
 
+	delete pLocalListener;
+
     pFrame = nullptr;
 	pGame = nullptr;
 	pLane = nullptr;
 	pPlayer = nullptr;
+
+	pLocalListener = nullptr;
 }
 #endif // __TESTBASE_H__
