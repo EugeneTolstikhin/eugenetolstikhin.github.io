@@ -23,4 +23,4 @@ private:
     std::pair<std::shared_ptr<IFrame>, decltype(m_Frames.begin())> m_currFrame;
 };
 
-#endif // --GAME_H__
+#endif // __GAME_H__

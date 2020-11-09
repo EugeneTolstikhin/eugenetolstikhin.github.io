@@ -8,8 +8,8 @@ class Frame : public IFrame
 {
 public:
 
-    Frame() = default;
-    virtual ~Frame() = default;
+    Frame();
+    virtual ~Frame()
 
     Frame(const Frame&) = delete;
     Frame(Frame&&) = delete;

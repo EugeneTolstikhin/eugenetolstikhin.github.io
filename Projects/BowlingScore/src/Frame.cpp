@@ -1,6 +1,16 @@
 #include "Frame.h"
 #include <stdexcept>
 
+Frame::Frame()
+{
+    //
+}
+
+Frame::~Frame()
+{
+    //
+}
+
 void Frame::SetTrialPoints(const unsigned short points) 
 {
     switch (m_CurrentTrial)
