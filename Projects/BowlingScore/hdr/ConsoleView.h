@@ -9,7 +9,7 @@ public:
     ConsoleView() = default;
     virtual ~ConsoleView() = default;
 
-    virtual void InitScoreTable() noexcept;
+    virtual void InitScoreTable();
     virtual void UpdateScore();
 };
 

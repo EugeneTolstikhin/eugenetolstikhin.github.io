@@ -70,12 +70,12 @@ void Frame::incTrial()
                 }
                 else
                 {
-                    //
+                    throw std::runtime_error("Unimplemented functionality");
                 }
             }
             else
             {
-                //
+                throw std::runtime_error("Unimplemented functionality");
             }
             break;
         }
@@ -97,12 +97,12 @@ void Frame::incTrial()
                 }
                 else
                 {
-                    //
+                    throw std::runtime_error("Unimplemented functionality");
                 }
             }
             else
             {
-                //
+                throw std::runtime_error("Unimplemented functionality");
             }
         }
         case Trial::THIRD:

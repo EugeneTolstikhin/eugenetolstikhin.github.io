@@ -7,7 +7,7 @@ public:
     IView() = default;
     virtual ~IView() = default;
 
-    virtual void InitScoreTable() noexcept = 0;
+    virtual void InitScoreTable() = 0;
     virtual void UpdateScore() = 0;
 };
 

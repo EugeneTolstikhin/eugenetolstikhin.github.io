@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Frame.h"
+#include "PointsListenerFactory.h"
 
 Game::Game()
 {
@@ -45,7 +46,9 @@ unsigned short Game::waitForPoints()
 {
     unsigned short points = 0;
 
-    //TODO: By using TCP Listen Socket return a number of points
+    //std::unique_ptr<IPointsListener> listener(std::make_unique(m_pointsListenerFactory.CreatePointsListener(m_listenerType)));
+
+    //TODO: Add reading points from the listener
 
     return points;
 }

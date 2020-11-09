@@ -1,11 +1,17 @@
 #include "ConsoleView.h"
+#include <stdexcept>
 
-void ConsoleView::InitScoreTable() noexcept
+ConsoleView::ConsoleView()
 {
     //
 }
 
+void ConsoleView::InitScoreTable()
+{
+    throw std::runtime_error("Unimplemented functionality");
+}
+
 void ConsoleView::UpdateScore()
 {
-    //
+    throw std::runtime_error("Unimplemented functionality");
 }
