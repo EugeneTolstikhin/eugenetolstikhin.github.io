@@ -14,6 +14,7 @@ set (FRAME_INC ../interface/IFrame.h ../hdr/Frame.h ../src/Frame.cpp hdr/FrameTe
 set (GAME_INC ../interface/IGame.h ../hdr/Game.h ../src/Game.cpp hdr/GameTest.hpp src/GameTest.cpp)
 set (LANE_INC ../interface/ILane.h ../hdr/Lane.h ../src/Lane.cpp hdr/LaneTest.hpp src/LaneTest.cpp)
 set (PLAYER_INC ../interface/IPlayer.h ../hdr/Player.h ../src/Player.cpp hdr/PlayerTest.hpp src/PlayerTest.cpp)
+set (CONSOLE_VIEW_INC ../interface/IView.h ../hdr/ConsoleView.h ../src/ConsoleView.cpp hdr/ConsoleViewTest.hpp src/ConsoleViewTest.cpp)
 
 # Add test cpp file
 add_executable (TestBase
@@ -21,6 +22,7 @@ add_executable (TestBase
     ${GAME_INC}
     ${LANE_INC}
     ${PLAYER_INC}
+    ${CONSOLE_VIEW_INC}
 )
 
 # Link test executable against gtest & gtest_main
