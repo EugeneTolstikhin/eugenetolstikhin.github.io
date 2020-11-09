@@ -69,13 +69,20 @@ Logging of Backup/Restore class should not depend on the specific logging way bu
 
 # Design patterns
 
-## TODO:
-Define which patterns should be used for this project
+## MVC (Model-View-Controller)
+This pattern is used to separate application's concerns and contains 3 parts:
 
----
+- **Model** - represents an object independently from the user interface (UI). It directly manages the data, logic and rules of the application
+- **View** - outputs representation of the information. Multiple views of the same info is possible. That is what the user sees in reality
+- **Controller** - accepts the inputs and convert them to the commands for the ***Model*** and ***View***. It acts as an interface between ***Model*** and ***View*** components to process all the business logic and incoming requests, manipulates the data by using the ***Model*** component and interacts with the ***View***s components to render the final output
+
+
+***What does this mean for this project:***
+Each class (*Frame*, *Game*, *Lane*, *Player*) represent the ***Model*** of the Bowling game. The class that will be responsible for user interaction (e.g. via Console or UI) represents the ***View***. Finally, the classes, responsible for Backup/Restore, accepting the amount of points after each throw and the class which will manipulate the game after the admin's request represent the ***Controller***
+
 
 # Bowling rules
-
+## Components
 1) A bowling court has many **Lanes**
 2) Each **Lane** can contains many **Players**
 3) Each **Player** plays his own **Game**
@@ -95,7 +102,7 @@ Define which patterns should be used for this project
 
 # TODO:
 
-- [ ] Implement each class according to the SOLID principles
+- [ ] Implement each Model class according to the SOLID principles
 - [ ] Implement the proper design patterns
 - [ ] Cover each class with proper unit test
 - [ ] Refactor CMakeLists.txt for unit tests
