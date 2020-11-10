@@ -6,6 +6,11 @@ ConsoleView::ConsoleView()
     //
 }
 
+ConsoleView::~ConsoleView()
+{
+    //
+}
+
 void ConsoleView::InitScoreTable()
 {
     throw std::runtime_error("Unimplemented functionality");

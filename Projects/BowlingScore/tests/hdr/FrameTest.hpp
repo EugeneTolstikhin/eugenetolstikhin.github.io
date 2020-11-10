@@ -8,7 +8,7 @@
 class TestFrame
 {
 public:
-    TestFrame() : m_frame(new Frame){}
+    TestFrame() : m_frame(new Frame) {}
     ~TestFrame() = default;
 
     FRIEND_TEST(TestBase, InitFrameTestCase);

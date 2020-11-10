@@ -6,8 +6,8 @@
 class ConsoleView : public IView
 {
 public:
-    ConsoleView() = default;
-    virtual ~ConsoleView() = default;
+    ConsoleView();
+    virtual ~ConsoleView();
 
     virtual void InitScoreTable();
     virtual void UpdateScore();

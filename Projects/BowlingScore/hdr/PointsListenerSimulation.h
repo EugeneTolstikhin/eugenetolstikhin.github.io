@@ -1,5 +1,5 @@
-#ifndef __POINTS_LISTENER_H__
-#define __POINTS_LISTENER_H__
+#ifndef __POINTS_LISTENER_SIMULATION_H__
+#define __POINTS_LISTENER_SIMULATION_H__
 
 #include "IPointsListener.h"
 
@@ -14,4 +14,4 @@ public:
     virtual void Shutdown();
 };
 
-#endif //__POINTS_LISTENER_H__
+#endif //__POINTS_LISTENER_SIMULATION_H__
