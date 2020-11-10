@@ -1,8 +1,9 @@
 #include "Game.h"
 #include "Frame.h"
 #include "IPointsListener.h"
+#include "PointsListenerFactory.h"
 
-Game::Game()
+Game::Game() : m_pointsListenerFactory(new PointsListenerFactory)
 {
     for (auto iter = m_Frames.begin(); iter != m_Frames.end(); ++iter)
     {
@@ -46,7 +47,7 @@ unsigned short Game::waitForPoints()
 {
     unsigned short points = 0;
 
-    std::shared_ptr<IPointsListener> listener(m_pointsListenerFactory.CreatePointsListener(m_listenerType));
+    std::shared_ptr<IPointsListener> listener(m_pointsListenerFactory->CreatePointsListener(m_listenerType));
 
     //TODO: Add reading points from the listener
 

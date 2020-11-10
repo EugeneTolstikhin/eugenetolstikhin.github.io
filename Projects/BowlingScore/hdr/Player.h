@@ -1,7 +1,6 @@
 #ifndef __PLAYER_H__
 #define __PLAYER_H__
 
-#include <memory>
 #include "IPlayer.h"
 #include "IGame.h"
 
@@ -12,7 +11,7 @@ public:
     Player(const std::string &);
     virtual ~Player();
 
-    virtual void Play(std::function<void()> gameover);
+    virtual void Play(const std::vector<std::shared_ptr<IView>>&, std::function<void()> gameover);
 
 private:
     std::string m_PlayerName;
