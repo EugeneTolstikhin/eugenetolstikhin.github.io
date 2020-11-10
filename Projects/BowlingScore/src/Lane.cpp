@@ -6,7 +6,7 @@ Lane::Lane() :
     m_factory(new ViewFactory),
     m_Views(1)
 {
-    //m_Views.insert(m_Views.begin(), m_factory->CreateView(m_type));
+    m_Views.emplace(m_Views.begin(), m_factory->CreateView(m_type));
 }
 
 Lane::~Lane()
