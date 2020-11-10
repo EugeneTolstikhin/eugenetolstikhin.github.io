@@ -19,6 +19,8 @@ set (POINTS_LISTENER_SIMULATION_INC ../interface/IPointsListener.h ../hdr/Points
 set (POINTS_LISTENER_LOCAL_INC ../interface/IPointsListener.h ../hdr/PointsListenerLocal.h ../src/PointsListenerLocal.cpp hdr/PointsListenerLocalTest.hpp src/PointsListenerLocalTest.cpp)
 set (POINTS_LISTENER_FACTORY_INC ../interface/IPointsListenerFactory.h ../hdr/PointsListenerFactory.h ../src/PointsListenerFactory.cpp hdr/PointsListenerFactoryTest.hpp src/PointsListenerFactoryTest.cpp)
 set (VIEW_FACTORY_INC ../interface/IViewFactory.h ../hdr/ViewFactory.h ../src/ViewFactory.cpp hdr/ViewFactoryTest.hpp src/ViewFactoryTest.cpp)
+set (LOGGER_FACTORY_INC ../interface/ILoggerFactory.h ../hdr/LoggerFactory.h ../src/LoggerFactory.cpp hdr/LoggerFactoryTest.hpp src/LoggerFactoryTest.cpp)
+set (CONSOLE_LOGGER_INC ../interface/ILogger.h ../hdr/ConsoleLogger.h ../src/ConsoleLogger.cpp hdr/ConsoleLoggerTest.hpp src/ConsoleLoggerTest.cpp)
 
 # Add test cpp file
 add_executable (TestBase
@@ -31,6 +33,8 @@ add_executable (TestBase
     ${POINTS_LISTENER_LOCAL_INC}
     ${POINTS_LISTENER_FACTORY_INC}
     ${VIEW_FACTORY_INC}
+    ${LOGGER_FACTORY_INC}
+    ${CONSOLE_LOGGER_INC}
 )
 
 # Link test executable against gtest & gtest_main
