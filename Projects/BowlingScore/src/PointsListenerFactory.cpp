@@ -22,7 +22,7 @@ IPointsListener* PointsListenerFactory::CreatePointsListener(const ListenerType&
             return new PointsListenerSimulation;
         case ListenerType::LOCAL:
             return new PointsListenerLocal;
-        case ListenerType::SIMULATION:
+        case ListenerType::NETWORK:
             //TODO: return the proper instance of class here when it will be implemented
             throw std::runtime_error("Unimplemented type of Listener");
         default:

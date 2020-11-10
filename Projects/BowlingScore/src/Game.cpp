@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Frame.h"
+#include "IPointsListener.h"
 
 Game::Game()
 {
@@ -22,9 +23,9 @@ void Game::ThrowBall()
     m_currFrame.first->SetTrialPoints(points);
 }
 
-bool Game::IsAnotherThrowAllowed() const noexcept 
+bool Game::IsAnotherThrowAllowed() 
 {
-    m_currFrame.first->isAllowedThrow();
+    return m_currFrame.first->isAllowedThrow();
 }
 
 void Game::CloseFrame(std::function<void()> gameOver) 
@@ -45,7 +46,7 @@ unsigned short Game::waitForPoints()
 {
     unsigned short points = 0;
 
-    std::unique_ptr<IPointsListener> listener(std::make_unique(m_pointsListenerFactory.CreatePointsListener(m_listenerType)));
+    std::shared_ptr<IPointsListener> listener(m_pointsListenerFactory.CreatePointsListener(m_listenerType));
 
     //TODO: Add reading points from the listener
 

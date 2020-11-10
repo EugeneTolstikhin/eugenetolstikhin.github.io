@@ -9,7 +9,7 @@ class Frame : public IFrame
 public:
 
     Frame();
-    virtual ~Frame()
+    virtual ~Frame();
 
     Frame(const Frame&) = delete;
     Frame(Frame&&) = delete;

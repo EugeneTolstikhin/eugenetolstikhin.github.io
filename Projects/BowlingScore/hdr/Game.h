@@ -14,7 +14,7 @@ public:
     virtual ~Game();
 
     virtual void ThrowBall() override;
-    virtual bool IsAnotherThrowAllowed() const noexcept override;
+    virtual bool IsAnotherThrowAllowed() override;
     virtual void CloseFrame(std::function<void()> gameover) override;
 
 private:
