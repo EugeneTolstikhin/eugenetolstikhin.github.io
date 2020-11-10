@@ -9,8 +9,9 @@ public:
     ConsoleView();
     virtual ~ConsoleView();
 
-    virtual void InitScoreTable();
+    virtual void InitScoreTable(const std::vector<std::string>&);
     virtual void UpdateScore();
+    virtual void CleanScore();
 };
 
 #endif //__CONSOLE_VIEW_H__

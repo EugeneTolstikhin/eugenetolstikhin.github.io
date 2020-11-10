@@ -10,6 +10,7 @@
 #include "PointsListenerSimulationTest.hpp"
 #include "PointsListenerLocalTest.hpp"
 #include "PointsListenerFactoryTest.hpp"
+#include "ViewFactoryTest.hpp"
 
 class TestBase : public testing::Test
 {
@@ -35,6 +36,7 @@ public:
 	static TestPointsListenerSimulation* pSimulationListener;
 	static TestPointsListenerLocal* pLocalListener;
 	static TestPointsListenerFactory* pListenerFactory;
+	static TestViewFactory* pViewFactory;
 };
 
 int TestBase::mArgc = 0;
@@ -48,6 +50,7 @@ TestConsoleView* TestBase::pConsoleView = nullptr;
 TestPointsListenerSimulation* TestBase::pSimulationListener = nullptr;
 TestPointsListenerLocal* TestBase::pLocalListener = nullptr;
 TestPointsListenerFactory* TestBase::pListenerFactory = nullptr;
+TestViewFactory* TestBase::pViewFactory = nullptr;
 
 void TestBase::SetUpTestCase()
 {
@@ -93,6 +96,11 @@ void TestBase::SetUpTestCase()
 		delete pListenerFactory;
 	}
 
+	if ( pViewFactory != nullptr )
+	{
+		delete pViewFactory;
+	}
+
 	pFrame = new TestFrame;
 	pGame = new TestGame;
 	pLane = new TestLane;
@@ -101,6 +109,7 @@ void TestBase::SetUpTestCase()
 	pSimulationListener = new TestPointsListenerSimulation;
 	pLocalListener = new TestPointsListenerLocal;
 	pListenerFactory = new TestPointsListenerFactory;
+	pViewFactory = new TestViewFactory;
 }
 
 void TestBase::TearDownTestCase()
@@ -115,6 +124,7 @@ void TestBase::TearDownTestCase()
 	delete pSimulationListener;
 	delete pLocalListener;
 	delete pListenerFactory;
+	delete pViewFactory;
 
     pFrame = nullptr;
 	pGame = nullptr;
@@ -124,5 +134,6 @@ void TestBase::TearDownTestCase()
 	pSimulationListener = nullptr;
 	pLocalListener = nullptr;
 	pListenerFactory = nullptr;
+	pViewFactory = nullptr;
 }
 #endif // __TESTBASE_H__
