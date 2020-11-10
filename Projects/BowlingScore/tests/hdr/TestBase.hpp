@@ -11,6 +11,8 @@
 #include "PointsListenerLocalTest.hpp"
 #include "PointsListenerFactoryTest.hpp"
 #include "ViewFactoryTest.hpp"
+#include "LoggerFactoryTest.hpp"
+#include "ConsoleLoggerTest.hpp"
 
 class TestBase : public testing::Test
 {
@@ -37,6 +39,8 @@ public:
 	static TestPointsListenerLocal* pLocalListener;
 	static TestPointsListenerFactory* pListenerFactory;
 	static TestViewFactory* pViewFactory;
+	static TestLoggerFactory* pLoggerFactory;
+	static TestConsoleLogger* pConsoleLogger;
 };
 
 int TestBase::mArgc = 0;
@@ -51,6 +55,8 @@ TestPointsListenerSimulation* TestBase::pSimulationListener = nullptr;
 TestPointsListenerLocal* TestBase::pLocalListener = nullptr;
 TestPointsListenerFactory* TestBase::pListenerFactory = nullptr;
 TestViewFactory* TestBase::pViewFactory = nullptr;
+TestLoggerFactory* TestBase::pLoggerFactory = nullptr;
+TestConsoleLogger* TestBase::pConsoleLogger = nullptr;
 
 void TestBase::SetUpTestCase()
 {
@@ -101,6 +107,16 @@ void TestBase::SetUpTestCase()
 		delete pViewFactory;
 	}
 
+	if ( pLoggerFactory != nullptr )
+	{
+		delete pLoggerFactory;
+	}
+
+	if ( pConsoleLogger != nullptr )
+	{
+		delete pConsoleLogger;
+	}
+
 	pFrame = new TestFrame;
 	pGame = new TestGame;
 	pLane = new TestLane;
@@ -110,6 +126,8 @@ void TestBase::SetUpTestCase()
 	pLocalListener = new TestPointsListenerLocal;
 	pListenerFactory = new TestPointsListenerFactory;
 	pViewFactory = new TestViewFactory;
+	pLoggerFactory = new TestLoggerFactory;
+	pConsoleLogger = new TestConsoleLogger;
 }
 
 void TestBase::TearDownTestCase()
@@ -125,6 +143,7 @@ void TestBase::TearDownTestCase()
 	delete pLocalListener;
 	delete pListenerFactory;
 	delete pViewFactory;
+	delete pConsoleLogger;
 
     pFrame = nullptr;
 	pGame = nullptr;
@@ -135,5 +154,6 @@ void TestBase::TearDownTestCase()
 	pLocalListener = nullptr;
 	pListenerFactory = nullptr;
 	pViewFactory = nullptr;
+	pConsoleLogger = nullptr;
 }
 #endif // __TESTBASE_H__
