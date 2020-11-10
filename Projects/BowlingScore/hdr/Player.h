@@ -8,13 +8,14 @@ class Player : public IPlayer
 {
 public:
     Player();
-    Player(const std::string &);
+    Player(const std::string &, const std::vector<std::shared_ptr<IView>>&);
     virtual ~Player();
 
     virtual void Play(const std::vector<std::shared_ptr<IView>>&, std::function<void()> gameover);
 
 private:
     std::string m_PlayerName;
+    std::vector<std::shared_ptr<IView>> m_Views;
     std::unique_ptr<IGame> m_Game;
 };
 

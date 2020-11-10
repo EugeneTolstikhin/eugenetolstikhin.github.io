@@ -6,9 +6,15 @@ Player::Player() : m_PlayerName("Test"), m_Game(new Game)
     //
 }
 
-Player::Player(const std::string& name) : m_PlayerName(name)
+Player::Player(const std::string& name, const std::vector<std::shared_ptr<IView>>& views) :
+        m_PlayerName(name)
+        ,m_Views(views)
+        //,m_Game(new Game)
 {
-    //
+    for (auto& view : m_Views)
+    {
+        view->InitPlayerScore(name);
+    }
 }
 
 Player::~Player()
