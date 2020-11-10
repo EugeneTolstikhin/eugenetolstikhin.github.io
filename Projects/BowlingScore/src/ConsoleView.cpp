@@ -14,12 +14,10 @@ ConsoleView::~ConsoleView()
     //
 }
 
-void ConsoleView::InitScoreTable(const std::vector<std::string>& players)
+void ConsoleView::InitScoreTableFrame(const std::vector<std::string>& players)
 {
-    auto drawRow = [](const std::string& name, unsigned nameWidth){
+    auto drawRow = [this](unsigned nameWidth){
         constexpr unsigned ROW_WIDTH = 150;
-        std::string displayName((name.length() <= nameWidth ? name : (name.substr(0, nameWidth - 3) + std::string("..."))));
-
         std::string picture;
 
         auto drawHeaderLine = [&picture]{
@@ -28,6 +26,23 @@ void ConsoleView::InitScoreTable(const std::vector<std::string>& players)
             picture.append(1, '|');
             picture.append(1, '\n');
         };
+
+        drawHeaderLine();
+
+        std::cout << picture;
+    };
+
+    constexpr unsigned MAX_LENGTH = 10;
+    drawRow(MAX_LENGTH);
+}
+
+void ConsoleView::InitPlayerScore(const std::string& name)
+{
+    auto drawRow = [this](const std::string& name, unsigned nameWidth){
+        constexpr unsigned ROW_WIDTH = 150;
+        std::string displayName((name.length() <= nameWidth ? name : (name.substr(0, nameWidth - 3) + std::string("..."))));
+
+        std::string picture;
 
         auto drawAboveName = [&picture, &nameWidth]{
             picture.append(1, '|');
@@ -97,20 +112,21 @@ void ConsoleView::InitScoreTable(const std::vector<std::string>& players)
             picture.append(1, '\n');
         };
 
-        drawHeaderLine();
         drawAboveName();
         drawName();
         drawBelowName();
         drawFooterLine();
 
-        std::cout << std::setw(ROW_WIDTH) << picture << std::flush;
+        std::cout << picture;
     };
 
     constexpr unsigned MAX_LENGTH = 10;
-    for (auto& player : players)
-    {
-        drawRow(player, MAX_LENGTH);
-    }
+    drawRow(name, MAX_LENGTH);
+}
+
+void ConsoleView::InitFlush() 
+{
+    std::cout << std::flush;
 }
 
 void ConsoleView::UpdateScore()

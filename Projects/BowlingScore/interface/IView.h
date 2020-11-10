@@ -10,7 +10,9 @@ public:
     IView() = default;
     virtual ~IView() = default;
 
-    virtual void InitScoreTable(const std::vector<std::string>&) = 0;
+    virtual void InitScoreTableFrame(const std::vector<std::string>&) = 0;
+    virtual void InitPlayerScore(const std::string&) = 0;
+    virtual void InitFlush() = 0;
     virtual void UpdateScore() = 0;
     virtual void CleanScore() = 0;
 };

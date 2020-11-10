@@ -20,18 +20,23 @@ void Lane::Init(const std::vector<std::string>& players)
 {
     for (auto& view : m_Views)
     {
-        view->InitScoreTable(players);
+        view->InitScoreTableFrame(players);
     }
 
-    m_logger->LogMe(__FILE__, __LINE__, std::string("Amount of views = ") + std::to_string(m_Views.size()));
+    //m_logger->LogMe(__FILE__, __LINE__, std::string("Amount of views = ") + std::to_string(m_Views.size()));
 
     m_Players.reserve(players.size());
     for (size_t i = 0; i < players.size(); ++i)
     {
-        m_Players.emplace(m_Players.begin() + i, new Player(players.at(i)));
+        m_Players.emplace(m_Players.begin() + i, new Player(players.at(i), m_Views));
     }
 
-    m_logger->LogMe(__FILE__, __LINE__, std::string("Amount of players = ") + std::to_string(m_Players.size()));
+    //m_logger->LogMe(__FILE__, __LINE__, std::string("Amount of players = ") + std::to_string(m_Players.size()));
+
+    for (auto& view : m_Views)
+    {
+        view->InitFlush();
+    }
 }
 
 void Lane::Play(std::function<void()> gameover)
