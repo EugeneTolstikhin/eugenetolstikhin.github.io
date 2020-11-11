@@ -85,6 +85,12 @@ Deal with the problem of creating the objects without having to specify the exac
 ***What does this mean for this project:***
 Class ***Game*** waits for the points and receives them from the Listener class without knowing what kind of Listener it uses. The specific type of Listener is created based on the type of the data (as for now it is a member variable of the ***Game*** class, but it can be also an input parameter from the build script) the ListenerFactory is received
 
+## Observer Pattern
+The object (called the Subject) maintains a list of its dependents (called Observers), and notifies them automatically of their state changes, usually by calling one of their methods. Used inside MVC pattern to inform, e.g. Views, about the changes inside model to refresh the views
+
+***What does this mean for this project:***
+Every class (Lane, Player, Game, Frame) has the visual representation inside the Views. Each class should notify the Views components about their changes independently. e.g. during the init procedure, the Views should be able to visualize the clear Score table. During the play, each change should be visualized immediately
+
 # Bowling rules
 ## Components
 1) A bowling court has many **Lanes**
