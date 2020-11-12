@@ -23,6 +23,7 @@ ConsoleView::ConsoleView()
     m_lastFrameCellsAmount = 3;
     m_columnAmount = m_normalFrameCellsAmount * m_normalFramesAmount + m_lastFrameCellsAmount;
     m_nameWidth = m_RowWidth / m_columnAmount;
+    m_Frames.reserve(m_normalFramesAmount + 1);
 #elif _WIN32
 #endif
 }
@@ -34,27 +35,27 @@ ConsoleView::~ConsoleView()
 
 void ConsoleView::InitScoreTableFrame(const std::vector<std::string>& players)
 {
-    std::string picture;
+    std::string line;
     size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
 
-    picture.append(1, '|');
-    picture.append(cellWidth * m_columnAmount + m_nameWidth + 1, '-');
-    picture.append(1, '|');
-    picture.append(1, '\n');
+    line.append(1, '|');
+    line.append(cellWidth * m_columnAmount + m_nameWidth + 1, '-');
+    line.append(1, '|');
+    line.append(1, '\n');
 
-    std::cout << picture;
+    m_ScoreTable.append(line);
 }
 
 void ConsoleView::InitPlayerScore(const std::string& name)
 {
     std::string displayName((name.length() <= this->m_nameWidth ? name : (name.substr(0, this->m_nameWidth - 3) + std::string("..."))));
 
-    std::string picture;
-
-    auto drawAboveName = [this, &picture]{
-        picture.append(1, '|');
-        picture.append(this->m_nameWidth + 1, ' ');
-        picture.append(1, '|');
+    auto drawAboveName = [this]
+    {
+        std::string line;
+        line.append(1, '|');
+        line.append(this->m_nameWidth + 1, ' ');
+        line.append(1, '|');
 
         size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
         std::string toFindFirst = std::string(cellWidth - 1, ' ') + std::string(1, '|') + std::string(cellWidth - 1, ' ') + std::string(1, '|');
@@ -62,14 +63,18 @@ void ConsoleView::InitPlayerScore(const std::string& name)
         size_t start = this->m_PlayerGame.find(toFindFirst);
         size_t end = this->m_PlayerGame.find(toFindLast, start);
         std::string aboveNameGame = this->m_PlayerGame.substr(start, end + 1);
-        picture.append(aboveNameGame);
+        line.append(aboveNameGame);
+
+        return std::move(line);
     };
 
-    auto drawName = [this, &picture, &displayName]{
-        picture.append(1, '|');
-        picture.append(displayName);
-        picture.append(this->m_nameWidth - displayName.length() + 1, ' ');
-        picture.append(1, '|');
+    auto drawName = [this, &displayName]
+    {
+        std::string line;
+        line.append(1, '|');
+        line.append(displayName);
+        line.append(this->m_nameWidth - displayName.length() + 1, ' ');
+        line.append(1, '|');
 
         size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
         std::string toFindFirst = std::string(cellWidth - 1, ' ') + std::string(1, '|') + std::string(cellWidth - 1, '-') + std::string(1, '|');
@@ -77,13 +82,17 @@ void ConsoleView::InitPlayerScore(const std::string& name)
         size_t start = this->m_PlayerGame.find(toFindFirst);
         size_t end = this->m_PlayerGame.find(toFindLast, start);
         std::string nameGame = this->m_PlayerGame.substr(start, end - toFindLast.length());
-        picture.append(nameGame);
+        line.append(nameGame);
+
+        return line;
     };
 
-    auto drawBelowName = [this, &picture]{
-        picture.append(1, '|');
-        picture.append(this->m_nameWidth + 1, ' ');
-        picture.append(1, '|');
+    auto drawBelowName = [this]
+    {
+        std::string line;
+        line.append(1, '|');
+        line.append(this->m_nameWidth + 1, ' ');
+        line.append(1, '|');
 
         size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
         std::string toFindFirst = std::string(m_normalFrameCellsAmount * cellWidth - 1, ' ') + std::string(1, '|');
@@ -91,96 +100,128 @@ void ConsoleView::InitPlayerScore(const std::string& name)
         size_t start = this->m_PlayerGame.find(toFindFirst);
         size_t end = this->m_PlayerGame.find(toFindLast, start);
         std::string belowNameGame = this->m_PlayerGame.substr(start, end + 1);
-        picture.append(belowNameGame);
+        line.append(belowNameGame);
+
+        return line;
     };
 
-    auto drawFooterLine = [this, &picture]{
+    auto drawFooterLine = [this]
+    {
+        std::string line;
         size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
 
-        picture.append(1, '|');
-        picture.append(cellWidth * this->m_columnAmount + this->m_nameWidth + 1, '-');
-        picture.append(1, '|');
-        picture.append(1, '\n');
+        line.append(1, '|');
+        line.append(cellWidth * this->m_columnAmount + this->m_nameWidth + 1, '-');
+        line.append(1, '|');
+        line.append(1, '\n');
+
+        return line;
     };
 
-    drawAboveName();
-    drawName();
-    drawBelowName();
-    drawFooterLine();
-
-    std::cout << picture;
+    m_ScoreTable.append(drawAboveName() + drawName() + drawBelowName() + drawFooterLine());
 }
 
 void ConsoleView::InitGameScore()
 {
     m_PlayerGame = "";
-
     std::string picture;
+    std::vector<std::string> lines(m_Frames.at(0).size());
+    for (const auto& frame: m_Frames)
+    {
+        for (size_t i = 0; i < frame.size(); ++i)
+        {
+            lines.at(i) += frame.at(i);
+        }
+    }
 
-    auto drawAboveName = [this, &picture]{
+    for (const auto& line: lines)
+    {
+        m_PlayerGame += line + std::string("\n");
+    }
+
+    m_Frames.clear();
+}
+
+void ConsoleView::InitFrameScore(bool isLastFrame)
+{
+    std::vector<std::string> m_FrameLines;
+    auto drawAboveName = [this, &isLastFrame]
+    { 
+        std::string line;
         size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
 
-        for (size_t i = 0; i < m_normalFramesAmount; ++i)
+        if (isLastFrame)
         {
-            picture.append(cellWidth - 1, ' ');
-            picture.append(1, '|');
-            picture.append(cellWidth - 1, ' ');
-            picture.append(1, '|');
+            for (size_t i = 0; i < m_lastFrameCellsAmount; ++i)
+            {
+                line.append(cellWidth - 1, ' ');
+                line.append(1, '|');
+            }
+        }
+        else
+        {
+            line.append(cellWidth - 1, ' ');
+            line.append(1, '|');
+            line.append(cellWidth - 1, ' ');
+            line.append(1, '|');
         }
 
-        for (size_t i = 0; i < m_lastFrameCellsAmount; ++i)
-        {
-            picture.append(cellWidth - 1, ' ');
-            picture.append(1, '|');
-        }
-
-        picture.append(1, '\n');
+        return std::move(line);
     };
 
-    auto drawName = [this, &picture]{
+    auto drawName = [this, &isLastFrame]
+    {
+        std::string line;
         size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / 21;
 
-        for (size_t i = 0; i < m_normalFramesAmount; ++i)
+        if (isLastFrame)
         {
-            picture.append(cellWidth - 1, ' ');
-            picture.append(1, '|');
-            picture.append(cellWidth - 1, '-');
-            picture.append(1, '|');
+            for (size_t i = 0; i < m_lastFrameCellsAmount; ++i)
+            {
+                line.append(cellWidth - 1, '-');
+                line.append(1, '|');
+            }
+        }
+        else
+        {
+            line.append(cellWidth - 1, ' ');
+            line.append(1, '|');
+            line.append(cellWidth - 1, '-');
+            line.append(1, '|');
         }
 
-        for (size_t i = 0; i < m_lastFrameCellsAmount; ++i)
-        {
-            picture.append(cellWidth - 1, '-');
-            picture.append(1, '|');
-        }
-
-        picture.append(1, '\n');
+        return std::move(line);
     };
 
-    auto drawBelowName = [this, &picture]{
+    auto drawBelowName = [this, &isLastFrame]
+    {
+        std::string line;
         size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
 
-        for (size_t i = 0; i < m_normalFramesAmount; ++i)
+        if (isLastFrame)
         {
-            picture.append(m_normalFrameCellsAmount * cellWidth - 1, ' ');
-            picture.append(1, '|');
+            line.append(m_lastFrameCellsAmount * cellWidth - 1, ' ');
+            line.append(1, '|');
+        }
+        else
+        {
+            line.append(m_normalFrameCellsAmount * cellWidth - 1, ' ');
+            line.append(1, '|');
         }
 
-        picture.append(m_lastFrameCellsAmount * cellWidth - 1, ' ');
-        picture.append(1, '|');
-        picture.append(1, '\n');
+        return std::move(line);
     };
 
-    drawAboveName();
-    drawName();
-    drawBelowName();
+    m_FrameLines.push_back(drawAboveName());
+    m_FrameLines.push_back(drawName());
+    m_FrameLines.push_back(drawBelowName());
 
-    m_PlayerGame = picture;
+    m_Frames.push_back(std::move(m_FrameLines));
 }
 
 void ConsoleView::InitFlush() 
 {
-    std::cout << std::flush;
+    std::cout << m_ScoreTable << std::flush;
 }
 
 void ConsoleView::UpdateScore()
@@ -190,5 +231,7 @@ void ConsoleView::UpdateScore()
 
 void ConsoleView::CleanScore()
 {
-    throw std::runtime_error("Unimplemented functionality");
+    m_ScoreTable.clear();
+    m_Frames.clear();
+    m_PlayerGame.clear();
 }

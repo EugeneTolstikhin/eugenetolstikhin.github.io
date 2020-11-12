@@ -12,17 +12,22 @@ Game::Game(const std::vector<std::shared_ptr<IView>>& views) :
     m_pointsListenerFactory(new PointsListenerFactory)
     ,m_Views(views)
 {
+    //This parameter can be read from a config file
+    m_FramesAmount = 10;
+    m_Frames.reserve(m_FramesAmount);
+
+    size_t counter = 0;
+    while (++counter <= m_FramesAmount)
+    {
+        m_Frames.emplace_back(new Frame(counter == m_FramesAmount, m_Views));
+    }
+
+    m_currFrame = std::make_pair(*(m_Frames.begin()), m_Frames.begin());
+
     for (auto& view : m_Views)
     {
         view->InitGameScore();
     }
-
-    for (auto iter = m_Frames.begin(); iter != m_Frames.end(); ++iter)
-    {
-        m_Frames.emplace_front(new Frame);
-    }
-
-    m_currFrame = std::make_pair(*(m_Frames.begin()), m_Frames.begin());
 }
 
 Game::~Game()
