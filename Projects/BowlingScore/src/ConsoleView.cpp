@@ -4,9 +4,27 @@
 #include <iostream>
 #include <iomanip>
 
+#ifdef __linux__
+#include <sys/ioctl.h> //ioctl() and TIOCGWINSZ
+#include <unistd.h> // for STDOUT_FILENO
+#elif _WIN32 
+#endif
+
 ConsoleView::ConsoleView()
 {
-    //
+#ifdef __linux__
+    struct winsize size;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
+
+    //The following parameters can be read from a config files
+    m_RowWidth = size.ws_col;
+    m_normalFrameCellsAmount = 2;
+    m_normalFramesAmount = 9;
+    m_lastFrameCellsAmount = 3;
+    m_columnAmount = m_normalFrameCellsAmount * m_normalFramesAmount + m_lastFrameCellsAmount;
+    m_nameWidth = m_RowWidth / m_columnAmount;
+#elif _WIN32
+#endif
 }
 
 ConsoleView::~ConsoleView()
@@ -16,98 +34,96 @@ ConsoleView::~ConsoleView()
 
 void ConsoleView::InitScoreTableFrame(const std::vector<std::string>& players)
 {
-    auto drawRow = [this](unsigned nameWidth){
-        constexpr unsigned ROW_WIDTH = 150;
-        std::string picture;
+    std::string picture;
+    size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
 
-        auto drawHeaderLine = [&picture]{
-            picture.append(1, '|');
-            picture.append(ROW_WIDTH - 1, '-');
-            picture.append(1, '|');
-            picture.append(1, '\n');
-        };
+    picture.append(1, '|');
+    picture.append(cellWidth * m_columnAmount + m_nameWidth + 1, '-');
+    picture.append(1, '|');
+    picture.append(1, '\n');
 
-        drawHeaderLine();
-
-        std::cout << picture;
-    };
-
-    constexpr unsigned MAX_LENGTH = 10;
-    drawRow(MAX_LENGTH);
+    std::cout << picture;
 }
 
 void ConsoleView::InitPlayerScore(const std::string& name)
 {
-    auto drawRow = [this](const std::string& name, unsigned nameWidth){
-        constexpr unsigned ROW_WIDTH = 150;
-        std::string displayName((name.length() <= nameWidth ? name : (name.substr(0, nameWidth - 3) + std::string("..."))));
+    auto drawRow = [this](const std::string& name){
+        std::string displayName((name.length() <= this->m_nameWidth ? name : (name.substr(0, this->m_nameWidth - 3) + std::string("..."))));
 
         std::string picture;
 
-        auto drawAboveName = [&picture, &nameWidth]{
+        auto drawAboveName = [this, &picture]{
             picture.append(1, '|');
-            picture.append(nameWidth + 1, ' ');
+            picture.append(this->m_nameWidth + 1, ' ');
             picture.append(1, '|');
 
-            for (size_t i = 0; i < 9; ++i)
+            size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
+
+            for (size_t i = 0; i < m_normalFramesAmount; ++i)
             {
-                picture.append(6, ' ');
+                picture.append(cellWidth - 1, ' ');
                 picture.append(1, '|');
-                picture.append(6, ' ');
+                picture.append(cellWidth - 1, ' ');
                 picture.append(1, '|');
             }
 
-            for (size_t i = 0; i < 3; ++i)
+            for (size_t i = 0; i < m_lastFrameCellsAmount; ++i)
             {
-                picture.append(3, ' ');
+                picture.append(cellWidth - 1, ' ');
                 picture.append(1, '|');
             }
 
             picture.append(1, '\n');
         };
 
-        auto drawName = [&picture, &displayName, &nameWidth]{
+        auto drawName = [this, &picture, &displayName]{
             picture.append(1, '|');
             picture.append(displayName);
-            picture.append(nameWidth - displayName.length() + 1, ' ');
+            picture.append(this->m_nameWidth - displayName.length() + 1, ' ');
             picture.append(1, '|');
 
-            for (size_t i = 0; i < 9; ++i)
+            size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / 21;
+
+            for (size_t i = 0; i < m_normalFramesAmount; ++i)
             {
-                picture.append(6, ' ');
+                picture.append(cellWidth - 1, ' ');
                 picture.append(1, '|');
-                picture.append(6, '-');
+                picture.append(cellWidth - 1, '-');
                 picture.append(1, '|');
             }
 
-            for (size_t i = 0; i < 3; ++i)
+            for (size_t i = 0; i < m_lastFrameCellsAmount; ++i)
             {
-                picture.append(3, '-');
+                picture.append(cellWidth - 1, '-');
                 picture.append(1, '|');
             }
 
             picture.append(1, '\n');
         };
 
-        auto drawBelowName = [&picture, &nameWidth]{
+        auto drawBelowName = [this, &picture]{
             picture.append(1, '|');
-            picture.append(nameWidth + 1, ' ');
+            picture.append(this->m_nameWidth + 1, ' ');
             picture.append(1, '|');
 
-            for (size_t i = 0; i < 9; ++i)
+            size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
+
+            for (size_t i = 0; i < m_normalFramesAmount; ++i)
             {
-                picture.append(13, ' ');
+                picture.append(m_normalFrameCellsAmount * cellWidth - 1, ' ');
                 picture.append(1, '|');
             }
 
-            picture.append(ROW_WIDTH - nameWidth + 1 - 10 * 13, ' ');
+            picture.append(m_lastFrameCellsAmount * cellWidth - 1, ' ');
             picture.append(1, '|');
             picture.append(1, '\n');
         };
 
-        auto drawFooterLine = [&picture]{
+        auto drawFooterLine = [this, &picture]{
+            size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
+
             picture.append(1, '|');
-            picture.append(ROW_WIDTH - 1, '-');
+            picture.append(cellWidth * this->m_columnAmount + this->m_nameWidth + 1, '-');
             picture.append(1, '|');
             picture.append(1, '\n');
         };
@@ -120,8 +136,7 @@ void ConsoleView::InitPlayerScore(const std::string& name)
         std::cout << picture;
     };
 
-    constexpr unsigned MAX_LENGTH = 10;
-    drawRow(name, MAX_LENGTH);
+    drawRow(name);
 }
 
 void ConsoleView::InitFlush() 
