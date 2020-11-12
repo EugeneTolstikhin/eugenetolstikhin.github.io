@@ -2,15 +2,17 @@
 #define __GAME_H__
 
 #include <memory>
-#include <forward_list>
+#include <list>
 #include "IGame.h"
 #include "IFrame.h"
 #include "IPointsListenerFactory.h"
+#include "IView.h"
 
 class Game : public IGame
 {
 public:
     Game();
+    Game(const std::vector<std::shared_ptr<IView>>&);
     virtual ~Game();
 
     virtual void ThrowBall() override;
@@ -21,9 +23,10 @@ private:
     unsigned short waitForPoints();
 
     ListenerType m_listenerType = ListenerType::SIMULATION;
-    std::forward_list<std::shared_ptr<IFrame>> m_Frames;
+    std::list<std::shared_ptr<IFrame>> m_Frames;
     std::pair<std::shared_ptr<IFrame>, decltype(m_Frames.begin())> m_currFrame;
     std::unique_ptr<IPointsListenerFactory> m_pointsListenerFactory;
+    std::vector<std::shared_ptr<IView>> m_Views;
 };
 
 #endif // __GAME_H__
