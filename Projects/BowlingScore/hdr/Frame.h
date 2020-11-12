@@ -2,6 +2,8 @@
 #define __FRAME_H__
 
 #include "IFrame.h"
+#include "IView.h"
+#include <memory>
 #include <vector>
 
 class Frame : public IFrame
@@ -9,6 +11,7 @@ class Frame : public IFrame
 public:
 
     Frame();
+    Frame(bool, const std::vector<std::shared_ptr<IView>>&);
     virtual ~Frame();
 
     Frame(const Frame&) = delete;
@@ -27,6 +30,7 @@ private:
     Trial m_CurrentTrial = Trial::FIRST;
     std::vector<unsigned short> m_TrialPoints = {0, 0, 0};
     bool m_AllowThrow = true;
+    std::vector<std::shared_ptr<IView>> m_Views;
 };
 
 #endif // __FRAME_H__

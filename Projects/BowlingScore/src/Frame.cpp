@@ -6,6 +6,16 @@ Frame::Frame()
     //
 }
 
+Frame::Frame(bool isLastFrame, const std::vector<std::shared_ptr<IView>>& views) :
+    m_isLastFrame(isLastFrame)
+    ,m_Views(views)
+{
+    for (auto& view : m_Views)
+    {
+        view->InitFrameScore(m_isLastFrame);
+    }
+}
+
 Frame::~Frame()
 {
     //
