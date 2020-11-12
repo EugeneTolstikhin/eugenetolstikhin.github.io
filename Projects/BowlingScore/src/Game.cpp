@@ -5,6 +5,18 @@
 
 Game::Game() : m_pointsListenerFactory(new PointsListenerFactory)
 {
+    //
+}
+
+Game::Game(const std::vector<std::shared_ptr<IView>>& views) :
+    m_pointsListenerFactory(new PointsListenerFactory)
+    ,m_Views(views)
+{
+    for (auto& view : m_Views)
+    {
+        view->InitGameScore();
+    }
+
     for (auto iter = m_Frames.begin(); iter != m_Frames.end(); ++iter)
     {
         m_Frames.emplace_front(new Frame);
