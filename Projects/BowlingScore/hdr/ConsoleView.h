@@ -10,15 +10,16 @@ public:
     ConsoleView();
     virtual ~ConsoleView();
 
-    virtual void InitScoreTableFrame(const std::vector<std::string>&);
-    virtual void InitPlayerScore(const std::string&);
-    virtual void InitGameScore();
-    virtual void InitFrameScore(bool);
-    virtual void InitFlush();
+    virtual void Draw(const ViewElement&, void*);
     virtual void UpdateScore();
     virtual void CleanScore();
 
 private:
+    void InitLaneScore();
+    void InitPlayerScore(const std::string&);
+    void InitGameScore();
+    void InitFrameScore(bool);
+
     size_t m_RowWidth = 0;
     size_t m_nameWidth = 0;
     size_t m_columnAmount = 0;

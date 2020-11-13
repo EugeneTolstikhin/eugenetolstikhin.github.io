@@ -12,7 +12,7 @@ Frame::Frame(bool isLastFrame, const std::vector<std::shared_ptr<IView>>& views)
 {
     for (auto& view : m_Views)
     {
-        view->InitFrameScore(m_isLastFrame);
+        view->Draw(ViewElement::FRAME, &m_isLastFrame);
     }
 }
 
