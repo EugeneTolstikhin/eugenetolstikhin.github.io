@@ -16,7 +16,7 @@ void PointsListenerLocal::Connect()
     throw std::runtime_error("Unimplemented functionality");
 }
 
-void PointsListenerLocal::Receive()
+unsigned short PointsListenerLocal::Receive()
 {
     throw std::runtime_error("Unimplemented functionality");
 }

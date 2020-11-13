@@ -266,6 +266,7 @@ void ConsoleView::UpdateScore()
 
 void ConsoleView::CleanScore()
 {
+    std::cout << "Game over!" << std::endl << std::flush;
     m_ScoreTable.clear();
     m_Frames.clear();
     m_PlayerGame.clear();

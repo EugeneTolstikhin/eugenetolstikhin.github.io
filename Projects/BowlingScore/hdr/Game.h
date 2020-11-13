@@ -24,7 +24,7 @@ private:
 
     ListenerType m_listenerType = ListenerType::SIMULATION;
     std::vector<std::shared_ptr<IFrame>> m_Frames;
-    std::pair<std::shared_ptr<IFrame>, decltype(m_Frames.begin())> m_currFrame;
+    std::pair<std::shared_ptr<IFrame>, std::vector<std::shared_ptr<IFrame>>::iterator> m_currFrame;
     std::unique_ptr<IPointsListenerFactory> m_pointsListenerFactory;
     std::vector<std::shared_ptr<IView>> m_Views;
     size_t m_FramesAmount = 0;

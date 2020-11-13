@@ -29,12 +29,16 @@ void Frame::SetTrialPoints(const unsigned short points)
         {
             if (points > MAX_POINTS)
                 throw std::runtime_error("Amount of points is more then allowed for the 1st trial");
+
+            break;
         }
         case Trial::SECOND:
         {
             bool specialCase = m_isLastFrame && MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
             if (points > MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)) && false == specialCase)
                 throw std::runtime_error("Amount of points is more then allowed for the 2nd trial"); 
+
+            break;
         }
         case Trial::THIRD:
         {
@@ -43,6 +47,8 @@ void Frame::SetTrialPoints(const unsigned short points)
 
             if (points > MAX_POINTS)
                 throw std::runtime_error("Amount of points is more then allowed for the 2nd trial"); 
+
+            break;
         }
         default:
             break;
@@ -114,6 +120,7 @@ void Frame::incTrial()
             {
                 throw std::runtime_error("Unimplemented functionality");
             }
+            break;
         }
         case Trial::THIRD:
         {
@@ -134,6 +141,8 @@ void Frame::incTrial()
             
             m_CurrentTrial = Trial::FIRST;
             m_AllowThrow = false; 
+
+            break;
         }
         default:
             break;

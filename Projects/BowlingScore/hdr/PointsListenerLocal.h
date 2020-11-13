@@ -10,7 +10,7 @@ public:
     virtual ~PointsListenerLocal();
 
     virtual void Connect();
-    virtual void Receive();
+    virtual unsigned short Receive();
     virtual void Shutdown();
 };
 
