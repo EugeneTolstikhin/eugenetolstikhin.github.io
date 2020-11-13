@@ -24,6 +24,12 @@ ConsoleView::ConsoleView()
     m_columnAmount = m_normalFrameCellsAmount * m_normalFramesAmount + m_lastFrameCellsAmount;
     m_nameWidth = m_RowWidth / m_columnAmount;
     m_Frames.reserve(m_normalFramesAmount + 1);
+
+    size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
+    if (cellWidth < 2)
+    {
+        throw std::runtime_error("The screen is narrower then the min width is supported");
+    }
 #elif _WIN32
 #endif
 }
