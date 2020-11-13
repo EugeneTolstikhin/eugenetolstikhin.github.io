@@ -13,7 +13,7 @@ Player::Player(const std::string& name, const std::vector<std::shared_ptr<IView>
 {
     for (auto& view : m_Views)
     {
-        view->InitPlayerScore(name);
+        view->Draw(ViewElement::PLAYER, &m_PlayerName);
     }
 }
 

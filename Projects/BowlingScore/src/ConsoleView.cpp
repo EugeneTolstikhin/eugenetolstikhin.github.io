@@ -33,7 +33,50 @@ ConsoleView::~ConsoleView()
     //
 }
 
-void ConsoleView::InitScoreTableFrame(const std::vector<std::string>& players)
+void ConsoleView::Draw(const ViewElement& element, void* params)
+{
+    switch (element)
+    {
+        case ViewElement::FRAME:
+        {
+            bool* isLastFrame = static_cast<bool*>(params);
+            InitFrameScore(*isLastFrame);
+            break;
+        }
+
+        case ViewElement::GAME:
+        {
+            InitGameScore();
+            break;
+        }
+
+        case ViewElement::PLAYER:
+        {
+            std::string* name = static_cast<std::string*>(params);
+            InitPlayerScore(*name);
+            break;
+        }
+
+        case ViewElement::LANE:
+        {
+            InitLaneScore();
+            break;
+        }
+
+        case ViewElement::FLUSH:
+        {
+            std::cout << m_ScoreTable << std::flush;
+            break;
+        }
+
+        default:
+        {
+            throw std::runtime_error("Unknown type of view element");
+        }
+    }
+}
+
+void ConsoleView::InitLaneScore()
 {
     std::string line;
     size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
@@ -48,70 +91,67 @@ void ConsoleView::InitScoreTableFrame(const std::vector<std::string>& players)
 
 void ConsoleView::InitPlayerScore(const std::string& name)
 {
-    std::string displayName((name.length() <= this->m_nameWidth ? name : (name.substr(0, this->m_nameWidth - 3) + std::string("..."))));
+    std::string displayName((name.length() <= m_nameWidth ? name : (name.substr(0, m_nameWidth - 3) + std::string("..."))));
+    size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
 
-    auto drawAboveName = [this]
+    auto drawAboveName = [this, &cellWidth]
     {
         std::string line;
         line.append(1, '|');
-        line.append(this->m_nameWidth + 1, ' ');
+        line.append(m_nameWidth + 1, ' ');
         line.append(1, '|');
 
-        size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
         std::string toFindFirst = std::string(cellWidth - 1, ' ') + std::string(1, '|') + std::string(cellWidth - 1, ' ') + std::string(1, '|');
         std::string toFindLast = std::string("\n");
-        size_t start = this->m_PlayerGame.find(toFindFirst);
-        size_t end = this->m_PlayerGame.find(toFindLast, start);
-        std::string aboveNameGame = this->m_PlayerGame.substr(start, end + 1);
+        size_t start = m_PlayerGame.find(toFindFirst);
+        size_t end = m_PlayerGame.find(toFindLast, start);
+        std::string aboveNameGame = m_PlayerGame.substr(start, end + 1);
         line.append(aboveNameGame);
 
         return std::move(line);
     };
 
-    auto drawName = [this, &displayName]
+    auto drawName = [this, &displayName, &cellWidth]
     {
         std::string line;
         line.append(1, '|');
         line.append(displayName);
-        line.append(this->m_nameWidth - displayName.length() + 1, ' ');
+        line.append(m_nameWidth - displayName.length() + 1, ' ');
         line.append(1, '|');
 
-        size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
         std::string toFindFirst = std::string(cellWidth - 1, ' ') + std::string(1, '|') + std::string(cellWidth - 1, '-') + std::string(1, '|');
         std::string toFindLast = std::string(cellWidth - 1, '-') + std::string(1, '|');
-        size_t start = this->m_PlayerGame.find(toFindFirst);
-        size_t end = this->m_PlayerGame.find(toFindLast, start);
-        std::string nameGame = this->m_PlayerGame.substr(start, end - toFindLast.length());
+        size_t start = m_PlayerGame.find(toFindFirst);
+        size_t end = m_PlayerGame.find(toFindLast, start);
+        std::string nameGame = m_PlayerGame.substr(start, end - toFindLast.length());
         line.append(nameGame);
 
         return line;
     };
 
-    auto drawBelowName = [this]
+    auto drawBelowName = [this, &cellWidth]
     {
         std::string line;
         line.append(1, '|');
-        line.append(this->m_nameWidth + 1, ' ');
+        line.append(m_nameWidth + 1, ' ');
         line.append(1, '|');
 
-        size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
+        size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
         std::string toFindFirst = std::string(m_normalFrameCellsAmount * cellWidth - 1, ' ') + std::string(1, '|');
         std::string toFindLast = std::string("\n");
-        size_t start = this->m_PlayerGame.find(toFindFirst);
-        size_t end = this->m_PlayerGame.find(toFindLast, start);
-        std::string belowNameGame = this->m_PlayerGame.substr(start, end + 1);
+        size_t start = m_PlayerGame.find(toFindFirst);
+        size_t end = m_PlayerGame.find(toFindLast, start);
+        std::string belowNameGame = m_PlayerGame.substr(start, end + 1);
         line.append(belowNameGame);
 
         return line;
     };
 
-    auto drawFooterLine = [this]
+    auto drawFooterLine = [this, &cellWidth]
     {
         std::string line;
-        size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
-
         line.append(1, '|');
-        line.append(cellWidth * this->m_columnAmount + this->m_nameWidth + 1, '-');
+        line.append(cellWidth * m_columnAmount + m_nameWidth + 1, '-');
         line.append(1, '|');
         line.append(1, '\n');
 
@@ -125,6 +165,7 @@ void ConsoleView::InitGameScore()
 {
     m_PlayerGame = "";
     std::string picture;
+
     std::vector<std::string> lines(m_Frames.at(0).size());
     for (const auto& frame: m_Frames)
     {
@@ -145,10 +186,11 @@ void ConsoleView::InitGameScore()
 void ConsoleView::InitFrameScore(bool isLastFrame)
 {
     std::vector<std::string> m_FrameLines;
-    auto drawAboveName = [this, &isLastFrame]
+    size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
+
+    auto drawAboveName = [this, &isLastFrame, &cellWidth]
     { 
         std::string line;
-        size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
 
         if (isLastFrame)
         {
@@ -169,10 +211,9 @@ void ConsoleView::InitFrameScore(bool isLastFrame)
         return std::move(line);
     };
 
-    auto drawName = [this, &isLastFrame]
+    auto drawName = [this, &isLastFrame, &cellWidth]
     {
         std::string line;
-        size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / 21;
 
         if (isLastFrame)
         {
@@ -193,10 +234,9 @@ void ConsoleView::InitFrameScore(bool isLastFrame)
         return std::move(line);
     };
 
-    auto drawBelowName = [this, &isLastFrame]
+    auto drawBelowName = [this, &isLastFrame, &cellWidth]
     {
         std::string line;
-        size_t cellWidth = (this->m_RowWidth - this->m_nameWidth - 1) / this->m_columnAmount;
 
         if (isLastFrame)
         {
@@ -217,11 +257,6 @@ void ConsoleView::InitFrameScore(bool isLastFrame)
     m_FrameLines.push_back(drawBelowName());
 
     m_Frames.push_back(std::move(m_FrameLines));
-}
-
-void ConsoleView::InitFlush() 
-{
-    std::cout << m_ScoreTable << std::flush;
 }
 
 void ConsoleView::UpdateScore()

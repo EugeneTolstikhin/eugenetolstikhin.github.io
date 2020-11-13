@@ -26,7 +26,7 @@ Game::Game(const std::vector<std::shared_ptr<IView>>& views) :
 
     for (auto& view : m_Views)
     {
-        view->InitGameScore();
+        view->Draw(ViewElement::GAME);
     }
 }
 

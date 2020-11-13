@@ -20,7 +20,7 @@ void Lane::Init(const std::vector<std::string>& players)
 {
     for (auto& view : m_Views)
     {
-        view->InitScoreTableFrame(players);
+        view->Draw(ViewElement::LANE);
     }
 
     //m_logger->LogMe(__FILE__, __LINE__, std::string("Amount of views = ") + std::to_string(m_Views.size()));
@@ -35,7 +35,7 @@ void Lane::Init(const std::vector<std::string>& players)
 
     for (auto& view : m_Views)
     {
-        view->InitFlush();
+        view->Draw(ViewElement::FLUSH);
     }
 }
 
