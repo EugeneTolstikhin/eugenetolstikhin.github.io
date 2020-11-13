@@ -23,15 +23,11 @@ void Lane::Init(const std::vector<std::string>& players)
         view->Draw(ViewElement::LANE);
     }
 
-    //m_logger->LogMe(__FILE__, __LINE__, std::string("Amount of views = ") + std::to_string(m_Views.size()));
-
     m_Players.reserve(players.size());
     for (size_t i = 0; i < players.size(); ++i)
     {
         m_Players.emplace(m_Players.begin() + i, new Player(players.at(i), m_Views));
     }
-
-    //m_logger->LogMe(__FILE__, __LINE__, std::string("Amount of players = ") + std::to_string(m_Players.size()));
 
     for (auto& view : m_Views)
     {
@@ -42,17 +38,17 @@ void Lane::Init(const std::vector<std::string>& players)
 void Lane::Play(std::function<void()> gameover)
 {
     size_t counterGameovers = 0;
-    for (auto& player: m_Players)
+    while (counterGameovers < m_Players.size())
     {
-        player->Play(m_Views, [&counterGameovers]{
-            ++counterGameovers;
-        });
+        for (auto& player: m_Players)
+        {
+            player->Play(m_Views, [&counterGameovers]{
+                ++counterGameovers;
+            });
+        }
     }
 
-    if (counterGameovers == m_Players.size())
-    {
-        gameover();
-    }
+    gameover();
 }
 
 void Lane::Finish()

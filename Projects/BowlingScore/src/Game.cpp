@@ -48,9 +48,7 @@ bool Game::IsAnotherThrowAllowed()
 
 void Game::CloseFrame(std::function<void()> gameOver) 
 {
-    m_currFrame.second = ++m_currFrame.second;
-
-    if (m_currFrame.second == m_Frames.end())
+    if (++m_currFrame.second == m_Frames.end())
     {
         gameOver();
     }
@@ -65,8 +63,8 @@ unsigned short Game::waitForPoints()
     unsigned short points = 0;
 
     std::shared_ptr<IPointsListener> listener(m_pointsListenerFactory->CreatePointsListener(m_listenerType));
-
-    //TODO: Add reading points from the listener
-
+    listener->Connect();
+    points = listener->Receive();
+    listener->Shutdown();
     return points;
 }
