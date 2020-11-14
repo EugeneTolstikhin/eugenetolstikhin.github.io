@@ -1,8 +1,8 @@
 #include "ConsoleView.h"
 #include <stdexcept>
-
 #include <iostream>
 #include <iomanip>
+#include <regex>
 
 #ifdef __linux__
 #include <sys/ioctl.h> //ioctl() and TIOCGWINSZ
@@ -46,26 +46,26 @@ void ConsoleView::Draw(const ViewElement& element, void* params)
         case ViewElement::FRAME:
         {
             bool* isLastFrame = static_cast<bool*>(params);
-            InitFrameScore(*isLastFrame);
+            DrawFrameScore(*isLastFrame);
             break;
         }
 
         case ViewElement::GAME:
         {
-            InitGameScore();
+            DrawGameScore();
             break;
         }
 
         case ViewElement::PLAYER:
         {
             std::string* name = static_cast<std::string*>(params);
-            InitPlayerScore(*name);
+            DrawPlayerScore(*name);
             break;
         }
 
         case ViewElement::LANE:
         {
-            InitLaneScore();
+            DrawLaneScore();
             break;
         }
 
@@ -82,7 +82,7 @@ void ConsoleView::Draw(const ViewElement& element, void* params)
     }
 }
 
-void ConsoleView::InitLaneScore()
+void ConsoleView::DrawLaneScore()
 {
     std::string line;
     size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
@@ -95,7 +95,7 @@ void ConsoleView::InitLaneScore()
     m_ScoreTable.append(line);
 }
 
-void ConsoleView::InitPlayerScore(const std::string& name)
+void ConsoleView::DrawPlayerScore(const std::string& name)
 {
     std::string displayName((name.length() <= m_nameWidth ? name : (name.substr(0, m_nameWidth - 3) + std::string("..."))));
     size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
@@ -107,11 +107,32 @@ void ConsoleView::InitPlayerScore(const std::string& name)
         line.append(m_nameWidth + 1, ' ');
         line.append(1, '|');
 
-        std::string toFindFirst = std::string(cellWidth - 1, ' ') + std::string(1, '|') + std::string(cellWidth - 1, ' ') + std::string(1, '|');
+        size_t signPos = (cellWidth - 1) / 2;
+        bool isWidthOdd = (cellWidth - 1) % 2 == 0;
+        std::string pattern;
+        for (size_t i = 0; i < 2; ++i)
+        {
+            pattern += std::string("[\\s]{")
+                    + std::to_string(signPos - (isWidthOdd ? 1 : 0))
+                    + std::string("}[\\s0-9X\\/-]{1}[\\s]{")
+                    + std::to_string(signPos)
+                    + std::string("}[|]{1}");
+        }
+
+        std::regex regexp(pattern);
+        std::smatch m;
+        
+        if (!std::regex_search(m_PlayerGame, m, regexp))
+        { 
+            throw std::runtime_error("Cannot find the string");
+        }
+
+        std::string toFindFirst = *m.begin();
         std::string toFindLast = std::string("\n");
         size_t start = m_PlayerGame.find(toFindFirst);
         size_t end = m_PlayerGame.find(toFindLast, start);
         std::string aboveNameGame = m_PlayerGame.substr(start, end + 1);
+
         line.append(aboveNameGame);
 
         return std::move(line);
@@ -167,7 +188,7 @@ void ConsoleView::InitPlayerScore(const std::string& name)
     m_ScoreTable.append(drawAboveName() + drawName() + drawBelowName() + drawFooterLine());
 }
 
-void ConsoleView::InitGameScore()
+void ConsoleView::DrawGameScore()
 {
     m_PlayerGame = "";
     std::string picture;
@@ -189,29 +210,36 @@ void ConsoleView::InitGameScore()
     m_Frames.clear();
 }
 
-void ConsoleView::InitFrameScore(bool isLastFrame)
+void ConsoleView::DrawFrameScore(bool isLastFrame, char sign)
 {
     std::vector<std::string> m_FrameLines;
     size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
 
-    auto drawAboveName = [this, &isLastFrame, &cellWidth]
+    auto drawAboveName = [this, &isLastFrame, &cellWidth, &sign]
     { 
         std::string line;
+        size_t signPos = (cellWidth - 1) / 2;
+        bool isWidthOdd = (cellWidth - 1) % 2 == 0;
 
         if (isLastFrame)
         {
             for (size_t i = 0; i < m_lastFrameCellsAmount; ++i)
             {
-                line.append(cellWidth - 1, ' ');
+                line.append(signPos - (isWidthOdd ? 1 : 0), ' ');
+                line.append(1, sign);
+                line.append(signPos, ' ');
                 line.append(1, '|');
             }
         }
         else
         {
-            line.append(cellWidth - 1, ' ');
-            line.append(1, '|');
-            line.append(cellWidth - 1, ' ');
-            line.append(1, '|');
+            for (size_t i = 0; i < 2; ++i)
+            {
+                line.append(signPos - (isWidthOdd ? 1 : 0), ' ');
+                line.append(1, sign);
+                line.append(signPos, ' ');
+                line.append(1, '|');
+            }
         }
 
         return std::move(line);
