@@ -15,10 +15,10 @@ public:
     virtual void CleanScore();
 
 private:
-    void InitLaneScore();
-    void InitPlayerScore(const std::string&);
-    void InitGameScore();
-    void InitFrameScore(bool);
+    void DrawLaneScore();
+    void DrawPlayerScore(const std::string&);
+    void DrawGameScore();
+    void DrawFrameScore(bool, char sign = ' ');
 
     size_t m_RowWidth = 0;
     size_t m_nameWidth = 0;
