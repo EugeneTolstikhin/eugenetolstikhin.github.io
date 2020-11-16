@@ -9,9 +9,9 @@ public:
     PointsListenerSimulation();
     virtual ~PointsListenerSimulation();
 
-    virtual void Connect();
-    virtual unsigned short Receive();
-    virtual void Shutdown();
+    virtual void Connect() override;
+    virtual unsigned short Receive() override;
+    virtual void Shutdown() override;
 };
 
 #endif //__POINTS_LISTENER_SIMULATION_H__

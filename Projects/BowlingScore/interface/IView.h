@@ -16,9 +16,7 @@ enum class ViewElement
 class IView
 {
 public:
-    IView() = default;
     virtual ~IView() = default;
-
     virtual void Draw(const ViewElement&, void* params = nullptr) = 0;
     virtual void UpdateScore() = 0;
     virtual void CleanScore() = 0;

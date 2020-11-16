@@ -21,14 +21,7 @@ static const unsigned short MAX_POINTS = 10;
 class IFrame
 {
 public:
-    IFrame() = default;
     virtual ~IFrame() = default;
-
-    IFrame(const IFrame&) = delete;
-    IFrame(IFrame&&) = delete;
-    IFrame& operator = (const IFrame&) = delete;
-    IFrame&& operator = (IFrame&&) = delete;
-
     virtual void SetTrialPoints(const unsigned short) = 0;
     virtual bool isAllowedThrow() const noexcept = 0;
 };

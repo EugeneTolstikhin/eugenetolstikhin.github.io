@@ -14,7 +14,7 @@ PointsListenerFactory::~PointsListenerFactory()
     //
 }
 
-IPointsListener* PointsListenerFactory::CreatePointsListener(const ListenerType& type)
+IPointsListener* PointsListenerFactory::CreatePointsListener(const ListenerType& type) const
 {
     switch (type)
     {

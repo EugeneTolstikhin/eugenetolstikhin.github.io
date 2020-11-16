@@ -12,10 +12,8 @@ class IPointsListener;
 class IPointsListenerFactory
 {
 public:
-    IPointsListenerFactory() = default;
     virtual ~IPointsListenerFactory() = default;
-
-    virtual IPointsListener* CreatePointsListener(const ListenerType&) = 0;
+    virtual IPointsListener* CreatePointsListener(const ListenerType&) const = 0;
 };
 
 #endif //__IPOINTS_LISTENER_FACTORY_H__

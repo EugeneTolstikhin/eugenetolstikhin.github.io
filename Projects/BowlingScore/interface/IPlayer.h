@@ -10,9 +10,7 @@
 class IPlayer
 {
 public:
-    IPlayer() = default;
     virtual ~IPlayer() = default;
-
     virtual void Play(const std::vector<std::shared_ptr<IView>>&, std::function<void()> gameover) = 0;
 };
 

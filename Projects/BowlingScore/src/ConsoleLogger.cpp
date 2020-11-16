@@ -11,7 +11,7 @@ ConsoleLogger::~ConsoleLogger()
     //
 }
 
-void ConsoleLogger::LogMe(const std::string& file, int line, const std::string& message) 
+void ConsoleLogger::LogMe(const std::string& file, int line, const std::string& message) const noexcept
 {
     std::cout   << "File: " << file << std::endl
                 << "Line: " << line << std::endl

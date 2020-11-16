@@ -15,6 +15,11 @@ public:
     Game(const std::vector<std::shared_ptr<IView>>&);
     virtual ~Game();
 
+    Game(const Game&) = delete;
+    Game(Game&&) = delete;
+    Game& operator = (const Game&) = delete;
+    Game&& operator = (Game&&) = delete;
+
     virtual void ThrowBall() override;
     virtual bool IsAnotherThrowAllowed() override;
     virtual void CloseFrame(std::function<void()> gameover) override;

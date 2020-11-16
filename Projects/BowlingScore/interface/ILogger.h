@@ -6,10 +6,8 @@
 class ILogger
 {
 public:
-    ILogger() = default;
     virtual ~ILogger() = default;
-
-    virtual void LogMe(const std::string&, int, const std::string&) = 0;
+    virtual void LogMe(const std::string&, int, const std::string&) const noexcept = 0;
 };
 
 #endif // __ILOGGER_H__

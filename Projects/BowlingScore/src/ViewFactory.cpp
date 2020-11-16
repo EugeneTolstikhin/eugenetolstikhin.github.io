@@ -13,7 +13,7 @@ ViewFactory::~ViewFactory()
     //
 }
 
-IView* ViewFactory::CreateView(const ViewType& type)
+IView* ViewFactory::CreateView(const ViewType& type) const
 {
     switch (type)
     {

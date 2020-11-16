@@ -13,7 +13,7 @@ LoggerFactory::~LoggerFactory()
     //
 }
 
-ILogger* LoggerFactory::CreateLogger(const LoggerType& type)
+ILogger* LoggerFactory::CreateLogger(const LoggerType& type) const
 {
     switch (type)
     {
