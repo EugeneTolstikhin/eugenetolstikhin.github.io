@@ -12,10 +12,8 @@ class IView;
 class IViewFactory
 {
 public:
-    IViewFactory() = default;
     virtual ~IViewFactory() = default;
-
-    virtual IView* CreateView(const ViewType&) = 0;
+    virtual IView* CreateView(const ViewType&) const = 0;
 };
 
 #endif //__IVIEW_FACTORY_H__

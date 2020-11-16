@@ -14,9 +14,14 @@ public:
     Lane();
     virtual ~Lane();
 
-    virtual void Init(const std::vector<std::string>&);
-    virtual void Play(std::function<void()> gameover);
-    virtual void Finish();
+    Lane(const Lane&) = delete;
+    Lane(Lane&&) = delete;
+    Lane& operator = (const Lane&) = delete;
+    Lane&& operator = (Lane&&) = delete;
+
+    virtual void Init(const std::vector<std::string>&) override;
+    virtual void Play(std::function<void()> gameover) override;
+    virtual void Finish() override;
     
 private:
     ViewType m_typeView = ViewType::CLS;

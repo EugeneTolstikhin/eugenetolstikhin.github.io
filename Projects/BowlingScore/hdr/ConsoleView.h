@@ -10,9 +10,9 @@ public:
     ConsoleView();
     virtual ~ConsoleView();
 
-    virtual void Draw(const ViewElement&, void*);
-    virtual void UpdateScore();
-    virtual void CleanScore();
+    virtual void Draw(const ViewElement&, void*) override;
+    virtual void UpdateScore() override;
+    virtual void CleanScore() override;
 
 private:
     void DrawLaneScore();
