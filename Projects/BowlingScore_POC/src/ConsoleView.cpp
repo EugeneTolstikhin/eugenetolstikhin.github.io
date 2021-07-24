@@ -12,6 +12,9 @@
 
 ConsoleView::ConsoleView()
 {
+    initscr();
+    refresh();
+    curs_set(0);
 #ifdef __linux__
     struct winsize size;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
@@ -23,7 +26,7 @@ ConsoleView::ConsoleView()
     m_lastFrameCellsAmount = 3;
     m_columnAmount = m_normalFrameCellsAmount * m_normalFramesAmount + m_lastFrameCellsAmount;
     m_nameWidth = m_RowWidth / m_columnAmount;
-    m_Frames.reserve(m_normalFramesAmount + 1);
+    m_wFrames.reserve(m_normalFramesAmount + 1);
 
     size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
     if (cellWidth < 2)
@@ -32,11 +35,28 @@ ConsoleView::ConsoleView()
     }
 #elif _WIN32
 #endif
+
+    //mvwprintw(w0, 2, 1, "Gene");
+    //mvwprintw(w1, 1, 1, "1");
+    //mvwprintw(w2, 1, 1, "X");
+    //mvwprintw(w3, 1, 1, "300");
 }
 
 ConsoleView::~ConsoleView()
 {
-    //
+    for (auto w: m_wPlayers)
+    {
+        delwin(w);
+    }
+
+    for (auto w: m_wFrames)
+    {
+        delwin(w.at(0));
+        delwin(w.at(1));
+        delwin(w.at(2));
+    }
+
+    endwin();
 }
 
 void ConsoleView::Draw(const ViewElement& element, void* params)
@@ -50,12 +70,6 @@ void ConsoleView::Draw(const ViewElement& element, void* params)
             break;
         }
 
-        case ViewElement::GAME:
-        {
-            DrawGameScore();
-            break;
-        }
-
         case ViewElement::PLAYER:
         {
             std::string* name = static_cast<std::string*>(params);
@@ -63,15 +77,29 @@ void ConsoleView::Draw(const ViewElement& element, void* params)
             break;
         }
 
-        case ViewElement::LANE:
-        {
-            DrawLaneScore();
-            break;
-        }
-
         case ViewElement::FLUSH:
         {
-            std::cout << m_ScoreTable << std::flush;
+            for (auto w: m_wFrames)
+            {
+                wrefresh(w.at(0));
+
+                if (w.size() == 3)
+                {
+                    wrefresh(w.at(2));
+                    wrefresh(w.at(1));
+                }
+                else if (w.size() == 4)
+                {
+                    wrefresh(w.at(1));
+                    wrefresh(w.at(3));
+                    wrefresh(w.at(2));
+                }
+            }
+
+            for (auto w: m_wPlayers)
+            {
+                wrefresh(w);
+            }
             break;
         }
 
@@ -82,132 +110,24 @@ void ConsoleView::Draw(const ViewElement& element, void* params)
     }
 }
 
-void ConsoleView::DrawLaneScore()
-{
-    std::string line;
-    size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
-
-    line.append(1, '|');
-    line.append(cellWidth * m_columnAmount + m_nameWidth + 1, '-');
-    line.append(1, '|');
-    line.append(1, '\n');
-
-    m_ScoreTable.append(line);
-}
-
 void ConsoleView::DrawPlayerScore(const std::string& name)
 {
     std::string displayName((name.length() <= m_nameWidth ? name : (name.substr(0, m_nameWidth - 3) + std::string("..."))));
     size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
 
-    auto drawAboveName = [this, &cellWidth]
+    cellWidth = 3; // TMP
+
+    m_wPlayers.emplace_back(newwin(cellWidth * 2 - 1, m_nameWidth + 2, m_wPlayers.size() * (cellWidth * 2 - 1), 0));
+    WINDOW* w = m_wPlayers.back();
+
+    if (m_wPlayers.size() == 1)
     {
-        std::string line;
-        line.append(1, '|');
-        line.append(m_nameWidth + 1, ' ');
-        line.append(1, '|');
-
-        size_t signPos = (cellWidth - 1) / 2;
-        bool isWidthOdd = (cellWidth - 1) % 2 == 0;
-        std::string pattern;
-        for (size_t i = 0; i < 2; ++i)
-        {
-            pattern += std::string("[\\s]{")
-                    + std::to_string(signPos - (isWidthOdd ? 1 : 0))
-                    + std::string("}[\\s0-9X\\/-]{1}[\\s]{")
-                    + std::to_string(signPos)
-                    + std::string("}[|]{1}");
-        }
-
-        std::regex regexp(pattern);
-        std::smatch m;
-        
-        if (!std::regex_search(m_PlayerGame, m, regexp))
-        { 
-            throw std::runtime_error("Cannot find the string");
-        }
-
-        std::string toFindFirst = *m.begin();
-        std::string toFindLast = std::string("\n");
-        size_t start = m_PlayerGame.find(toFindFirst);
-        size_t end = m_PlayerGame.find(toFindLast, start);
-        std::string aboveNameGame = m_PlayerGame.substr(start, end + 1);
-
-        line.append(aboveNameGame);
-
-        return std::move(line);
-    };
-
-    auto drawName = [this, &displayName, &cellWidth]
-    {
-        std::string line;
-        line.append(1, '|');
-        line.append(displayName);
-        line.append(m_nameWidth - displayName.length() + 1, ' ');
-        line.append(1, '|');
-
-        std::string toFindFirst = std::string(cellWidth - 1, ' ') + std::string(1, '|') + std::string(cellWidth - 1, '-') + std::string(1, '|');
-        std::string toFindLast = std::string(cellWidth - 1, '-') + std::string(1, '|');
-        size_t start = m_PlayerGame.find(toFindFirst);
-        size_t end = m_PlayerGame.find(toFindLast, start);
-        std::string nameGame = m_PlayerGame.substr(start, end - toFindLast.length());
-        line.append(nameGame);
-
-        return line;
-    };
-
-    auto drawBelowName = [this, &cellWidth]
-    {
-        std::string line;
-        line.append(1, '|');
-        line.append(m_nameWidth + 1, ' ');
-        line.append(1, '|');
-
-        size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
-        std::string toFindFirst = std::string(m_normalFrameCellsAmount * cellWidth - 1, ' ') + std::string(1, '|');
-        std::string toFindLast = std::string("\n");
-        size_t start = m_PlayerGame.find(toFindFirst);
-        size_t end = m_PlayerGame.find(toFindLast, start);
-        std::string belowNameGame = m_PlayerGame.substr(start, end + 1);
-        line.append(belowNameGame);
-
-        return line;
-    };
-
-    auto drawFooterLine = [this, &cellWidth]
-    {
-        std::string line;
-        line.append(1, '|');
-        line.append(cellWidth * m_columnAmount + m_nameWidth + 1, '-');
-        line.append(1, '|');
-        line.append(1, '\n');
-
-        return line;
-    };
-
-    m_ScoreTable.append(drawAboveName() + drawName() + drawBelowName() + drawFooterLine());
-}
-
-void ConsoleView::DrawGameScore()
-{
-    m_PlayerGame = "";
-    std::string picture;
-
-    std::vector<std::string> lines(m_Frames.at(0).size());
-    for (const auto& frame: m_Frames)
-    {
-        for (size_t i = 0; i < frame.size(); ++i)
-        {
-            lines.at(i) += frame.at(i);
-        }
+        wattron(w, A_BOLD); // FIrst user mark as active. He will start the 1st
     }
 
-    for (const auto& line: lines)
-    {
-        m_PlayerGame += line + std::string("\n");
-    }
-
-    m_Frames.clear();
+    wborder(w, 0, 0, 0, 0, 0, 0, 0, 0);
+    mvwprintw(w, 2, 1, displayName.c_str());
+    wattroff(w, A_BOLD);
 }
 
 void ConsoleView::DrawFrameScore(bool isLastFrame, char sign)
@@ -215,82 +135,38 @@ void ConsoleView::DrawFrameScore(bool isLastFrame, char sign)
     std::vector<std::string> m_FrameLines;
     size_t cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
 
-    auto drawAboveName = [this, &isLastFrame, &cellWidth, &sign]
-    { 
-        std::string line;
-        size_t signPos = (cellWidth - 1) / 2;
-        bool isWidthOdd = (cellWidth - 1) % 2 == 0;
+    cellWidth = 3; // TMP
 
-        if (isLastFrame)
-        {
-            for (size_t i = 0; i < m_lastFrameCellsAmount; ++i)
-            {
-                line.append(signPos - (isWidthOdd ? 1 : 0), ' ');
-                line.append(1, sign);
-                line.append(signPos, ' ');
-                line.append(1, '|');
-            }
-        }
-        else
-        {
-            for (size_t i = 0; i < 2; ++i)
-            {
-                line.append(signPos - (isWidthOdd ? 1 : 0), ' ');
-                line.append(1, sign);
-                line.append(signPos, ' ');
-                line.append(1, '|');
-            }
-        }
-
-        return std::move(line);
-    };
-
-    auto drawName = [this, &isLastFrame, &cellWidth]
+    if (!isLastFrame)
     {
-        std::string line;
+        FRAMES fr = {
+            newwin(cellWidth, cellWidth + 1, m_wPlayers.size() * (cellWidth * 2 - 1), m_nameWidth + 1 + (m_wFrames.size() - 10 * m_wPlayers.size()) * cellWidth * 2),
+            newwin(cellWidth, cellWidth, m_wPlayers.size() * (cellWidth * 2 - 1), m_nameWidth + cellWidth + 1 + (m_wFrames.size() - 10 * m_wPlayers.size()) * cellWidth * 2),
+            newwin(cellWidth, cellWidth * 2, m_wPlayers.size() * (cellWidth * 2 - 1) + cellWidth - 1, m_nameWidth + 1 + (m_wFrames.size() - 10 * m_wPlayers.size()) * cellWidth * 2)
+        };
 
-        if (isLastFrame)
-        {
-            for (size_t i = 0; i < m_lastFrameCellsAmount; ++i)
-            {
-                line.append(cellWidth - 1, '-');
-                line.append(1, '|');
-            }
-        }
-        else
-        {
-            line.append(cellWidth - 1, ' ');
-            line.append(1, '|');
-            line.append(cellWidth - 1, '-');
-            line.append(1, '|');
-        }
+        wborder(fr.at(0), 0, ' ', 0, ' ', 0, 0, ' ', ' ');
+        wborder(fr.at(1), 0, 0, 0, 0, 0, 0, 0, 0);
+        wborder(fr.at(2), 0, 0, ' ', 0, '|', '|', 0, 0);
 
-        return std::move(line);
-    };
-
-    auto drawBelowName = [this, &isLastFrame, &cellWidth]
+        m_wFrames.push_back(std::move(fr));
+    }
+    else
     {
-        std::string line;
+        FRAMES fr = {
+            newwin(cellWidth, cellWidth + 1, m_wPlayers.size() * (cellWidth * 2 - 1), m_nameWidth + 1 + (m_wFrames.size() - 10 * m_wPlayers.size()) * cellWidth * 2),
+            newwin(cellWidth, cellWidth + 1, m_wPlayers.size() * (cellWidth * 2 - 1), m_nameWidth + cellWidth + 1 + (m_wFrames.size() - 10 * m_wPlayers.size()) * cellWidth * 2),
+            newwin(cellWidth, cellWidth, m_wPlayers.size() * (cellWidth * 2 - 1), m_nameWidth + 2 * cellWidth + 1 + (m_wFrames.size() - 10 * m_wPlayers.size()) * cellWidth * 2),
+            newwin(cellWidth, cellWidth * 3, m_wPlayers.size() * (cellWidth * 2 - 1) + cellWidth - 1, m_nameWidth + 1 + (m_wFrames.size() - 10 * m_wPlayers.size()) * cellWidth * 2)
+        };
 
-        if (isLastFrame)
-        {
-            line.append(m_lastFrameCellsAmount * cellWidth - 1, ' ');
-            line.append(1, '|');
-        }
-        else
-        {
-            line.append(m_normalFrameCellsAmount * cellWidth - 1, ' ');
-            line.append(1, '|');
-        }
+        wborder(fr.at(0), 0, ' ', 0, ' ', 0, 0, ' ', ' ');
+        wborder(fr.at(1), ' ', ' ', 0, ' ', ' ', ' ', ' ', ' ');
+        wborder(fr.at(2), 0, 0, 0, 0, 0, 0, 0, 0);
+        wborder(fr.at(3), 0, 0, ' ', 0, '|', '|', 0, 0);
 
-        return std::move(line);
-    };
-
-    m_FrameLines.push_back(drawAboveName());
-    m_FrameLines.push_back(drawName());
-    m_FrameLines.push_back(drawBelowName());
-
-    m_Frames.push_back(std::move(m_FrameLines));
+        m_wFrames.push_back(std::move(fr));
+    }
 }
 
 void ConsoleView::UpdateScore()
@@ -300,8 +176,11 @@ void ConsoleView::UpdateScore()
 
 void ConsoleView::CleanScore()
 {
-    std::cout << "Game over!" << std::endl << std::flush;
-    m_ScoreTable.clear();
-    m_Frames.clear();
-    m_PlayerGame.clear();
+    //std::cout << "Game over!" << std::endl << std::flush;
+    //m_ScoreTable.clear();
+    //m_Frames.clear();
+    //m_PlayerGame.clear();
+
+    refresh();
+    getch();
 }

@@ -23,11 +23,6 @@ Game::Game(const std::vector<std::shared_ptr<IView>>& views) :
     }
 
     m_currFrame = std::make_pair(*(m_Frames.begin()), m_Frames.begin());
-
-    for (auto& view : m_Views)
-    {
-        view->Draw(ViewElement::GAME);
-    }
 }
 
 Game::~Game()
