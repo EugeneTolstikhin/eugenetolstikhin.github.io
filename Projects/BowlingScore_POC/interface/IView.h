@@ -7,9 +7,7 @@
 enum class ViewElement
 {
     FRAME,
-    GAME,
     PLAYER,
-    LANE,
     FLUSH
 };
 

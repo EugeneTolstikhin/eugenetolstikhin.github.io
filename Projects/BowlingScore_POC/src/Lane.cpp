@@ -18,11 +18,6 @@ Lane::~Lane()
 
 void Lane::Init(const std::vector<std::string>& players)
 {
-    for (auto& view : m_Views)
-    {
-        view->Draw(ViewElement::LANE);
-    }
-
     m_Players.reserve(players.size());
     for (size_t i = 0; i < players.size(); ++i)
     {
