@@ -124,6 +124,8 @@ void ConsoleView::Draw(const ViewElement& element, void* params)
             {
                 wrefresh(w.second);
             }
+
+            m_ActiveFrame = m_wGames.front().front().front();
             break;
         }
 
@@ -199,7 +201,8 @@ void ConsoleView::DrawFrameScore(bool isLastFrame, char sign)
 
 void ConsoleView::UpdateScore(unsigned short score)
 {
-    //throw std::runtime_error("Unimplemented functionality");
+    mvwprintw(m_ActiveFrame.second, 1, 1, std::to_string(score).c_str());
+    wrefresh(m_ActiveFrame.second);
 }
 
 void ConsoleView::CleanScore()
@@ -215,6 +218,7 @@ void ConsoleView::CleanScore()
 
 void ConsoleView::SetNextPlayerActive()
 {
+    m_log->LogMe(__FILE__, __LINE__, std::string());
     WINDOW* w = m_wPlayers.at(m_ActivePlayerIdx).second;
     auto displayName = m_wPlayers.at(m_ActivePlayerIdx).first;
     wattroff(w, A_BOLD); // Should be already OFF, but just in case mentioned OFF here
@@ -228,6 +232,7 @@ void ConsoleView::SetNextPlayerActive()
     else
     {
         m_ActivePlayerIdx = 0;
+        ++m_ActiveFramesIdx;
     }
 
     w = m_wPlayers.at(m_ActivePlayerIdx).second;
@@ -237,10 +242,20 @@ void ConsoleView::SetNextPlayerActive()
     mvwprintw(w, 2, 1, displayName.c_str());
     wattroff(w, A_BOLD);
     wrefresh(w);
-    usleep(5000000);
+    usleep(500000);
 }
 
-void ConsoleView::SetNextFrameActive()
+void ConsoleView::SetNextFrameActive(bool last)
 {
-    //
+    m_log->LogMe(__FILE__, __LINE__, std::string());
+    if (!last)
+    {
+        ++m_ActiveFrameIdx;
+    }
+    else
+    {
+        m_ActiveFrameIdx = 0;
+    }
+
+    m_ActiveFrame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx).at(m_ActiveFrameIdx);
 }
