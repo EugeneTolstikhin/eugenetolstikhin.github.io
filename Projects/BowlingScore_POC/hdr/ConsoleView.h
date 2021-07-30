@@ -7,7 +7,8 @@
 #include <ncurses.h>
 #include <memory>
 
-typedef std::vector<std::pair<unsigned short, WINDOW*>> FRAMES;
+typedef std::pair<unsigned short, WINDOW*> FRAME;
+typedef std::vector<FRAME> FRAMES;
 typedef std::vector<FRAMES> GAME;
 typedef std::pair<std::string, WINDOW*> PLAYER;
 
@@ -21,7 +22,7 @@ public:
     virtual void UpdateScore(unsigned short);
     virtual void CleanScore();
     virtual void SetNextPlayerActive();
-    virtual void SetNextFrameActive();
+    virtual void SetNextFrameActive(bool);
 
 private:
     void DrawPlayerScore(const std::string&);
@@ -38,6 +39,7 @@ private:
     std::string m_ScoreTable;
 
     short m_ActivePlayerIdx = 0;
+    short m_ActiveFramesIdx = 0;
     short m_ActiveFrameIdx = 0;
 
     GAME m_Game;
@@ -47,6 +49,8 @@ private:
 
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
     std::unique_ptr<ILogger> m_log;
+
+    FRAME m_ActiveFrame;
 };
 
 #endif //__CONSOLE_VIEW_H__

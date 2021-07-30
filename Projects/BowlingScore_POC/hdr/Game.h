@@ -7,6 +7,7 @@
 #include "IFrame.h"
 #include "IPointsListenerFactory.h"
 #include "IView.h"
+#include "ILoggerFactory.h"
 
 class Game : public IGame
 {
@@ -17,7 +18,7 @@ public:
 
     virtual void ThrowBall() override;
     virtual bool IsAnotherThrowAllowed() override;
-    virtual void CloseFrame(std::function<void()> gameover) override;
+    virtual void CloseGame(std::function<void()> gameover) override;
 
 private:
     unsigned short waitForPoints();
@@ -28,6 +29,9 @@ private:
     std::unique_ptr<IPointsListenerFactory> m_pointsListenerFactory;
     std::vector<std::shared_ptr<IView>> m_Views;
     size_t m_FramesAmount = 0;
+
+    std::unique_ptr<ILoggerFactory> m_loggerFactory;
+    std::unique_ptr<ILogger> m_log;
 };
 
 #endif // __GAME_H__

@@ -1,4 +1,6 @@
 #include "Frame.h"
+#include "LoggerFactory.h"
+#include "FileLogger.h"
 #include <stdexcept>
 
 Frame::Frame()
@@ -9,6 +11,8 @@ Frame::Frame()
 Frame::Frame(bool isLastFrame, const std::vector<std::shared_ptr<IView>>& views) :
     m_isLastFrame(isLastFrame)
     ,m_Views(views)
+    ,m_loggerFactory(new LoggerFactory)
+    ,m_log(m_loggerFactory->CreateLogger(LoggerType::TO_FILE))
 {
     for (auto& view : m_Views)
     {
@@ -59,6 +63,8 @@ void Frame::SetTrialPoints(const unsigned short points)
             break;
     }
     m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) = p;//points;
+
+    //m_log->LogMe(__FILE__, __LINE__, std::string("AMount of points are ") + std::to_string(p));
 
     for (auto& view : m_Views)
     {
@@ -156,5 +162,10 @@ void Frame::incTrial()
         }
         default:
             break;
+    }
+
+    for (auto& view : m_Views)
+    {
+        view->SetNextFrameActive(!m_AllowThrow);
     }
 }

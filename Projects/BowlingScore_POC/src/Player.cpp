@@ -29,7 +29,8 @@ void Player::Play(const std::vector<std::shared_ptr<IView>>& views, std::functio
         m_Game->ThrowBall();
     }
 
-    m_Game->CloseFrame([&gameover]{
+    m_Game->CloseGame([&gameover]
+    {
         gameover();
     });
 }
