@@ -13,7 +13,7 @@ Game::Game(const std::vector<std::shared_ptr<IView>>& views) :
     ,m_Views(views)
 {
     //This parameter can be read from a config file
-    m_FramesAmount = 10;
+    m_FramesAmount = MAX_FRAME_AMOUNT;
     m_Frames.reserve(m_FramesAmount);
 
     size_t counter = 0;

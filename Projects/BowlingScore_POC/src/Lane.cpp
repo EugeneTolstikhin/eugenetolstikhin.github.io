@@ -40,6 +40,11 @@ void Lane::Play(std::function<void()> gameover)
             player->Play(m_Views, [&counterGameovers]{
                 ++counterGameovers;
             });
+
+            for (auto& view : m_Views)
+            {
+                view->SetNextPlayerActive();
+            }
         }
     }
 

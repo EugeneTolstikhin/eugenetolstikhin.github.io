@@ -3,6 +3,8 @@
 
 #include <functional>
 
+static const unsigned short MAX_FRAME_AMOUNT = 10;
+
 class IGame
 {
 public:

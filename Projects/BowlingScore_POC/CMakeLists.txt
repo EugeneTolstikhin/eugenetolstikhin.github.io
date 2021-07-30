@@ -16,6 +16,6 @@ file(GLOB SOURCES "src/*.cpp")
 
 add_executable(Bowling ${SOURCES})
 
-add_subdirectory (tests)
-enable_testing ()
-add_test (NAME BowlingTests COMMAND TestBase)
+#add_subdirectory (tests)
+#enable_testing ()
+#add_test (NAME BowlingTests COMMAND TestBase)
