@@ -18,9 +18,9 @@ void PointsListenerSimulation::Connect()
 
 unsigned short PointsListenerSimulation::Receive()
 {
-    //throw std::runtime_error("Unimplemented functionality");
-
-    return 0;
+    std::discrete_distribution<unsigned short> distrib (0, 10);
+    auto res = distrib(m_Generator);
+    return res;
 }
 
 void PointsListenerSimulation::Shutdown()

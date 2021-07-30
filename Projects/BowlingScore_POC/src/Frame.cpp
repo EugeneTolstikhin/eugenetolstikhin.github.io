@@ -23,6 +23,7 @@ Frame::~Frame()
 
 void Frame::SetTrialPoints(const unsigned short points) 
 {
+    unsigned short p = points; //TMP
     switch (m_CurrentTrial)
     {
         case Trial::FIRST:
@@ -36,7 +37,11 @@ void Frame::SetTrialPoints(const unsigned short points)
         {
             bool specialCase = m_isLastFrame && MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
             if (points > MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)) && false == specialCase)
-                throw std::runtime_error("Amount of points is more then allowed for the 2nd trial"); 
+            {
+                //throw std::runtime_error("Amount of points is more then allowed for the 2nd trial");
+
+                p = MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
+            }
 
             break;
         }
@@ -46,14 +51,19 @@ void Frame::SetTrialPoints(const unsigned short points)
                 throw std::runtime_error("Only the last frame contains the 3rd trial");
 
             if (points > MAX_POINTS)
-                throw std::runtime_error("Amount of points is more then allowed for the 2nd trial"); 
+                throw std::runtime_error("Amount of points is more then allowed for the 2nd trial");
 
             break;
         }
         default:
             break;
     }
-    m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) = points;
+    m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) = p;//points;
+
+    for (auto& view : m_Views)
+    {
+        view->UpdateScore(p);
+    }
 
     incTrial();
 }
