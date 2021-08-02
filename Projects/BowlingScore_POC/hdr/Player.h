@@ -11,7 +11,7 @@ public:
     Player(const std::string &, const std::vector<std::shared_ptr<IView>>&);
     virtual ~Player();
 
-    virtual void Play(const std::vector<std::shared_ptr<IView>>&, std::function<void()> gameover);
+    virtual void Play(const std::vector<std::shared_ptr<IView>>&, std::function<void()> gameover) override;
 
 private:
     std::string m_PlayerName;

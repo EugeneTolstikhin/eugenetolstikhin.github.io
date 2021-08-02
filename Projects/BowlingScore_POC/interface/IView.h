@@ -18,6 +18,7 @@ public:
     virtual ~IView() = default;
 
     virtual void Draw(const ViewElement&, void* params = nullptr) = 0;
+    virtual void UpdateFrameScore(unsigned short) = 0;
     virtual void UpdateScore(unsigned short) = 0;
     virtual void CleanScore() = 0;
     virtual void SetNextFrameActive(bool) = 0;

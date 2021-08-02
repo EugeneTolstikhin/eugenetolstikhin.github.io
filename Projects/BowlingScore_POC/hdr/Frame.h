@@ -22,6 +22,7 @@ public:
 
     virtual void SetTrialPoints(const unsigned short) override;
     virtual bool isAllowedThrow() const noexcept override;
+    virtual unsigned short GetTotalFramePoints() const noexcept override;
 
 private:
     void incTrial();

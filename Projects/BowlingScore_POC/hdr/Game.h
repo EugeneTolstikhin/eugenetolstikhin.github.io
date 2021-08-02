@@ -17,8 +17,9 @@ public:
     virtual ~Game();
 
     virtual void ThrowBall() override;
-    virtual bool IsAnotherThrowAllowed() override;
+    virtual bool IsAnotherThrowAllowed() const noexcept override;
     virtual void CloseGame(std::function<void()> gameover) override;
+    virtual void UpdateTotalScore() override;
 
 private:
     unsigned short waitForPoints();
@@ -28,7 +29,6 @@ private:
     std::pair<std::shared_ptr<IFrame>, std::vector<std::shared_ptr<IFrame>>::iterator> m_currFrame;
     std::unique_ptr<IPointsListenerFactory> m_pointsListenerFactory;
     std::vector<std::shared_ptr<IView>> m_Views;
-    size_t m_FramesAmount = 0;
 
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
     std::unique_ptr<ILogger> m_log;

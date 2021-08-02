@@ -1,7 +1,9 @@
 #include "Player.h"
 #include "Game.h"
 
-Player::Player() : m_PlayerName("Test"), m_Game(new Game)
+Player::Player() :
+    m_PlayerName("Test")
+    ,m_Game(new Game)
 {
     //
 }
@@ -28,6 +30,8 @@ void Player::Play(const std::vector<std::shared_ptr<IView>>& views, std::functio
     {
         m_Game->ThrowBall();
     }
+
+    m_Game->UpdateTotalScore();
 
     m_Game->CloseGame([&gameover]
     {

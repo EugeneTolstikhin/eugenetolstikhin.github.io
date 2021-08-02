@@ -4,16 +4,16 @@
 #include <stdexcept>
 
 PointsListenerSimulation::PointsListenerSimulation() :
-    distrib(0, 10)
-    ,m_loggerFactory(new LoggerFactory)
+    m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(LoggerType::TO_FILE))
+    ,distrib(0, 10)
 {
     m_log->LogMe(__FILE__, __LINE__, std::string("Enter points listener simulator ctr"));
 }
 
 PointsListenerSimulation::~PointsListenerSimulation()
 {
-    //
+    m_log->LogMe(__FILE__, __LINE__, std::string("Enter points listener simulator dtr"));
 }
 
 void PointsListenerSimulation::Connect()
@@ -23,8 +23,8 @@ void PointsListenerSimulation::Connect()
 
 unsigned short PointsListenerSimulation::Receive()
 {
-    std::default_random_engine generator;
     m_log->LogMe(__FILE__, __LINE__, std::string("Generate random number between 0 and 10"));
+    distrib.reset();
     auto res = distrib(generator);
     m_log->LogMe(__FILE__, __LINE__, std::string("Result random number = ") + std::to_string(res));
     return res;
