@@ -6,7 +6,8 @@
 PointsListenerSimulation::PointsListenerSimulation() :
     m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(LoggerType::TO_FILE))
-    ,distrib(0, 10)
+    ,m_generator(m_device())
+    ,m_distrib(0, 10)
 {
     m_log->LogMe(__FILE__, __LINE__, std::string("Enter points listener simulator ctr"));
 }
@@ -24,8 +25,7 @@ void PointsListenerSimulation::Connect()
 unsigned short PointsListenerSimulation::Receive()
 {
     m_log->LogMe(__FILE__, __LINE__, std::string("Generate random number between 0 and 10"));
-    distrib.reset();
-    auto res = distrib(generator);
+    auto res = m_distrib(m_generator);
     m_log->LogMe(__FILE__, __LINE__, std::string("Result random number = ") + std::to_string(res));
     return res;
 }
