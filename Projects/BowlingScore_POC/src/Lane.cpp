@@ -41,10 +41,10 @@ void Lane::Play(std::function<void()> gameover)
                 ++counterGameovers;
             });
 
-            for (auto& view : m_Views)
+            /*for (auto& view : m_Views)
             {
                 view->SetNextPlayerActive();
-            }
+            }*/
         }
     }
 

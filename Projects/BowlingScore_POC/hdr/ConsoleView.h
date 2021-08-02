@@ -21,12 +21,12 @@ public:
     virtual void Draw(const ViewElement&, void*);
     virtual void UpdateScore(unsigned short);
     virtual void CleanScore();
-    virtual void SetNextPlayerActive();
     virtual void SetNextFrameActive(bool);
 
 private:
     void DrawPlayerScore(const std::string&);
-    void DrawFrameScore(bool, char sign = ' ');
+    void DrawFrameScore(bool);
+    void SetNextPlayerActive();
 
     size_t m_RowWidth = 0;
     size_t m_nameWidth = 0;
