@@ -5,7 +5,6 @@
 #include "IView.h"
 #include "ILoggerFactory.h"
 #include <memory>
-#include <vector>
 
 class Frame : public IFrame
 {
@@ -25,7 +24,7 @@ public:
     virtual unsigned short GetTotalFramePoints() const noexcept override;
 
 private:
-    void incTrial();
+    void incTrial(const unsigned short points);
 
     Flag m_Flag = Flag::NOTHING;
     bool m_isLastFrame = false;

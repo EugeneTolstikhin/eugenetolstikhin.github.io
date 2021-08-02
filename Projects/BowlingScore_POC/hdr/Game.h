@@ -32,6 +32,8 @@ private:
 
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
     std::unique_ptr<ILogger> m_log;
+
+    unsigned short m_frameTotalPoints;
 };
 
 #endif // __GAME_H__

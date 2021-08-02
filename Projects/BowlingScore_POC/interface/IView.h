@@ -1,6 +1,7 @@
 #ifndef __IVIEW_H__
 #define __IVIEW_H__
 
+#include "ICommon.h"
 #include <vector>
 #include <string>
 
@@ -18,10 +19,10 @@ public:
     virtual ~IView() = default;
 
     virtual void Draw(const ViewElement&, void* params = nullptr) = 0;
-    virtual void UpdateFrameScore(unsigned short) = 0;
-    virtual void UpdateScore(unsigned short) = 0;
+    virtual void UpdateFrameScore(const unsigned short, const Flag&) = 0;
+    virtual void UpdateScore(const unsigned short) = 0;
     virtual void CleanScore() = 0;
-    virtual void SetNextFrameActive(bool) = 0;
+    virtual void SetNextFrameActive(const bool) = 0;
 };
 
 #endif //__IVIEW_H__
