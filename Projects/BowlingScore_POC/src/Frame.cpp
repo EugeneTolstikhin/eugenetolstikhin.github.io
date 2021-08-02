@@ -66,12 +66,7 @@ void Frame::SetTrialPoints(const unsigned short points)
     }
     m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) = p;//points;
 
-    for (auto& view : m_Views)
-    {
-        view->UpdateFrameScore(p);
-    }
-
-    incTrial();
+    incTrial(p);
 }
 
 bool Frame::isAllowedThrow() const noexcept 
@@ -81,11 +76,11 @@ bool Frame::isAllowedThrow() const noexcept
 
 unsigned short Frame::GetTotalFramePoints() const noexcept 
 {
-    unsigned short sum = std::accumulate(m_TrialPoints.begin(), m_TrialPoints.end(), 0);
+    auto sum = std::accumulate(m_TrialPoints.begin(), m_TrialPoints.end(), 0);
     return sum;
 }
 
-void Frame::incTrial()
+void Frame::incTrial(const unsigned short points)
 {
     bool specialCase = m_isLastFrame && MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial));
     switch (m_CurrentTrial)
@@ -174,6 +169,7 @@ void Frame::incTrial()
 
     for (auto& view : m_Views)
     {
+        view->UpdateFrameScore(points, m_Flag);
         view->SetNextFrameActive(false);
     }
 }

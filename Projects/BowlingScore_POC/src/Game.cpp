@@ -5,10 +5,13 @@
 #include "LoggerFactory.h"
 #include "FileLogger.h"
 
+#include <numeric>
+
 Game::Game() :
     m_pointsListenerFactory(new PointsListenerFactory)
     ,m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(LoggerType::TO_FILE))
+    ,m_frameTotalPoints(MAX_FRAME_AMOUNT)
 {
     //
 }
@@ -52,9 +55,11 @@ bool Game::IsAnotherThrowAllowed() const noexcept
 void Game::UpdateTotalScore()
 {
     auto total = m_currFrame.first->GetTotalFramePoints();
+    m_frameTotalPoints += total;
+
     for (auto& view : m_Views)
     {
-        view->UpdateScore(total);
+        view->UpdateScore(m_frameTotalPoints);
         view->SetNextFrameActive(true);
     }
 }

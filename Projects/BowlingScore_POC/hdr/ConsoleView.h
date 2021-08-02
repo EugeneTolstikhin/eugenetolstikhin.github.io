@@ -7,7 +7,7 @@
 #include <ncurses.h>
 #include <memory>
 
-typedef std::pair<unsigned short, WINDOW*> FRAME;
+typedef WINDOW* FRAME;
 typedef std::vector<FRAME> FRAMES;
 typedef std::vector<FRAMES> GAME;
 typedef std::pair<std::string, WINDOW*> PLAYER;
@@ -19,14 +19,14 @@ public:
     virtual ~ConsoleView();
 
     virtual void Draw(const ViewElement&, void*) override;
-    virtual void UpdateFrameScore(unsigned short) override;
-    virtual void UpdateScore(unsigned short) override;
+    virtual void UpdateFrameScore(const unsigned short, const Flag&) override;
+    virtual void UpdateScore(const unsigned short) override;
     virtual void CleanScore() override;
-    virtual void SetNextFrameActive(bool) override;
+    virtual void SetNextFrameActive(const bool) override;
 
 private:
     void DrawPlayerScore(const std::string&);
-    void DrawFrameScore(bool);
+    void DrawFrameScore(const bool);
     void SetNextPlayerActive();
     void PrintPlayerName(WINDOW*, const std::string&);
 

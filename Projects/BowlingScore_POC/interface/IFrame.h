@@ -1,12 +1,8 @@
 #ifndef __IFRAME_H__
 #define __IFRAME_H__
 
-enum class Flag
-{
-    NOTHING,
-    SPARE,
-    STRIKE
-};
+#include "ICommon.h"
+#include <vector>
 
 enum class Trial : short
 {

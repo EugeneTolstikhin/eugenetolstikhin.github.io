@@ -1,9 +1,8 @@
 #ifndef __IGAME_H__
 #define __IGAME_H__
 
+#include "ICommon.h"
 #include <functional>
-
-static const unsigned short MAX_FRAME_AMOUNT = 10;
 
 class IGame
 {

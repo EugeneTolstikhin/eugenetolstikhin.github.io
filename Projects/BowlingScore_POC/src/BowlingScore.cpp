@@ -6,7 +6,7 @@ int main()
     try
     {
         std::unique_ptr<ILane> lane(new Lane);
-        lane->Init({"Peter", "John", "Sarah"});
+        lane->Init({"Peter", "John"});
         lane->Play([&lane]{
             lane->Finish();
         });
