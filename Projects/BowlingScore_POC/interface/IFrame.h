@@ -31,6 +31,7 @@ public:
 
     virtual void SetTrialPoints(const unsigned short) = 0;
     virtual bool isAllowedThrow() const noexcept = 0;
+    virtual unsigned short GetTotalFramePoints() const noexcept = 0;
 };
 
 #endif // __IFRAME_H__

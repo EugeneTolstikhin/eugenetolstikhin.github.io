@@ -9,7 +9,7 @@ public:
     PointsListenerFactory();
     virtual ~PointsListenerFactory();
 
-    virtual IPointsListener* CreatePointsListener(const ListenerType&);
+    virtual IPointsListener* CreatePointsListener(const ListenerType&) override;
 };
 
 #endif //__POINTS_LISTENER_LOCAL_FACTORY_H__

@@ -9,7 +9,7 @@ public:
     LoggerFactory();
     virtual ~LoggerFactory();
 
-    virtual ILogger* CreateLogger(const LoggerType&);
+    virtual ILogger* CreateLogger(const LoggerType&) override;
 };
 
 #endif //__LOGGER_FACTORY_H__

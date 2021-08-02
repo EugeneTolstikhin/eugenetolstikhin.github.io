@@ -9,7 +9,7 @@ public:
     ConsoleLogger();
     virtual ~ConsoleLogger();
 
-    virtual void LogMe(const std::string&, int, const std::string&);
+    virtual void LogMe(const std::string&, int, const std::string&) override;
 };
 
 #endif //__CONSOLE_LOGGER_H__

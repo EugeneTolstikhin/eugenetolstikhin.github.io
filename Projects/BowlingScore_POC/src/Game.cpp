@@ -19,14 +19,12 @@ Game::Game(const std::vector<std::shared_ptr<IView>>& views) :
     ,m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(LoggerType::TO_FILE))
 {
-    //This parameter can be read from a config file
-    m_FramesAmount = MAX_FRAME_AMOUNT;
-    m_Frames.reserve(m_FramesAmount);
+    m_Frames.reserve(MAX_FRAME_AMOUNT);
 
     size_t counter = 0;
-    while (++counter <= m_FramesAmount)
+    while (++counter <= MAX_FRAME_AMOUNT)
     {
-        m_Frames.emplace_back(new Frame(counter == m_FramesAmount, m_Views));
+        m_Frames.emplace_back(new Frame(counter == MAX_FRAME_AMOUNT, m_Views));
     }
 
     m_currFrame = std::make_pair(m_Frames.front(), m_Frames.begin());
@@ -41,14 +39,24 @@ void Game::ThrowBall()
 {
     auto points = waitForPoints();
 
-    //m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points are ") + std::to_string(points));
+    m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points are ") + std::to_string(points));
 
     m_currFrame.first->SetTrialPoints(points);
 }
 
-bool Game::IsAnotherThrowAllowed() 
+bool Game::IsAnotherThrowAllowed() const noexcept
 {
     return m_currFrame.first->isAllowedThrow();
+}
+
+void Game::UpdateTotalScore()
+{
+    auto total = m_currFrame.first->GetTotalFramePoints();
+    for (auto& view : m_Views)
+    {
+        view->UpdateScore(total);
+        view->SetNextFrameActive(true);
+    }
 }
 
 void Game::CloseGame(std::function<void()> gameOver) 

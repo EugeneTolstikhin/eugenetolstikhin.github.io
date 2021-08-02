@@ -9,7 +9,7 @@ public:
     ViewFactory();
     virtual ~ViewFactory();
 
-    virtual IView* CreateView(const ViewType&);
+    virtual IView* CreateView(const ViewType&) override;
 };
 
 #endif //__VIEW_FACTORY_H__

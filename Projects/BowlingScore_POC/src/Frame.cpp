@@ -2,6 +2,7 @@
 #include "LoggerFactory.h"
 #include "FileLogger.h"
 #include <stdexcept>
+#include <numeric>
 
 Frame::Frame()
 {
@@ -25,7 +26,7 @@ Frame::~Frame()
     //
 }
 
-void Frame::SetTrialPoints(const unsigned short points) 
+void Frame::SetTrialPoints(const unsigned short points)
 {
     m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points are ") + std::to_string(points));
     unsigned short p = points; //TMP
@@ -67,7 +68,7 @@ void Frame::SetTrialPoints(const unsigned short points)
 
     for (auto& view : m_Views)
     {
-        view->UpdateScore(p);
+        view->UpdateFrameScore(p);
     }
 
     incTrial();
@@ -76,6 +77,12 @@ void Frame::SetTrialPoints(const unsigned short points)
 bool Frame::isAllowedThrow() const noexcept 
 {
     return m_AllowThrow;
+}
+
+unsigned short Frame::GetTotalFramePoints() const noexcept 
+{
+    unsigned short sum = std::accumulate(m_TrialPoints.begin(), m_TrialPoints.end(), 0);
+    return sum;
 }
 
 void Frame::incTrial()
@@ -163,8 +170,10 @@ void Frame::incTrial()
             break;
     }
 
+    m_log->LogMe(__FILE__, __LINE__, std::string("m_AllowThrow = ") + std::to_string(m_AllowThrow));
+
     for (auto& view : m_Views)
     {
-        view->SetNextFrameActive(!m_AllowThrow);
+        view->SetNextFrameActive(false);
     }
 }
