@@ -1,9 +1,14 @@
 #include "PointsListenerSimulation.h"
+#include "LoggerFactory.h"
+#include "FileLogger.h"
 #include <stdexcept>
 
-PointsListenerSimulation::PointsListenerSimulation()
+PointsListenerSimulation::PointsListenerSimulation() :
+    distrib(0, 10)
+    ,m_loggerFactory(new LoggerFactory)
+    ,m_log(m_loggerFactory->CreateLogger(LoggerType::TO_FILE))
 {
-    //
+    m_log->LogMe(__FILE__, __LINE__, std::string("Enter points listener simulator ctr"));
 }
 
 PointsListenerSimulation::~PointsListenerSimulation()
@@ -13,17 +18,19 @@ PointsListenerSimulation::~PointsListenerSimulation()
 
 void PointsListenerSimulation::Connect()
 {
-    //throw std::runtime_error("Unimplemented functionality");
+    m_log->LogMe(__FILE__, __LINE__, std::string("Connect to points listener simulator"));
 }
 
 unsigned short PointsListenerSimulation::Receive()
 {
-    std::discrete_distribution<unsigned short> distrib (0, 10);
-    auto res = distrib(m_Generator);
+    std::default_random_engine generator;
+    m_log->LogMe(__FILE__, __LINE__, std::string("Generate random number between 0 and 10"));
+    auto res = distrib(generator);
+    m_log->LogMe(__FILE__, __LINE__, std::string("Result random number = ") + std::to_string(res));
     return res;
 }
 
 void PointsListenerSimulation::Shutdown()
 {
-    //throw std::runtime_error("Unimplemented functionality");
+    m_log->LogMe(__FILE__, __LINE__, std::string("Shutdown points listener simulator"));
 }

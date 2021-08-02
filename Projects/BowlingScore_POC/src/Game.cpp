@@ -29,7 +29,7 @@ Game::Game(const std::vector<std::shared_ptr<IView>>& views) :
         m_Frames.emplace_back(new Frame(counter == m_FramesAmount, m_Views));
     }
 
-    m_currFrame = std::make_pair(*(m_Frames.begin()), m_Frames.begin());
+    m_currFrame = std::make_pair(m_Frames.front(), m_Frames.begin());
 }
 
 Game::~Game()
@@ -41,7 +41,7 @@ void Game::ThrowBall()
 {
     auto points = waitForPoints();
 
-    //m_log->LogMe(__FILE__, __LINE__, std::string("AMount of points are ") + std::to_string(points));
+    //m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points are ") + std::to_string(points));
 
     m_currFrame.first->SetTrialPoints(points);
 }

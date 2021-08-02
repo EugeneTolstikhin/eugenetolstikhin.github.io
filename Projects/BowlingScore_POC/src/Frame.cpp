@@ -27,6 +27,7 @@ Frame::~Frame()
 
 void Frame::SetTrialPoints(const unsigned short points) 
 {
+    m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points are ") + std::to_string(points));
     unsigned short p = points; //TMP
     switch (m_CurrentTrial)
     {
@@ -63,8 +64,6 @@ void Frame::SetTrialPoints(const unsigned short points)
             break;
     }
     m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) = p;//points;
-
-    //m_log->LogMe(__FILE__, __LINE__, std::string("AMount of points are ") + std::to_string(p));
 
     for (auto& view : m_Views)
     {

@@ -2,7 +2,9 @@
 #define __POINTS_LISTENER_SIMULATION_H__
 
 #include "IPointsListener.h"
+#include "ILoggerFactory.h"
 #include <random>
+#include <memory>
 
 class PointsListenerSimulation : public IPointsListener
 {
@@ -15,7 +17,10 @@ public:
     virtual void Shutdown();
 
 private:
-    std::default_random_engine m_Generator;
+    std::uniform_int_distribution<int> distrib;
+
+    std::unique_ptr<ILoggerFactory> m_loggerFactory;
+    std::unique_ptr<ILogger> m_log;
 };
 
 #endif //__POINTS_LISTENER_SIMULATION_H__
