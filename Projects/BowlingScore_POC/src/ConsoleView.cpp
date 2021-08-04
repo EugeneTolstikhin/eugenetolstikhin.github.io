@@ -15,6 +15,7 @@
 ConsoleView::ConsoleView() :
     m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(LoggerType::TO_FILE))
+    ,m_ActiveFrame(nullptr)
 {
     initscr();
     refresh();
@@ -57,7 +58,7 @@ ConsoleView::~ConsoleView()
         {
             for (auto& frame: frames)
             {
-                delwin(frame);
+                delwin(frame.first);
             }
         }
     }
@@ -95,18 +96,18 @@ void ConsoleView::Draw(const ViewElement& element, void* params)
             {
                 for (auto& frames: game)
                 {
-                    wrefresh(frames.at(0));
+                    wrefresh(frames.at(0).first);
 
                     if (frames.size() == 3)
                     {
-                        wrefresh(frames.at(2));
-                        wrefresh(frames.at(1));
+                        wrefresh(frames.at(2).first);
+                        wrefresh(frames.at(1).first);
                     }
                     else if (frames.size() == 4)
                     {
-                        wrefresh(frames.at(1));
-                        wrefresh(frames.at(3));
-                        wrefresh(frames.at(2));
+                        wrefresh(frames.at(1).first);
+                        wrefresh(frames.at(3).first);
+                        wrefresh(frames.at(2).first);
                     }
                 }
             }
@@ -116,7 +117,7 @@ void ConsoleView::Draw(const ViewElement& element, void* params)
                 wrefresh(w.second);
             }
 
-            m_ActiveFrame = m_wGames.front().front().front();
+            m_ActiveFrame = &m_wGames.front().front().front();
             break;
         }
 
@@ -153,31 +154,31 @@ void ConsoleView::DrawFrameScore(const bool isLastFrame)
     if (!isLastFrame)
     {
         FRAMES fr = {
-            //       nlines,      ncols,          begin_y,                                            begin_x 
-            newwin(m_cellWidth, m_cellWidth,    playerIdx * (m_cellWidth * 2 - 1),                  m_nameWidth + 1 + gameIdx * m_cellWidth * 2),
-            newwin(m_cellWidth, m_cellWidth,    playerIdx * (m_cellWidth * 2 - 1),                  m_nameWidth + m_cellWidth + 1 + gameIdx * m_cellWidth * 2),
-            newwin(m_cellWidth, m_cellWidth * 2,playerIdx * (m_cellWidth * 2 - 1) + m_cellWidth - 1,m_nameWidth + 1 + gameIdx * m_cellWidth * 2)
+            //                      nlines,      ncols,          begin_y,                                            begin_x 
+            std::make_pair(newwin(m_cellWidth, m_cellWidth,    playerIdx * (m_cellWidth * 2 - 1),                  m_nameWidth + 1 + gameIdx * m_cellWidth * 2), Flag::NOTHING),
+            std::make_pair(newwin(m_cellWidth, m_cellWidth,    playerIdx * (m_cellWidth * 2 - 1),                  m_nameWidth + m_cellWidth + 1 + gameIdx * m_cellWidth * 2), Flag::NOTHING),
+            std::make_pair(newwin(m_cellWidth, m_cellWidth * 2,playerIdx * (m_cellWidth * 2 - 1) + m_cellWidth - 1,m_nameWidth + 1 + gameIdx * m_cellWidth * 2), Flag::NOTHING)
         };
 
-        wborder(fr.at(0), 0, ' ', 0, ' ', 0, ' ', ' ', ' ');
-        wborder(fr.at(1), 0, 0, 0, 0, 0, 0, 0, 0);
-        wborder(fr.at(2), 0, 0, ' ', 0, '|', '|', 0, 0);
+        wborder(fr.at(0).first, 0, ' ', 0, ' ', 0, ' ', ' ', ' ');
+        wborder(fr.at(1).first, 0, 0, 0, 0, 0, 0, 0, 0);
+        wborder(fr.at(2).first, 0, 0, ' ', 0, '|', '|', 0, 0);
 
         m_Game.push_back(std::move(fr));
     }
     else
     {
         FRAMES fr = {
-            newwin(m_cellWidth, m_cellWidth,    playerIdx * (m_cellWidth * 2 - 1),                  m_nameWidth + 1 + gameIdx * m_cellWidth * 2),
-            newwin(m_cellWidth, m_cellWidth,    playerIdx * (m_cellWidth * 2 - 1),                  m_nameWidth + m_cellWidth + 1 + gameIdx * m_cellWidth * 2),
-            newwin(m_cellWidth, m_cellWidth,    playerIdx * (m_cellWidth * 2 - 1),                  m_nameWidth + 2 * m_cellWidth + 1 + gameIdx * m_cellWidth * 2),
-            newwin(m_cellWidth, m_cellWidth * 3,playerIdx * (m_cellWidth * 2 - 1) + m_cellWidth - 1,m_nameWidth + 1 + gameIdx * m_cellWidth * 2)
+            std::make_pair(newwin(m_cellWidth, m_cellWidth,    playerIdx * (m_cellWidth * 2 - 1),                  m_nameWidth + 1 + gameIdx * m_cellWidth * 2), Flag::NOTHING),
+            std::make_pair(newwin(m_cellWidth, m_cellWidth,    playerIdx * (m_cellWidth * 2 - 1),                  m_nameWidth + m_cellWidth + 1 + gameIdx * m_cellWidth * 2), Flag::NOTHING),
+            std::make_pair(newwin(m_cellWidth, m_cellWidth,    playerIdx * (m_cellWidth * 2 - 1),                  m_nameWidth + 2 * m_cellWidth + 1 + gameIdx * m_cellWidth * 2), Flag::NOTHING),
+            std::make_pair(newwin(m_cellWidth, m_cellWidth * 3,playerIdx * (m_cellWidth * 2 - 1) + m_cellWidth - 1,m_nameWidth + 1 + gameIdx * m_cellWidth * 2), Flag::NOTHING)
         };
 
-        wborder(fr.at(0), 0, ' ', 0, ' ', 0, ' ', ' ', ' ');
-        wborder(fr.at(1), ' ', ' ', 0, ' ', ' ', ' ', ' ', ' ');
-        wborder(fr.at(2), 0, 0, 0, 0, 0, 0, 0, 0);
-        wborder(fr.at(3), 0, 0, ' ', 0, '|', '|', 0, 0);
+        wborder(fr.at(0).first, 0, ' ', 0, ' ', 0, ' ', ' ', ' ');
+        wborder(fr.at(1).first, ' ', ' ', 0, ' ', ' ', ' ', ' ', ' ');
+        wborder(fr.at(2).first, 0, 0, 0, 0, 0, 0, 0, 0);
+        wborder(fr.at(3).first, 0, 0, ' ', 0, '|', '|', 0, 0);
 
         m_Game.push_back(std::move(fr));
     }
@@ -209,22 +210,38 @@ void ConsoleView::UpdateFrameScore(const unsigned short score, const Flag& flag)
             break;
     }
 
-    mvwprintw(m_ActiveFrame, m_cellWidth / 2, m_cellWidth / 2, res.c_str());
-    wrefresh(m_ActiveFrame);
+    m_ActiveFrame->second = flag;
+    mvwprintw(m_ActiveFrame->first, m_cellWidth / 2, m_cellWidth / 2, res.c_str());
+    wrefresh(m_ActiveFrame->first);
     usleep(SLEEP_TIME);
 }
 
 void ConsoleView::UpdateScore(const unsigned short score)
 {
-    //m_log->LogMe(__FILE__, __LINE__, std::string("Update score with value = ") +
-    //                                std::to_string(score));
+    //m_log->LogMe(__FILE__, __LINE__, std::string("Update score with value = ") + std::to_string(score));
 
-    std::string sscore = std::to_string(score);
+    auto lastFrames = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx);
 
-    auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx).back();
-    mvwprintw(frame, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 1, std::to_string(score).c_str());
-    wrefresh(frame);
-    sscore.clear();
+    m_log->LogMe(__FILE__, __LINE__, std::string("Last flag = ") + std::to_string(static_cast<int>(lastFrames.at(lastFrames.size() - 2).second)));
+
+    if (lastFrames.at(lastFrames.size() - 2).second != Flag::SPARE
+    && lastFrames.at(lastFrames.size() - 3).second != Flag::STRIKE)
+    {
+        std::string sscore = std::to_string(score);
+        auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx).back();
+        mvwprintw(frame.first, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 1, std::to_string(score).c_str());
+        wrefresh(frame.first);
+        sscore.clear();
+    }
+    else if (lastFrames.at(lastFrames.size() - 3).second == Flag::STRIKE)
+    {
+        //
+    }
+    else if (lastFrames.at(lastFrames.size() - 2).second == Flag::SPARE)
+    {
+        //
+    }
+    
     usleep(SLEEP_TIME);
 }
 
@@ -277,7 +294,7 @@ void ConsoleView::SetNextFrameActive(const bool last)
 
     //m_log->LogMe(__FILE__, __LINE__, std::string("Activate next frame with active player idx = ") + std::to_string(m_ActivePlayerIdx));
 
-    m_ActiveFrame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx).at(m_ActiveFrameIdx);
+    m_ActiveFrame = &m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx).at(m_ActiveFrameIdx);
 }
 
 void ConsoleView::PrintPlayerName(WINDOW* w, const std::string& name)

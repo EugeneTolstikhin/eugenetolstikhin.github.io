@@ -7,7 +7,7 @@
 #include <ncurses.h>
 #include <memory>
 
-typedef WINDOW* FRAME;
+typedef std::pair<WINDOW*, Flag> FRAME;
 typedef std::vector<FRAME> FRAMES;
 typedef std::vector<FRAMES> GAME;
 typedef std::pair<std::string, WINDOW*> PLAYER;
@@ -53,7 +53,7 @@ private:
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
     std::unique_ptr<ILogger> m_log;
 
-    FRAME m_ActiveFrame;
+    FRAME* m_ActiveFrame;
 
     const unsigned int SLEEP_TIME = 200000;
 };
