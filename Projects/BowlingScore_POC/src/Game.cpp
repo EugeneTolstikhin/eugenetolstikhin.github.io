@@ -42,7 +42,7 @@ void Game::ThrowBall()
 {
     auto points = waitForPoints();
 
-    m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points are ") + std::to_string(points));
+    //m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points are ") + std::to_string(points));
 
     m_currFrame.first->SetTrialPoints(points);
 }

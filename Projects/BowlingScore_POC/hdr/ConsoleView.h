@@ -54,6 +54,8 @@ private:
     std::unique_ptr<ILogger> m_log;
 
     FRAME m_ActiveFrame;
+
+    const unsigned int SLEEP_TIME = 200000;
 };
 
 #endif //__CONSOLE_VIEW_H__

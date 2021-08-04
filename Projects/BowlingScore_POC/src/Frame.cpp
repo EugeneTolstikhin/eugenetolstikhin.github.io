@@ -28,7 +28,7 @@ Frame::~Frame()
 
 void Frame::SetTrialPoints(const unsigned short points)
 {
-    m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points are ") + std::to_string(points));
+    //m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points are ") + std::to_string(points));
     unsigned short p = points; //TMP
     switch (m_CurrentTrial)
     {
@@ -165,7 +165,7 @@ void Frame::incTrial(const unsigned short points)
             break;
     }
 
-    m_log->LogMe(__FILE__, __LINE__, std::string("m_AllowThrow = ") + std::to_string(m_AllowThrow));
+    //m_log->LogMe(__FILE__, __LINE__, std::string("m_AllowThrow = ") + std::to_string(m_AllowThrow));
 
     for (auto& view : m_Views)
     {
