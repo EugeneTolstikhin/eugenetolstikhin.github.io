@@ -34,7 +34,7 @@ ConsoleView::ConsoleView() :
 
     m_cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
 
-    m_log->LogMe(__FILE__, __LINE__, std::string("Cell width = ") + std::to_string(m_cellWidth));
+    //m_log->LogMe(__FILE__, __LINE__, std::string("Cell width = ") + std::to_string(m_cellWidth));
 
     if (m_cellWidth < 3)
     {
@@ -185,7 +185,7 @@ void ConsoleView::DrawFrameScore(const bool isLastFrame)
 
 void ConsoleView::UpdateFrameScore(const unsigned short score, const Flag& flag)
 {
-    m_log->LogMe(__FILE__, __LINE__, std::string("Update frame score with value = ") + std::to_string(score));
+    //m_log->LogMe(__FILE__, __LINE__, std::string("Update frame score with value = ") + std::to_string(score));
     std::string res;
 
     switch (flag)
@@ -211,31 +211,28 @@ void ConsoleView::UpdateFrameScore(const unsigned short score, const Flag& flag)
 
     mvwprintw(m_ActiveFrame, m_cellWidth / 2, m_cellWidth / 2, res.c_str());
     wrefresh(m_ActiveFrame);
-    usleep(2000000);
+    usleep(SLEEP_TIME);
 }
 
 void ConsoleView::UpdateScore(const unsigned short score)
 {
-    m_log->LogMe(__FILE__, __LINE__, std::string("Update score with value = ") +
-                                    std::to_string(score));
+    //m_log->LogMe(__FILE__, __LINE__, std::string("Update score with value = ") +
+    //                                std::to_string(score));
 
     std::string sscore = std::to_string(score);
 
     auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx).back();
     mvwprintw(frame, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 1, std::to_string(score).c_str());
     wrefresh(frame);
-
-    usleep(2000000);
+    sscore.clear();
+    usleep(SLEEP_TIME);
 }
 
 void ConsoleView::CleanScore()
 {
-    //std::cout << "Game over!" << std::endl << std::flush;
-    //m_ScoreTable.clear();
-    //m_Frames.clear();
-    //m_PlayerGame.clear();
+    m_wPlayers.clear();
+    m_wGames.clear();
 
-    refresh();
     getch();
 }
 
@@ -259,11 +256,11 @@ void ConsoleView::SetNextPlayerActive()
     w = m_wPlayers.at(m_ActivePlayerIdx).second;
     displayName = m_wPlayers.at(m_ActivePlayerIdx).first;
 
-    m_log->LogMe(__FILE__, __LINE__, std::string("Activate next player with name = ") + displayName);
+    //m_log->LogMe(__FILE__, __LINE__, std::string("Activate next player with name = ") + displayName);
 
     wattron(w, A_BOLD);
     PrintPlayerName(w, displayName);
-    usleep(2000000);
+    usleep(SLEEP_TIME);
 }
 
 void ConsoleView::SetNextFrameActive(const bool last)
@@ -278,7 +275,7 @@ void ConsoleView::SetNextFrameActive(const bool last)
         m_ActiveFrameIdx = 0;
     }
 
-    m_log->LogMe(__FILE__, __LINE__, std::string("Activate next frame with active player idx = ") + std::to_string(m_ActivePlayerIdx));
+    //m_log->LogMe(__FILE__, __LINE__, std::string("Activate next frame with active player idx = ") + std::to_string(m_ActivePlayerIdx));
 
     m_ActiveFrame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx).at(m_ActiveFrameIdx);
 }
