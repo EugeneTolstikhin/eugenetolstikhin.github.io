@@ -20,6 +20,7 @@ ConsoleView::ConsoleView() :
     initscr();
     refresh();
     curs_set(0);
+    cbreak();
 #ifdef __linux__
     struct winsize size;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
@@ -226,12 +227,15 @@ void ConsoleView::UpdateScore(const unsigned short score, const short prevIdxShi
     else if (frames.at(frames.size() - 3).second == Flag::STRIKE)
     {
         // If previous is SPARE, update the previous score
-        auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx + prevIdxShift).back();
-        std::string sscore = std::to_string(score);
-        mvwprintw(frame.first, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 1, std::to_string(score).c_str());
-        wrefresh(frame.first);
-        sscore.clear();
-        usleep(SLEEP_TIME);
+        if (prevIdxShift < 0)
+        {
+            auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx + prevIdxShift).back();
+            std::string sscore = std::to_string(score);
+            mvwprintw(frame.first, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 1, std::to_string(score).c_str());
+            wrefresh(frame.first);
+            sscore.clear();
+            usleep(SLEEP_TIME);
+        }
 
         //Here starts logic for STRIKE
     }
@@ -250,8 +254,6 @@ void ConsoleView::CleanScore()
 {
     m_wPlayers.clear();
     m_wGames.clear();
-
-    getch();
 }
 
 void ConsoleView::SetNextPlayerActive()

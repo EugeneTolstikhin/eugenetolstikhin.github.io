@@ -55,6 +55,15 @@ void Game::ThrowBall()
     }
 
     m_lastFlags.push_back(flag);
+
+    if (m_currFrame.first->isLastFrame() && flag == Flag::STRIKE)
+    {
+        if (m_lastFrameCounter < 0)
+        {
+            UpdateTotalScore(m_lastFrameCounter);
+            ++m_lastFrameCounter;
+        }
+    }
 }
 
 bool Game::IsAnotherThrowAllowed() const noexcept
@@ -66,6 +75,49 @@ void Game::UpdateTotalScore(const short shift)
 {
     auto total = m_currFrame.first->GetTotalFramePoints();
     m_frameTotalPoints += total;
+
+    m_log->LogMe(__FILE__, __LINE__, std::string("m_frameTotalPoints = " + std::to_string(m_frameTotalPoints)));
+
+    if (shift == 0 && m_lastFlags.back() == Flag::STRIKE)
+    {
+        m_framePoints.push_back(m_frameTotalPoints);
+    }
+
+    if (shift == 0 && m_lastFlags.back() != Flag::STRIKE)
+    {
+        unsigned short counter = 0;
+        for (auto& val: m_framePoints)
+        {
+            val += total;
+            ++counter;
+            m_frameTotalPoints += total;
+
+            for (auto& view : m_Views)
+            {
+                view->UpdateScore(val, -counter);
+            }
+        }
+
+        m_lastFlags.remove(Flag::STRIKE);
+        m_framePoints.clear();
+    }
+    else if (shift == 0 && m_lastFlags.back() == Flag::STRIKE && m_lastFlags.size() == 3)
+    {
+        m_frameTotalPoints += 20;
+
+        for (auto& val: m_framePoints)
+        {
+            val += 20;
+        }
+
+        for (auto& view : m_Views)
+        {
+            view->UpdateScore(m_framePoints.front(), -(m_lastFlags.size() - 1));
+        }
+
+        m_lastFlags.pop_front();
+        m_framePoints.erase(m_framePoints.begin());
+    }
 
     m_log->LogMe(__FILE__, __LINE__, std::string("m_frameTotalPoints = ") +
                                     std::to_string(m_frameTotalPoints) +
