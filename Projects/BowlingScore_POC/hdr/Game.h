@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <vector>
+#include <list>
 #include "IGame.h"
 #include "IFrame.h"
 #include "IPointsListenerFactory.h"
@@ -19,7 +20,7 @@ public:
     virtual void ThrowBall() override;
     virtual bool IsAnotherThrowAllowed() const noexcept override;
     virtual void CloseGame(std::function<void()> gameover) override;
-    virtual void UpdateTotalScore() override;
+    virtual void UpdateTotalScore(const short shift = 0) override;
 
 private:
     unsigned short waitForPoints();
@@ -33,7 +34,8 @@ private:
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
     std::unique_ptr<ILogger> m_log;
 
-    unsigned short m_frameTotalPoints;
+    std::list<Flag> m_lastFlags;
+    unsigned short m_frameTotalPoints = 0;
 };
 
 #endif // __GAME_H__

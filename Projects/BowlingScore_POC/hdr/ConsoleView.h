@@ -20,7 +20,7 @@ public:
 
     virtual void Draw(const ViewElement&, void*) override;
     virtual void UpdateFrameScore(const unsigned short, const Flag&) override;
-    virtual void UpdateScore(const unsigned short) override;
+    virtual void UpdateScore(const unsigned short, const short) override;
     virtual void CleanScore() override;
     virtual void SetNextFrameActive(const bool) override;
 
@@ -55,7 +55,7 @@ private:
 
     FRAME* m_ActiveFrame;
 
-    const unsigned int SLEEP_TIME = 200000;
+    const unsigned int SLEEP_TIME = 2000000;
 };
 
 #endif //__CONSOLE_VIEW_H__

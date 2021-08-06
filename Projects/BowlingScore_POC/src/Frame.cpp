@@ -26,7 +26,7 @@ Frame::~Frame()
     //
 }
 
-void Frame::SetTrialPoints(const unsigned short points)
+Flag& Frame::SetTrialPoints(const unsigned short points)
 {
     //m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points are ") + std::to_string(points));
     unsigned short p = points; //TMP
@@ -67,6 +67,8 @@ void Frame::SetTrialPoints(const unsigned short points)
     m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) = p;//points;
 
     incTrial(p);
+
+    return m_Flag;
 }
 
 bool Frame::isAllowedThrow() const noexcept 

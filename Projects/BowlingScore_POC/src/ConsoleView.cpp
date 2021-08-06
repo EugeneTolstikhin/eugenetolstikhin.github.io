@@ -216,33 +216,34 @@ void ConsoleView::UpdateFrameScore(const unsigned short score, const Flag& flag)
     usleep(SLEEP_TIME);
 }
 
-void ConsoleView::UpdateScore(const unsigned short score)
+void ConsoleView::UpdateScore(const unsigned short score, const short prevIdxShift)
 {
-    //m_log->LogMe(__FILE__, __LINE__, std::string("Update score with value = ") + std::to_string(score));
-
-    auto lastFrames = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx);
-
-    m_log->LogMe(__FILE__, __LINE__, std::string("Last flag = ") + std::to_string(static_cast<int>(lastFrames.at(lastFrames.size() - 2).second)));
-
-    if (lastFrames.at(lastFrames.size() - 2).second != Flag::SPARE
-    && lastFrames.at(lastFrames.size() - 3).second != Flag::STRIKE)
+    auto frames = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx);
+    if (frames.at(frames.size() - 2).second == Flag::SPARE)
     {
+        //
+    }
+    else if (frames.at(frames.size() - 3).second == Flag::STRIKE)
+    {
+        // If previous is SPARE, update the previous score
+        auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx + prevIdxShift).back();
         std::string sscore = std::to_string(score);
-        auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx).back();
         mvwprintw(frame.first, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 1, std::to_string(score).c_str());
         wrefresh(frame.first);
         sscore.clear();
+        usleep(SLEEP_TIME);
+
+        //Here starts logic for STRIKE
     }
-    else if (lastFrames.at(lastFrames.size() - 3).second == Flag::STRIKE)
+    else
     {
-        //
+        auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx + prevIdxShift).back();
+        std::string sscore = std::to_string(score);
+        mvwprintw(frame.first, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 1, std::to_string(score).c_str());
+        wrefresh(frame.first);
+        sscore.clear();
+        usleep(SLEEP_TIME);
     }
-    else if (lastFrames.at(lastFrames.size() - 2).second == Flag::SPARE)
-    {
-        //
-    }
-    
-    usleep(SLEEP_TIME);
 }
 
 void ConsoleView::CleanScore()

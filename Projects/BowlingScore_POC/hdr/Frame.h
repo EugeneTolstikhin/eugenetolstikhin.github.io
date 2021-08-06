@@ -19,7 +19,7 @@ public:
     Frame& operator = (const Frame&) = delete;
     Frame&& operator = (Frame&&) = delete;
 
-    virtual void SetTrialPoints(const unsigned short) override;
+    virtual Flag& SetTrialPoints(const unsigned short) override;
     virtual bool isAllowedThrow() const noexcept override;
     virtual unsigned short GetTotalFramePoints() const noexcept override;
 
@@ -28,9 +28,9 @@ private:
 
     Flag m_Flag = Flag::NOTHING;
     bool m_isLastFrame = false;
+    bool m_AllowThrow = true;
     Trial m_CurrentTrial = Trial::FIRST;
     std::vector<unsigned short> m_TrialPoints = {0, 0, 0};
-    bool m_AllowThrow = true;
     std::vector<std::shared_ptr<IView>> m_Views;
 
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
