@@ -6,12 +6,12 @@
 #include "FileLogger.h"
 
 #include <numeric>
+#include <algorithm>
 
 Game::Game() :
     m_pointsListenerFactory(new PointsListenerFactory)
     ,m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(LoggerType::TO_FILE))
-    ,m_frameTotalPoints(MAX_FRAME_AMOUNT)
 {
     //
 }
@@ -22,8 +22,6 @@ Game::Game(const std::vector<std::shared_ptr<IView>>& views) :
     ,m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(LoggerType::TO_FILE))
 {
-    m_Frames.reserve(MAX_FRAME_AMOUNT);
-
     size_t counter = 0;
     while (++counter <= MAX_FRAME_AMOUNT)
     {
@@ -42,9 +40,21 @@ void Game::ThrowBall()
 {
     auto points = waitForPoints();
 
-    //m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points are ") + std::to_string(points));
+    Flag& flag = m_currFrame.first->SetTrialPoints(points);
+    
+    m_log->LogMe(__FILE__, __LINE__, std::string("flag = ") +
+                                    std::to_string(static_cast<int>(flag)));
 
-    m_currFrame.first->SetTrialPoints(points);
+    if (!m_lastFlags.empty())
+    {
+        if (m_lastFlags.back() == Flag::SPARE)
+        {
+            UpdateTotalScore(-1);
+            m_lastFlags.pop_back();
+        }
+    }
+
+    m_lastFlags.push_back(flag);
 }
 
 bool Game::IsAnotherThrowAllowed() const noexcept
@@ -52,15 +62,24 @@ bool Game::IsAnotherThrowAllowed() const noexcept
     return m_currFrame.first->isAllowedThrow();
 }
 
-void Game::UpdateTotalScore()
+void Game::UpdateTotalScore(const short shift)
 {
     auto total = m_currFrame.first->GetTotalFramePoints();
     m_frameTotalPoints += total;
 
+    m_log->LogMe(__FILE__, __LINE__, std::string("m_frameTotalPoints = ") +
+                                    std::to_string(m_frameTotalPoints) +
+                                    std::string("  shift = ") + 
+                                    std::to_string(shift));
+
     for (auto& view : m_Views)
     {
-        view->UpdateScore(m_frameTotalPoints);
-        view->SetNextFrameActive(true);
+        view->UpdateScore(m_frameTotalPoints, shift);
+
+        if (shift == 0)
+        {
+            view->SetNextFrameActive(true);
+        }
     }
 }
 

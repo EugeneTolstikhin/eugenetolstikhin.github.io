@@ -25,7 +25,7 @@ public:
     IFrame& operator = (const IFrame&) = delete;
     IFrame&& operator = (IFrame&&) = delete;
 
-    virtual void SetTrialPoints(const unsigned short) = 0;
+    virtual Flag& SetTrialPoints(const unsigned short) = 0;
     virtual bool isAllowedThrow() const noexcept = 0;
     virtual unsigned short GetTotalFramePoints() const noexcept = 0;
 };
