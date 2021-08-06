@@ -30,12 +30,14 @@ private:
     std::pair<std::shared_ptr<IFrame>, std::vector<std::shared_ptr<IFrame>>::iterator> m_currFrame;
     std::unique_ptr<IPointsListenerFactory> m_pointsListenerFactory;
     std::vector<std::shared_ptr<IView>> m_Views;
+    std::vector<unsigned short> m_framePoints;
 
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
     std::unique_ptr<ILogger> m_log;
 
     std::list<Flag> m_lastFlags;
     unsigned short m_frameTotalPoints = 0;
+    short m_lastFrameCounter = -2;
 };
 
 #endif // __GAME_H__
