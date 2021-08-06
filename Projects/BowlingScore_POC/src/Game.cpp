@@ -38,7 +38,7 @@ Game::~Game()
 
 void Game::ThrowBall()
 {
-    auto points = waitForPoints();
+    auto points = m_currFrame.first->isLastFrame() ? 0 : 10;//waitForPoints();
 
     Flag& flag = m_currFrame.first->SetTrialPoints(points);
     
@@ -56,13 +56,13 @@ void Game::ThrowBall()
 
     m_lastFlags.push_back(flag);
 
-    if (m_currFrame.first->isLastFrame() && flag == Flag::STRIKE)
+    if (m_currFrame.first->isLastFrame())
     {
-        if (m_lastFrameCounter < 0)
+        /*if (m_lastFrameCounter < 0)
         {
             UpdateTotalScore(m_lastFrameCounter);
             ++m_lastFrameCounter;
-        }
+        }*/
     }
 }
 
@@ -85,16 +85,21 @@ void Game::UpdateTotalScore(const short shift)
 
     if (shift == 0 && m_lastFlags.back() != Flag::STRIKE)
     {
+        m_log->LogMe(__FILE__, __LINE__, std::string("m_framePoints.size() = " + std::to_string(m_framePoints.size())));
         unsigned short counter = 0;
         for (auto& val: m_framePoints)
         {
-            val += total;
+            val += total + 10 * (m_framePoints.size() - 1 + counter);
+            m_frameTotalPoints += total + 10 * (m_framePoints.size() - 2 + counter);
+
+            m_log->LogMe(__FILE__, __LINE__, std::string("val = " + std::to_string(val)));
+            m_log->LogMe(__FILE__, __LINE__, std::string("counter = " + std::to_string(counter)));
+            m_log->LogMe(__FILE__, __LINE__, std::string("m_frameTotalPoints = " + std::to_string(m_frameTotalPoints)));
             ++counter;
-            m_frameTotalPoints += total;
 
             for (auto& view : m_Views)
             {
-                view->UpdateScore(val, -counter);
+                view->UpdateScore(m_frameTotalPoints, -(m_framePoints.size() - counter + 1));
             }
         }
 
@@ -153,7 +158,7 @@ unsigned short Game::waitForPoints()
 
     std::shared_ptr<IPointsListener> listener(m_pointsListenerFactory->CreatePointsListener(m_listenerType));
     listener->Connect();
-    points = listener->Receive();   // TODO: Check why 0 is here
+    points = listener->Receive();
     listener->Shutdown();
     return points;
 }

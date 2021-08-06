@@ -24,7 +24,7 @@ void PointsListenerSimulation::Connect()
 
 unsigned short PointsListenerSimulation::Receive()
 {
-    auto res = 10;//m_distrib(m_generator);
+    auto res = m_distrib(m_generator);
     return res;
 }
 

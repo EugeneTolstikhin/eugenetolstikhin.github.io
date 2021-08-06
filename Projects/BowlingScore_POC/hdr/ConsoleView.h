@@ -55,7 +55,7 @@ private:
 
     FRAME* m_ActiveFrame;
 
-    const unsigned int SLEEP_TIME = 500000;
+    const unsigned int SLEEP_TIME = 1000000;
 };
 
 #endif //__CONSOLE_VIEW_H__
