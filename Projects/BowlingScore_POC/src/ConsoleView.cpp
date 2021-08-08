@@ -217,10 +217,19 @@ void ConsoleView::UpdateFrameScore(const unsigned short score, const Flag& flag)
     usleep(SLEEP_TIME);
 }
 
-void ConsoleView::UpdateScore(const unsigned short score, const short prevIdxShift)
+void ConsoleView::UpdateScore(const unsigned short score, const short prevIdxShift, bool gameover)
 {
     auto frames = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx);
-    if (frames.at(frames.size() - 2).second == Flag::SPARE)
+    if (gameover)
+    {
+        auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx).back();
+        std::string sscore = std::to_string(score);
+        mvwprintw(frame.first, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 1, std::to_string(score).c_str());
+        wrefresh(frame.first);
+        sscore.clear();
+        usleep(SLEEP_TIME);
+    }
+    else if (frames.at(frames.size() - 2).second == Flag::SPARE)
     {
         //
     }
