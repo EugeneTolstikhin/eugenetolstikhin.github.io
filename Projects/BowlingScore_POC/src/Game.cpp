@@ -74,7 +74,10 @@ bool Game::IsAnotherThrowAllowed() const noexcept
 void Game::UpdateTotalScore(const short shift)
 {
     auto total = m_currFrame.first->GetTotalFramePoints();
-    m_frameTotalPoints += total;
+    if (!m_currFrame.first->isLastFrame() || m_lastFrameCounter == 0)
+    {
+        m_frameTotalPoints += total;
+    }
 
     m_log->LogMe(__FILE__, __LINE__, std::string("m_frameTotalPoints = " + std::to_string(m_frameTotalPoints)));
 
@@ -108,16 +111,20 @@ void Game::UpdateTotalScore(const short shift)
     }
     else if (m_lastFlags.back() == Flag::STRIKE && m_lastFlags.size() > 2)
     {
-        m_frameTotalPoints += 20;
-
-        for (auto& val: m_framePoints)
+        if (m_lastFrameCounter < 0)
         {
-            val += 20;
+            m_frameTotalPoints += 20;
+            for (auto& val: m_framePoints)
+            {
+                val += 20;
+            }
         }
 
         for (auto& view : m_Views)
         {
-            view->UpdateScore(m_framePoints.front(), m_currFrame.first->isLastFrame() ? shift : -(m_lastFlags.size() - 1));
+            view->UpdateScore(  m_framePoints.front(),
+                                m_currFrame.first->isLastFrame() ? shift : -(m_lastFlags.size() - 1),
+                                m_currFrame.first->isLastFrame() && m_lastFrameCounter == 0);
         }
 
         m_lastFlags.pop_front();

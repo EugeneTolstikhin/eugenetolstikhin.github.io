@@ -20,7 +20,7 @@ public:
 
     virtual void Draw(const ViewElement&, void*) override;
     virtual void UpdateFrameScore(const unsigned short, const Flag&) override;
-    virtual void UpdateScore(const unsigned short, const short) override;
+    virtual void UpdateScore(const unsigned short, const short, bool) override;
     virtual void CleanScore() override;
     virtual void SetNextFrameActive(const bool) override;
 
