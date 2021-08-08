@@ -38,7 +38,7 @@ Game::~Game()
 
 void Game::ThrowBall()
 {
-    auto points = m_currFrame.first->isLastFrame() ? 0 : 10;//waitForPoints();
+    auto points = 10;//waitForPoints();
 
     Flag& flag = m_currFrame.first->SetTrialPoints(points);
     
@@ -58,11 +58,11 @@ void Game::ThrowBall()
 
     if (m_currFrame.first->isLastFrame())
     {
-        /*if (m_lastFrameCounter < 0)
+        if (m_lastFrameCounter < 0)
         {
             UpdateTotalScore(m_lastFrameCounter);
             ++m_lastFrameCounter;
-        }*/
+        }
     }
 }
 
@@ -106,7 +106,7 @@ void Game::UpdateTotalScore(const short shift)
         m_lastFlags.remove(Flag::STRIKE);
         m_framePoints.clear();
     }
-    else if (shift == 0 && m_lastFlags.back() == Flag::STRIKE && m_lastFlags.size() == 3)
+    else if (m_lastFlags.back() == Flag::STRIKE && m_lastFlags.size() > 2)
     {
         m_frameTotalPoints += 20;
 
@@ -117,7 +117,7 @@ void Game::UpdateTotalScore(const short shift)
 
         for (auto& view : m_Views)
         {
-            view->UpdateScore(m_framePoints.front(), -(m_lastFlags.size() - 1));
+            view->UpdateScore(m_framePoints.front(), m_currFrame.first->isLastFrame() ? shift : -(m_lastFlags.size() - 1));
         }
 
         m_lastFlags.pop_front();
@@ -131,7 +131,10 @@ void Game::UpdateTotalScore(const short shift)
 
     for (auto& view : m_Views)
     {
-        view->UpdateScore(m_frameTotalPoints, shift);
+        if (m_lastFlags.back() != Flag::STRIKE || !m_currFrame.first->isLastFrame())
+        {
+            view->UpdateScore(m_frameTotalPoints, shift);
+        }
 
         if (shift == 0)
         {
