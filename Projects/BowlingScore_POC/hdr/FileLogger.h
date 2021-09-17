@@ -10,7 +10,7 @@ public:
     FileLogger();
     virtual ~FileLogger();
 
-    virtual void LogMe(const std::string&, int, const std::string&) override;
+    virtual void LogMe(const std::string&, int, const std::string&, ...) override;
 
 private:
     std::ofstream log;

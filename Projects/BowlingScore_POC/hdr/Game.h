@@ -26,18 +26,25 @@ private:
     unsigned short waitForPoints();
 
     ListenerType m_listenerType = ListenerType::SIMULATION;
-    std::vector<std::shared_ptr<IFrame>> m_Frames;
+    LoggerType m_typeLogger = LoggerType::TO_FILE;
+
     std::pair<std::shared_ptr<IFrame>, std::vector<std::shared_ptr<IFrame>>::iterator> m_currFrame;
+
     std::unique_ptr<IPointsListenerFactory> m_pointsListenerFactory;
+
+    std::vector<std::shared_ptr<IFrame>> m_Frames;
     std::vector<std::shared_ptr<IView>> m_Views;
     std::vector<unsigned short> m_framePoints;
+
+    std::list<Flag> m_lastFlags;
 
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
     std::unique_ptr<ILogger> m_log;
 
-    std::list<Flag> m_lastFlags;
     unsigned short m_frameTotalPoints = 0;
     short m_lastFrameCounter = -2;
+
+    bool m_gameOver = false;
 };
 
 #endif // __GAME_H__

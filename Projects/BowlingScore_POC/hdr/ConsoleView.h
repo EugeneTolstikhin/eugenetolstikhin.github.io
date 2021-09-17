@@ -6,6 +6,7 @@
 #include <string>
 #include <ncurses.h>
 #include <memory>
+#include <vector>
 
 typedef std::pair<WINDOW*, Flag> FRAME;
 typedef std::vector<FRAME> FRAMES;
@@ -29,6 +30,13 @@ private:
     void DrawFrameScore(const bool);
     void SetNextPlayerActive();
     void PrintPlayerName(WINDOW*, const std::string&);
+    void UpdateScoreFrame(const unsigned short, const short = 0);
+
+    bool m_canBeColored = false;
+
+    short m_ActivePlayerIdx = 0;
+    short m_ActiveFramesIdx = 0;
+    short m_ActiveFrameIdx = 0;
 
     size_t m_RowWidth = 0;
     size_t m_nameWidth = 0;
@@ -41,11 +49,9 @@ private:
     std::string m_PlayerGame;
     std::string m_ScoreTable;
 
-    short m_ActivePlayerIdx = 0;
-    short m_ActiveFramesIdx = 0;
-    short m_ActiveFrameIdx = 0;
-
     GAME m_Game;
+
+    LoggerType m_typeLogger = LoggerType::TO_FILE;
 
     std::vector<PLAYER> m_wPlayers;
     std::vector<GAME> m_wGames;

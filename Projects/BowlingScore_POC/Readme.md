@@ -67,6 +67,12 @@ High level modules should not depend on low level modules, but on their abstract
 ***What does this mean for this project:***
 Logging of Backup/Restore class should not depend on the specific logging way but only on the Logger interface. Each class should not depend on the low level of Backup/Restore implementation, but only on their interfaces
 
+# DRY - Don't repeat yourself
+It's better to avoid using the duplication of the code. The solution proposes to encapsulate the dupicated code into, e.g. function, and use it whenever it is needed.
+
+# KISS - Keep it simple, stupid
+All the code should be intuitively undrstandable. All functions should be as simple as possible, not to add extra complexity without any reasons.
+
 # Design patterns
 
 ## MVC (Model-View-Controller)

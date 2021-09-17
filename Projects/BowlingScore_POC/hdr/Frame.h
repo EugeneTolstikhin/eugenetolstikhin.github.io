@@ -10,7 +10,7 @@ class Frame : public IFrame
 {
 public:
 
-    Frame();
+    Frame() = delete;
     Frame(bool, const std::vector<std::shared_ptr<IView>>&);
     virtual ~Frame();
 
@@ -27,10 +27,13 @@ public:
 private:
     void incTrial(const unsigned short points);
 
+    LoggerType m_typeLogger = LoggerType::TO_FILE;
     Flag m_Flag = Flag::NOTHING;
+    Trial m_CurrentTrial = Trial::FIRST;
+
     bool m_isLastFrame = false;
     bool m_AllowThrow = true;
-    Trial m_CurrentTrial = Trial::FIRST;
+
     std::vector<unsigned short> m_TrialPoints = {0, 0, 0};
     std::vector<std::shared_ptr<IView>> m_Views;
 

@@ -4,16 +4,11 @@
 #include <stdexcept>
 #include <numeric>
 
-Frame::Frame()
-{
-    //
-}
-
 Frame::Frame(bool isLastFrame, const std::vector<std::shared_ptr<IView>>& views) :
     m_isLastFrame(isLastFrame)
     ,m_Views(views)
     ,m_loggerFactory(new LoggerFactory)
-    ,m_log(m_loggerFactory->CreateLogger(LoggerType::TO_FILE))
+    ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
     for (auto& view : m_Views)
     {
@@ -28,7 +23,6 @@ Frame::~Frame()
 
 Flag& Frame::SetTrialPoints(const unsigned short points)
 {
-    m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points are ") + std::to_string(points));
     unsigned short p = points; //TMP
     switch (m_CurrentTrial)
     {
@@ -42,15 +36,13 @@ Flag& Frame::SetTrialPoints(const unsigned short points)
         case Trial::SECOND:
         {
             bool specialCase = m_isLastFrame && MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
-            if (specialCase)
-            {
-                //
-            }
-            else if (points > MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)))
-            {
-                //throw std::runtime_error("Amount of points is more then allowed for the 2nd trial");
 
-                p = MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
+            if (!specialCase)
+            {
+                if (points > MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)))
+                {
+                    p = MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
+                }
             }
 
             break;
@@ -60,17 +52,19 @@ Flag& Frame::SetTrialPoints(const unsigned short points)
             bool specialCase = m_isLastFrame && MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(Trial::SECOND));
             
             if (!m_isLastFrame)
+            {
                 throw std::runtime_error("Only the last frame contains the 3rd trial");
+            }
 
             if (specialCase)
             {
                 if (points > MAX_POINTS)
+                {
                     throw std::runtime_error("Amount of points is more then allowed for the 2nd trial");
+                }
             }
             else if (points > MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::SECOND)))
             {
-                //throw std::runtime_error("Amount of points is more then allowed for the 2nd trial");
-
                 p = MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
             }
 
@@ -99,7 +93,6 @@ unsigned short Frame::GetTotalFramePoints() const noexcept
 
 void Frame::incTrial(const unsigned short points)
 {
-    m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points are ") + std::to_string(points));
     bool specialCase = m_isLastFrame && MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial));
     switch (m_CurrentTrial)
     {
@@ -121,6 +114,8 @@ void Frame::incTrial(const unsigned short points)
                 }
                 else
                 {
+                    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
+                    m_log->LogMe(__FILE__, __LINE__, std::string("points = ") + std::to_string(points));
                     throw std::runtime_error("Unimplemented functionality");
                 }
             }
@@ -150,12 +145,16 @@ void Frame::incTrial(const unsigned short points)
                 }
                 else
                 {
-                    throw std::runtime_error("Unimplemented functionality");
+                    m_Flag = Flag::NOTHING;
+                    m_CurrentTrial = m_isLastFrame ? Trial::THIRD : Trial::FIRST;
+                    m_AllowThrow = m_isLastFrame;
                 }
             }
             else
             {
-                m_Flag = Flag::STRIKE;
+                m_Flag = m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)) == MAX_POINTS
+                        ? Flag::STRIKE
+                        : Flag::SPARE;
                 m_CurrentTrial = Trial::THIRD;
                 m_AllowThrow = true;
             }
@@ -187,15 +186,11 @@ void Frame::incTrial(const unsigned short points)
             break;
     }
 
-    m_log->LogMe(__FILE__, __LINE__, std::string("Before view"));
-
     for (auto& view : m_Views)
     {
         view->UpdateFrameScore(points, m_Flag);
         view->SetNextFrameActive(false);
     }
-
-    m_log->LogMe(__FILE__, __LINE__, std::string("After view"));
 }
 
 bool Frame::isLastFrame() const noexcept

@@ -20,12 +20,14 @@ public:
     
 private:
     ViewType m_typeView = ViewType::CLS;
-    LoggerType m_typeLogger = LoggerType::CLS;
-    std::vector<std::unique_ptr<IPlayer>> m_Players;
+    LoggerType m_typeLogger = LoggerType::TO_FILE;
+
     std::unique_ptr<IViewFactory> m_factoryViews;
-    std::vector<std::shared_ptr<IView>> m_Views;
     std::unique_ptr<ILoggerFactory> m_factoryLogger;
-    std::shared_ptr<ILogger> m_logger;
+    std::unique_ptr<ILogger> m_log;
+
+    std::vector<std::unique_ptr<IPlayer>> m_Players;
+    std::vector<std::shared_ptr<IView>> m_Views;
 };
 
 #endif // __LANE_H__

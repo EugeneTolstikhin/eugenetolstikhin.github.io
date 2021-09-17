@@ -2,11 +2,12 @@
 #include "Player.h"
 #include "ViewFactory.h"
 #include "LoggerFactory.h"
+#include "FileLogger.h"
 
 Lane::Lane() :
-    m_factoryViews(new ViewFactory),
-    m_factoryLogger(new LoggerFactory),
-    m_logger(m_factoryLogger->CreateLogger(m_typeLogger))
+    m_factoryViews(new ViewFactory)
+    ,m_factoryLogger(new LoggerFactory)
+    ,m_log(m_factoryLogger->CreateLogger(m_typeLogger))
 {
     m_Views.emplace_back(m_factoryViews->CreateView(m_typeView));
 }
@@ -18,10 +19,17 @@ Lane::~Lane()
 
 void Lane::Init(const std::vector<std::string>& players)
 {
-    m_Players.reserve(players.size());
-    for (size_t i = 0; i < players.size(); ++i)
+    if (players.size() > 0)
     {
-        m_Players.emplace(m_Players.begin() + i, new Player(players.at(i), m_Views));
+        m_Players.reserve(players.size());
+        for (size_t i = 0; i < players.size(); ++i)
+        {
+            m_Players.emplace(m_Players.begin() + i, new Player(players.at(i), m_Views));
+        }
+    }
+    else
+    {
+        m_Players.emplace_back(new Player(m_Views));
     }
 
     for (auto& view : m_Views)

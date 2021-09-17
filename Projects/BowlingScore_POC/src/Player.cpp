@@ -1,11 +1,15 @@
 #include "Player.h"
 #include "Game.h"
 
-Player::Player() :
+Player::Player(const std::vector<std::shared_ptr<IView>>& views) :
     m_PlayerName("Test")
-    ,m_Game(new Game)
+    ,m_Views(views)
+    ,m_Game(new Game(m_Views))
 {
-    //
+    for (auto& view : m_Views)
+    {
+        view->Draw(ViewElement::PLAYER, &m_PlayerName);
+    }
 }
 
 Player::Player(const std::string& name, const std::vector<std::shared_ptr<IView>>& views) :
