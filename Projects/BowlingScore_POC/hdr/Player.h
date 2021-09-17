@@ -7,7 +7,8 @@
 class Player : public IPlayer
 {
 public:
-    Player();
+    Player() = delete;
+    Player(const std::vector<std::shared_ptr<IView>>& views);
     Player(const std::string &, const std::vector<std::shared_ptr<IView>>&);
     virtual ~Player();
 

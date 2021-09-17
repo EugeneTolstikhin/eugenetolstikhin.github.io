@@ -1,0 +1,2 @@
+language = "cpp"
+run = "cd Projects/*/bin; make; ./Bowling A B C D E F"

@@ -14,10 +14,19 @@
 
 ConsoleView::ConsoleView() :
     m_loggerFactory(new LoggerFactory)
-    ,m_log(m_loggerFactory->CreateLogger(LoggerType::TO_FILE))
+    ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
     ,m_ActiveFrame(nullptr)
 {
+    setlocale(LC_ALL, "");
     initscr();
+    m_canBeColored = !!has_colors();
+
+    if (m_canBeColored)
+    {
+        start_color();
+        init_pair(1, COLOR_RED, COLOR_BLACK);
+    }
+
     refresh();
     curs_set(0);
     cbreak();
@@ -35,8 +44,6 @@ ConsoleView::ConsoleView() :
     m_wGames.reserve(m_normalFramesAmount + 1);
 
     m_cellWidth = (m_RowWidth - m_nameWidth - 1) / m_columnAmount;
-
-    //m_log->LogMe(__FILE__, __LINE__, std::string("Cell width = ") + std::to_string(m_cellWidth));
 
     if (m_cellWidth < 3)
     {
@@ -136,12 +143,17 @@ void ConsoleView::DrawPlayerScore(const std::string& name)
     m_wPlayers.emplace_back(std::make_pair(displayName, newwin(m_cellWidth * 2 - 1, m_nameWidth + 2, m_wPlayers.size() * (m_cellWidth * 2 - 1), 0)));
     WINDOW* w = m_wPlayers.back().second;
 
+    wborder(w, 0, 0, 0, 0, 0, 0, 0, 0);
     if (m_wPlayers.size() == 1)
     {
+        if (m_canBeColored)
+        {
+            wattron(w, COLOR_PAIR(1));
+        }
+
         wattron(w, A_BOLD); // First user mark as active. He will start the 1st
     }
 
-    wborder(w, 0, 0, 0, 0, 0, 0, 0, 0);
     PrintPlayerName(w, displayName);
 }
 
@@ -187,7 +199,6 @@ void ConsoleView::DrawFrameScore(const bool isLastFrame)
 
 void ConsoleView::UpdateFrameScore(const unsigned short score, const Flag& flag)
 {
-    //m_log->LogMe(__FILE__, __LINE__, std::string("Update frame score with value = ") + std::to_string(score));
     std::string res;
 
     switch (flag)
@@ -222,41 +233,31 @@ void ConsoleView::UpdateScore(const unsigned short score, const short prevIdxShi
     auto frames = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx);
     if (gameover)
     {
-        auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx).back();
-        std::string sscore = std::to_string(score);
-        mvwprintw(frame.first, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 1, std::to_string(score).c_str());
-        wrefresh(frame.first);
-        sscore.clear();
-        usleep(SLEEP_TIME);
+        m_log->LogMe(__FILE__, __LINE__, "Gameover");
+        UpdateScoreFrame(score, 0);
     }
-    else if (frames.at(frames.size() - 2).second == Flag::SPARE)
+    else if (   frames.at(frames.size() - 2).second == Flag::SPARE
+            ||  frames.at(frames.size() - 3).second == Flag::STRIKE)
     {
-        //
-    }
-    else if (frames.at(frames.size() - 3).second == Flag::STRIKE)
-    {
-        // If previous is SPARE, update the previous score
         if (prevIdxShift < 0)
         {
-            auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx + prevIdxShift).back();
-            std::string sscore = std::to_string(score);
-            mvwprintw(frame.first, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 1, std::to_string(score).c_str());
-            wrefresh(frame.first);
-            sscore.clear();
-            usleep(SLEEP_TIME);
+            UpdateScoreFrame(score, prevIdxShift);
         }
-
-        //Here starts logic for STRIKE
     }
     else
     {
-        auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx + prevIdxShift).back();
-        std::string sscore = std::to_string(score);
-        mvwprintw(frame.first, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 1, std::to_string(score).c_str());
-        wrefresh(frame.first);
-        sscore.clear();
-        usleep(SLEEP_TIME);
+        UpdateScoreFrame(score, prevIdxShift);
     }
+}
+
+void ConsoleView::UpdateScoreFrame(const unsigned short score, const short prevIdxShift)
+{
+    auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx + prevIdxShift).back();
+    std::string sscore = std::to_string(score);
+    mvwprintw(frame.first, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 2, std::to_string(score).c_str());
+    wrefresh(frame.first);
+    sscore.clear();
+    usleep(SLEEP_TIME);
 }
 
 void ConsoleView::CleanScore()
@@ -269,6 +270,12 @@ void ConsoleView::SetNextPlayerActive()
 {
     WINDOW* w = m_wPlayers.at(m_ActivePlayerIdx).second;
     auto displayName = m_wPlayers.at(m_ActivePlayerIdx).first;
+
+    if (m_canBeColored)
+    {
+        wattroff(w, COLOR_PAIR(1));
+    }
+
     wattroff(w, A_BOLD); // Should be already OFF, but just in case mentioned OFF here
     PrintPlayerName(w, displayName);
 
@@ -285,8 +292,11 @@ void ConsoleView::SetNextPlayerActive()
     w = m_wPlayers.at(m_ActivePlayerIdx).second;
     displayName = m_wPlayers.at(m_ActivePlayerIdx).first;
 
-    //m_log->LogMe(__FILE__, __LINE__, std::string("Activate next player with name = ") + displayName);
-
+    if (m_canBeColored)
+    {
+        wattron(w, COLOR_PAIR(1));
+    }
+    
     wattron(w, A_BOLD);
     PrintPlayerName(w, displayName);
     usleep(SLEEP_TIME);
@@ -304,13 +314,11 @@ void ConsoleView::SetNextFrameActive(const bool last)
         m_ActiveFrameIdx = 0;
     }
 
-    //m_log->LogMe(__FILE__, __LINE__, std::string("Activate next frame with active player idx = ") + std::to_string(m_ActivePlayerIdx));
-
     m_ActiveFrame = &m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx).at(m_ActiveFrameIdx);
 }
 
 void ConsoleView::PrintPlayerName(WINDOW* w, const std::string& name)
 {
-    mvwprintw(w, m_cellWidth - 1, 1, name.c_str());
+    mvwprintw(w, m_cellWidth - 1, 1, name.c_str());   // OK only for ASCII symbols
     wrefresh(w);
 }

@@ -11,7 +11,7 @@
 Game::Game() :
     m_pointsListenerFactory(new PointsListenerFactory)
     ,m_loggerFactory(new LoggerFactory)
-    ,m_log(m_loggerFactory->CreateLogger(LoggerType::TO_FILE))
+    ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
     //
 }
@@ -20,7 +20,7 @@ Game::Game(const std::vector<std::shared_ptr<IView>>& views) :
     m_pointsListenerFactory(new PointsListenerFactory)
     ,m_Views(views)
     ,m_loggerFactory(new LoggerFactory)
-    ,m_log(m_loggerFactory->CreateLogger(LoggerType::TO_FILE))
+    ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
     size_t counter = 0;
     while (++counter <= MAX_FRAME_AMOUNT)
@@ -38,116 +38,179 @@ Game::~Game()
 
 void Game::ThrowBall()
 {
-    auto points = 10;//waitForPoints();
+    auto points = waitForPoints();
 
+    m_gameOver = m_lastFrameCounter == 0;
     Flag& flag = m_currFrame.first->SetTrialPoints(points);
     
-    m_log->LogMe(__FILE__, __LINE__, std::string("flag = ") +
-                                    std::to_string(static_cast<int>(flag)));
-
     if (!m_lastFlags.empty())
     {
-        if (m_lastFlags.back() == Flag::SPARE)
+        if (m_lastFlags.front() == Flag::NOTHING)
         {
-            UpdateTotalScore(-1);
-            m_lastFlags.pop_back();
+            m_lastFlags.pop_front();
+        }
+
+        switch (flag)
+        {
+            case Flag::NOTHING:
+            {
+                if (    m_currFrame.first->isLastFrame()
+                    &&  m_lastFlags.size() == 0)
+                {
+                    m_gameOver = true;
+                }
+
+                if (m_lastFlags.size() == 2)
+                {
+                    if (    m_lastFlags.back() == Flag::STRIKE
+                        &&  !(
+                                m_currFrame.first->isLastFrame() 
+                            &&  m_gameOver))
+                    {
+                        UpdateTotalScore(-2);
+                        m_lastFlags.pop_front();
+                    }
+                    else if (m_lastFlags.front() == Flag::STRIKE)
+                    {
+                        if (m_currFrame.first->isLastFrame())
+                        {
+                            UpdateTotalScore(m_lastFrameCounter);
+                            m_lastFlags.pop_front();
+
+                            if (m_lastFlags.front() == Flag::NOTHING)
+                            {
+                                UpdateTotalScore(0);
+                                m_lastFlags.pop_front();
+                            }
+                            else
+                            {
+                                m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
+                                throw std::runtime_error("Unimplemented functionality");
+                            }
+                        }
+                        else
+                        {
+                            UpdateTotalScore(-1);
+                            m_lastFlags.pop_front();
+                        }
+                    }
+                    else
+                    {
+                        m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
+                        throw std::runtime_error("Unimplemented functionality");
+                    }
+                }
+
+                if (    m_lastFlags.size() == 1
+                    &&  m_lastFlags.front() == Flag::SPARE
+                    &&  (!m_currFrame.first->isLastFrame()
+                            || (m_currFrame.first->isLastFrame()
+                                    && m_lastFrameCounter < -1))
+                    )
+                {
+                    UpdateTotalScore(-1);
+                    m_lastFlags.pop_front();
+                }
+
+                break;
+            }
+            case Flag::STRIKE:
+            {
+                if (!m_currFrame.first->isLastFrame())
+                {
+                    if (m_lastFlags.size() == 2)
+                    {
+                        UpdateTotalScore(-2);
+                        m_lastFlags.pop_front();
+                    }
+
+                    if (    m_lastFlags.size() == 1
+                        &&  m_lastFlags.front() == Flag::SPARE)
+                    {
+                        UpdateTotalScore(-1);
+                        m_lastFlags.pop_front();
+                    }
+                }
+                else
+                {
+                    if (m_lastFlags.size() > 0)
+                    {
+                        switch (m_lastFlags.size())
+                        {
+                            case 2:
+                            {
+                                UpdateTotalScore(m_lastFrameCounter);
+                                m_lastFlags.pop_front();
+                                break;
+                            }
+
+                            case 1:
+                            {
+                                 if (m_lastFrameCounter == -2)
+                                {
+                                    UpdateTotalScore(-1);
+                                }
+
+                                if (m_lastFlags.front() == Flag::SPARE)
+                                {
+                                    m_lastFlags.pop_front();
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                break;
+            }
+            case Flag::SPARE:
+            {
+                if (m_lastFlags.size() >= 2)    // == ???
+                {
+                    UpdateTotalScore(-1);
+                    m_lastFlags.pop_front();
+                    m_lastFlags.pop_front();
+                }
+
+                break;
+            }
+            default:
+                break;
         }
     }
 
     m_lastFlags.push_back(flag);
 
-    if (m_currFrame.first->isLastFrame())
+    if (m_currFrame.first->isLastFrame() && m_lastFrameCounter < 0)
     {
-        if (m_lastFrameCounter < 0)
-        {
-            UpdateTotalScore(m_lastFrameCounter);
-            ++m_lastFrameCounter;
-        }
+        ++m_lastFrameCounter;
     }
-}
-
-bool Game::IsAnotherThrowAllowed() const noexcept
-{
-    return m_currFrame.first->isAllowedThrow();
 }
 
 void Game::UpdateTotalScore(const short shift)
 {
-    auto total = m_currFrame.first->GetTotalFramePoints();
-    if (!m_currFrame.first->isLastFrame() || m_lastFrameCounter == 0)
-    {
-        m_frameTotalPoints += total;
-    }
-
-    m_log->LogMe(__FILE__, __LINE__, std::string("m_frameTotalPoints = " + std::to_string(m_frameTotalPoints)));
-
-    if (shift == 0 && m_lastFlags.back() == Flag::STRIKE)
-    {
-        m_framePoints.push_back(m_frameTotalPoints);
-    }
-
-    if (shift == 0 && m_lastFlags.back() != Flag::STRIKE)
-    {
-        m_log->LogMe(__FILE__, __LINE__, std::string("m_framePoints.size() = " + std::to_string(m_framePoints.size())));
-        unsigned short counter = 0;
-        for (auto& val: m_framePoints)
-        {
-            val += total + 10 * (m_framePoints.size() - 1 + counter);
-            m_frameTotalPoints += total + 10 * (m_framePoints.size() - 2 + counter);
-
-            m_log->LogMe(__FILE__, __LINE__, std::string("val = " + std::to_string(val)));
-            m_log->LogMe(__FILE__, __LINE__, std::string("counter = " + std::to_string(counter)));
-            m_log->LogMe(__FILE__, __LINE__, std::string("m_frameTotalPoints = " + std::to_string(m_frameTotalPoints)));
-            ++counter;
-
-            for (auto& view : m_Views)
-            {
-                view->UpdateScore(m_frameTotalPoints, -(m_framePoints.size() - counter + 1));
-            }
-        }
-
-        m_lastFlags.remove(Flag::STRIKE);
-        m_framePoints.clear();
-    }
-    else if (m_lastFlags.back() == Flag::STRIKE && m_lastFlags.size() > 2)
-    {
-        if (m_lastFrameCounter < 0)
-        {
-            m_frameTotalPoints += 20;
-            for (auto& val: m_framePoints)
-            {
-                val += 20;
-            }
-        }
-
-        for (auto& view : m_Views)
-        {
-            view->UpdateScore(  m_framePoints.front(),
-                                m_currFrame.first->isLastFrame() ? shift : -(m_lastFlags.size() - 1),
-                                m_currFrame.first->isLastFrame() && m_lastFrameCounter == 0);
-        }
-
-        m_lastFlags.pop_front();
-        m_framePoints.erase(m_framePoints.begin());
-    }
-
-    m_log->LogMe(__FILE__, __LINE__, std::string("m_frameTotalPoints = ") +
-                                    std::to_string(m_frameTotalPoints) +
-                                    std::string("  shift = ") + 
-                                    std::to_string(shift));
+    m_frameTotalPoints += m_currFrame.first->GetTotalFramePoints();;
 
     for (auto& view : m_Views)
     {
-        if (m_lastFlags.back() != Flag::STRIKE || !m_currFrame.first->isLastFrame())
-        {
-            view->UpdateScore(m_frameTotalPoints, shift);
-        }
+        view->UpdateScore(m_frameTotalPoints, shift, m_gameOver);
 
         if (shift == 0)
         {
             view->SetNextFrameActive(true);
         }
     }
+
+    if (shift == -2)
+    {
+        m_frameTotalPoints += MAX_POINTS;
+    }       
+}
+
+bool Game::IsAnotherThrowAllowed() const noexcept
+{
+    return m_currFrame.first->isAllowedThrow();
 }
 
 void Game::CloseGame(std::function<void()> gameOver) 
@@ -165,7 +228,6 @@ void Game::CloseGame(std::function<void()> gameOver)
 unsigned short Game::waitForPoints() 
 {
     unsigned short points = 0;
-
     std::shared_ptr<IPointsListener> listener(m_pointsListenerFactory->CreatePointsListener(m_listenerType));
     listener->Connect();
     points = listener->Receive();

@@ -2,8 +2,6 @@
 #define __IVIEW_H__
 
 #include "ICommon.h"
-#include <vector>
-#include <string>
 
 enum class ViewElement
 {
