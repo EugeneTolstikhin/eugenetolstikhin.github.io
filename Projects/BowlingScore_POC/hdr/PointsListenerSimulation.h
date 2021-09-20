@@ -12,9 +12,7 @@ public:
     PointsListenerSimulation();
     virtual ~PointsListenerSimulation();
 
-    virtual void Connect() override;
     virtual unsigned short Receive() override;
-    virtual void Shutdown() override;
 
 private:
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
