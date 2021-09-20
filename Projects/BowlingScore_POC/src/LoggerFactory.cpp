@@ -2,6 +2,7 @@
 #include "ConsoleLogger.h"
 #include "FileLogger.h"
 #include <stdexcept>
+#include <stdarg.h>
 
 LoggerFactory::LoggerFactory()
 {

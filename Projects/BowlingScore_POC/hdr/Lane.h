@@ -7,6 +7,7 @@
 #include "IView.h"
 #include "ILoggerFactory.h"
 #include "ILogger.h"
+#include "IPointsListenerFactory.h"
 
 class Lane : public ILane
 {
@@ -21,10 +22,13 @@ public:
 private:
     ViewType m_typeView = ViewType::CLS;
     LoggerType m_typeLogger = LoggerType::TO_FILE;
+    ListenerType m_listenerType = ListenerType::LOCAL;
 
     std::unique_ptr<IViewFactory> m_factoryViews;
     std::unique_ptr<ILoggerFactory> m_factoryLogger;
     std::unique_ptr<ILogger> m_log;
+    std::unique_ptr<IPointsListenerFactory> m_pointsListenerFactory;
+    std::unique_ptr<IPointsListener> m_listener;
 
     std::vector<std::unique_ptr<IPlayer>> m_Players;
     std::vector<std::shared_ptr<IView>> m_Views;

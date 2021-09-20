@@ -1,26 +1,17 @@
 #include "Game.h"
 #include "Frame.h"
-#include "IPointsListener.h"
-#include "PointsListenerFactory.h"
 #include "LoggerFactory.h"
 #include "FileLogger.h"
 
 #include <numeric>
 #include <algorithm>
 
-Game::Game() :
-    m_pointsListenerFactory(new PointsListenerFactory)
-    ,m_loggerFactory(new LoggerFactory)
-    ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
-{
-    //
-}
-
-Game::Game(const std::vector<std::shared_ptr<IView>>& views) :
-    m_pointsListenerFactory(new PointsListenerFactory)
+Game::Game(const std::vector<std::shared_ptr<IView>>& views, GetPointsFunction getPoints) :
+    m_getPoints(getPoints)
     ,m_Views(views)
     ,m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
+    ,m_frameTotalPoints(0)
 {
     size_t counter = 0;
     while (++counter <= MAX_FRAME_AMOUNT)
@@ -38,7 +29,7 @@ Game::~Game()
 
 void Game::ThrowBall()
 {
-    auto points = waitForPoints();
+    auto points = m_getPoints();
 
     m_gameOver = m_lastFrameCounter == 0;
     Flag& flag = m_currFrame.first->SetTrialPoints(points);
@@ -190,7 +181,7 @@ void Game::ThrowBall()
 
 void Game::UpdateTotalScore(const short shift)
 {
-    m_frameTotalPoints += m_currFrame.first->GetTotalFramePoints();;
+    m_frameTotalPoints += m_currFrame.first->GetTotalFramePoints();
 
     for (auto& view : m_Views)
     {
@@ -223,14 +214,4 @@ void Game::CloseGame(std::function<void()> gameOver)
     {
         m_currFrame.first = *m_currFrame.second;
     }
-}
-
-unsigned short Game::waitForPoints() 
-{
-    unsigned short points = 0;
-    std::shared_ptr<IPointsListener> listener(m_pointsListenerFactory->CreatePointsListener(m_listenerType));
-    listener->Connect();
-    points = listener->Receive();
-    listener->Shutdown();
-    return points;
 }

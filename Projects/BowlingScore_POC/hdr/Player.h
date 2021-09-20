@@ -8,8 +8,8 @@ class Player : public IPlayer
 {
 public:
     Player() = delete;
-    Player(const std::vector<std::shared_ptr<IView>>& views);
-    Player(const std::string &, const std::vector<std::shared_ptr<IView>>&);
+    Player(const std::vector<std::shared_ptr<IView>>& views, GetPointsFunction);
+    Player(const std::string &, const std::vector<std::shared_ptr<IView>>&, GetPointsFunction);
     virtual ~Player();
 
     virtual void Play(const std::vector<std::shared_ptr<IView>>&, std::function<void()> gameover) override;
