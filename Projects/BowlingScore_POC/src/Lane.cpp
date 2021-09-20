@@ -24,10 +24,7 @@ Lane::~Lane()
 void Lane::Init(const std::vector<std::string>& players)
 {
     auto getPoints = [this]()->unsigned short {
-        m_listener->Connect();
-        unsigned short res = m_listener->Receive();
-        m_listener->Shutdown();
-        return res;
+        return m_listener->Receive();
     };
     if (players.size() > 0)
     {

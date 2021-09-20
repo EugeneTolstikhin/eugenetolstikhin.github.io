@@ -17,7 +17,3 @@ file(GLOB SOURCES "src/*.cpp")
 
 add_executable(Bowling ${SOURCES})
 target_link_libraries(Bowling curses)
-
-#add_subdirectory (tests)
-#enable_testing ()
-#add_test (NAME BowlingTests COMMAND TestBase)

@@ -17,18 +17,8 @@ PointsListenerSimulation::~PointsListenerSimulation()
     //
 }
 
-void PointsListenerSimulation::Connect()
-{
-    //
-}
-
 unsigned short PointsListenerSimulation::Receive()
 {
     auto res = m_distrib(m_generator);
     return res;
-}
-
-void PointsListenerSimulation::Shutdown()
-{
-    //
 }

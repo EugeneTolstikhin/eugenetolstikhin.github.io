@@ -15,21 +15,21 @@ PointsListenerLocal::PointsListenerLocal() :
     
 PointsListenerLocal::~PointsListenerLocal()
 {
-    Shutdown();
+    close(sockfd);
 }
 
-void PointsListenerLocal::Connect()
+unsigned short PointsListenerLocal::Receive()
 {
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
     {
-        return;
+        return -1;
     }
 
     server = gethostbyname(HOSTNAME.c_str());
     if (server == NULL)
     {
-        return;
+        return -2;
     }
 
     bzero((char *) &serv_addr, sizeof(serv_addr));
@@ -41,35 +41,29 @@ void PointsListenerLocal::Connect()
     
     if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
     {
-        return;
+        return -3;
     }
 
     if (write(sockfd, CLIENT_TO_SERVER_MESSAGE.c_str(), CLIENT_TO_SERVER_MESSAGE.length()) < 0)
     {
-        return;
+        return -4;
     }
-}
 
-unsigned short PointsListenerLocal::Receive()
-{
     bzero(buf, BUFFER_SIZE);
     auto err = read(sockfd, buf, BUFFER_SIZE - 1);
     if (err < 0)
     {
-        return -2;
+        return -5;
     }
 
     int numBuf = atoi(buf);
 
     if (numBuf < 0 || numBuf > 10)
     {
-        return -3;
+        return -6;
     }
 
-    return static_cast<unsigned short>(numBuf);
-}
-
-void PointsListenerLocal::Shutdown()
-{
     close(sockfd);
+
+    return static_cast<unsigned short>(numBuf);
 }

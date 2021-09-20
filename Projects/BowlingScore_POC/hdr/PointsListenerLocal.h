@@ -19,9 +19,7 @@ public:
     PointsListenerLocal();
     virtual ~PointsListenerLocal();
 
-    virtual void Connect() override;
     virtual unsigned short Receive() override;
-    virtual void Shutdown() override;
 
 private:
     static constexpr int BUFFER_SIZE = 256;
