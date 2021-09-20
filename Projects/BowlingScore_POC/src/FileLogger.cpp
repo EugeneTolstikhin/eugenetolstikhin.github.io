@@ -9,7 +9,7 @@ FileLogger::FileLogger() : log("log.txt", std::ios::app)
 {
     if (!log)
     {
-        std::cout << "Error opening log file" << std::endl;
+        std::cerr << "Error opening log file" << std::endl;
     }
 }
 

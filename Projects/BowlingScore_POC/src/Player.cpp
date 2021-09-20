@@ -1,10 +1,10 @@
 #include "Player.h"
 #include "Game.h"
 
-Player::Player(const std::vector<std::shared_ptr<IView>>& views) :
+Player::Player(const std::vector<std::shared_ptr<IView>>& views, GetPointsFunction getPoints) :
     m_PlayerName("Test")
     ,m_Views(views)
-    ,m_Game(new Game(m_Views))
+    ,m_Game(new Game(m_Views, getPoints))
 {
     for (auto& view : m_Views)
     {
@@ -12,10 +12,10 @@ Player::Player(const std::vector<std::shared_ptr<IView>>& views) :
     }
 }
 
-Player::Player(const std::string& name, const std::vector<std::shared_ptr<IView>>& views) :
+Player::Player(const std::string& name, const std::vector<std::shared_ptr<IView>>& views, GetPointsFunction getPoints) :
         m_PlayerName(name)
         ,m_Views(views)
-        ,m_Game(new Game(m_Views))
+        ,m_Game(new Game(m_Views, getPoints))
 {
     for (auto& view : m_Views)
     {

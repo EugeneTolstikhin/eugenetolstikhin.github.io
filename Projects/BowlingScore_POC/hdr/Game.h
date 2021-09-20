@@ -4,17 +4,17 @@
 #include <memory>
 #include <vector>
 #include <list>
+#include <functional>
 #include "IGame.h"
 #include "IFrame.h"
-#include "IPointsListenerFactory.h"
 #include "IView.h"
 #include "ILoggerFactory.h"
 
 class Game : public IGame
 {
 public:
-    Game();
-    Game(const std::vector<std::shared_ptr<IView>>&);
+    Game() = delete;
+    Game(const std::vector<std::shared_ptr<IView>>&, GetPointsFunction);
     virtual ~Game();
 
     virtual void ThrowBall() override;
@@ -23,14 +23,11 @@ public:
     virtual void UpdateTotalScore(const short shift = 0) override;
 
 private:
-    unsigned short waitForPoints();
-
-    ListenerType m_listenerType = ListenerType::SIMULATION;
     LoggerType m_typeLogger = LoggerType::TO_FILE;
 
-    std::pair<std::shared_ptr<IFrame>, std::vector<std::shared_ptr<IFrame>>::iterator> m_currFrame;
+    GetPointsFunction m_getPoints;
 
-    std::unique_ptr<IPointsListenerFactory> m_pointsListenerFactory;
+    std::pair<std::shared_ptr<IFrame>, std::vector<std::shared_ptr<IFrame>>::iterator> m_currFrame;
 
     std::vector<std::shared_ptr<IFrame>> m_Frames;
     std::vector<std::shared_ptr<IView>> m_Views;
@@ -41,7 +38,7 @@ private:
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
     std::unique_ptr<ILogger> m_log;
 
-    unsigned short m_frameTotalPoints = 0;
+    unsigned short m_frameTotalPoints;
     short m_lastFrameCounter = -2;
 
     bool m_gameOver = false;

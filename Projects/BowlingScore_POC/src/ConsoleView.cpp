@@ -262,6 +262,7 @@ void ConsoleView::UpdateScoreFrame(const unsigned short score, const short prevI
 
 void ConsoleView::CleanScore()
 {
+    clear();
     m_wPlayers.clear();
     m_wGames.clear();
 }

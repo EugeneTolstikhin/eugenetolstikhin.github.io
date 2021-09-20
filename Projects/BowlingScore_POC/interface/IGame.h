@@ -4,6 +4,8 @@
 #include "ICommon.h"
 #include <functional>
 
+typedef std::function<unsigned short(void)> GetPointsFunction;
+
 class IGame
 {
 public:

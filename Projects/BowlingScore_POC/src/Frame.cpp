@@ -29,7 +29,10 @@ Flag& Frame::SetTrialPoints(const unsigned short points)
         case Trial::FIRST:
         {
             if (points > MAX_POINTS)
+            {
+                m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points = ") + std::to_string(points));
                 throw std::runtime_error("Amount of points is more then allowed for the 1st trial");
+            }
 
             break;
         }
