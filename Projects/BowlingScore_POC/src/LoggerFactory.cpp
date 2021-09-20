@@ -26,7 +26,9 @@ ILogger* LoggerFactory::CreateLogger(const LoggerType& type)
             //TODO: return the proper instance of class here when it will be implemented
             throw std::runtime_error("Unimplemented type of Logger");
         default:
-            throw std::out_of_range("Unknown type of Logger");
+            std::string error("Unknown type of Logger: ");
+            error += std::to_string(static_cast<int>(type));
+            throw std::out_of_range(error);
     }
     
     return nullptr;
