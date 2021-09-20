@@ -1,4 +1,5 @@
 #include "Lane.h"
+#include "GameInitialiser.h"
 #include <memory>
 #include <iostream>
 
@@ -7,15 +8,19 @@ int main(int argc, char** argv)
     try
     {
         std::vector<std::string> players;
-
-        if (argc > 1)
+        if (argc == 1)
+        {
+            GameInitialiser game;
+            players = game.Init();
+        }
+        else if (argc > 1)
         {
             players.reserve(argc - 1);
-        }
-        
-        for (int i = 1; i < argc; ++i)
-        {
-            players.push_back(argv[i]);
+
+            for (int i = 1; i < argc; ++i)
+            {
+                players.push_back(argv[i]);
+            }
         }
 
         std::unique_ptr<ILane> lane(new Lane);
