@@ -3,6 +3,7 @@
 
 enum class Flag : unsigned short
 {
+    ZERO,
     NOTHING,
     SPARE,
     STRIKE

@@ -19,7 +19,8 @@ int main(int argc, char *argv[])
     struct sockaddr_in serv_addr;
     struct hostent *server;
 
-    char buffer[256];
+    char buffer[128];
+    char header[256];
     portno = 8888;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) 
@@ -37,14 +38,17 @@ int main(int argc, char *argv[])
     serv_addr.sin_port = htons(portno);
     if (connect(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) 
         error("ERROR connecting");
-    printf("Please enter the message: ");
-    bzero(buffer,256);
-    fgets(buffer,255,stdin);
-    n = write(sockfd, buffer, strlen(buffer));
+    printf("Please enter the names of players: ");
+    bzero(buffer,128);
+    fgets(buffer,127,stdin);
+    strcpy(header, "1 ");
+    strcat(header, buffer);
+    printf("%s", header);
+    n = write(sockfd, header, strlen(header));
     if (n < 0) 
          error("ERROR writing to socket");
-    bzero(buffer,256);
-    n = read(sockfd, buffer, 255);
+    bzero(buffer,128);
+    n = read(sockfd, buffer, 127);
     if (n < 0) 
          error("ERROR reading from socket");
     printf("%s\n", buffer);

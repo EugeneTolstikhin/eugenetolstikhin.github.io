@@ -1,35 +1,50 @@
 #include "Player.h"
 #include "Game.h"
+#include "LoggerFactory.h"
+#include "FileLogger.h"
 
-Player::Player(const std::vector<std::shared_ptr<IView>>& views, GetPointsFunction getPoints) :
+Player::Player(IView* view, GetPointsFunction getPoints) :
     m_PlayerName("Test")
-    ,m_Views(views)
-    ,m_Game(new Game(m_Views, getPoints))
+    ,m_view(view)
+    ,m_Game(new Game(view, getPoints))
+    ,m_loggerFactory(new LoggerFactory)
+    ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
-    for (auto& view : m_Views)
+    //m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
+    if (m_view != nullptr)
     {
-        view->Draw(ViewElement::PLAYER, &m_PlayerName);
+        m_view->Draw(ViewElement::PLAYER, &m_PlayerName);
+    }
+    else
+    {
+        //m_log->LogMe(__FILE__, __LINE__, "view is UNAVAILABLE");
     }
 }
 
-Player::Player(const std::string& name, const std::vector<std::shared_ptr<IView>>& views, GetPointsFunction getPoints) :
+Player::Player(const std::string& name, IView* view, GetPointsFunction getPoints) :
         m_PlayerName(name)
-        ,m_Views(views)
-        ,m_Game(new Game(m_Views, getPoints))
+        ,m_view(view)
+        ,m_Game(new Game(view, getPoints))
 {
-    for (auto& view : m_Views)
+    //m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
+    if (m_view != nullptr)
     {
-        view->Draw(ViewElement::PLAYER, &m_PlayerName);
+        m_view->Draw(ViewElement::PLAYER, &m_PlayerName);
+    }
+    else
+    {
+        //m_log->LogMe(__FILE__, __LINE__, "view is UNAVAILABLE");
     }
 }
 
 Player::~Player()
 {
-    //
+    //m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
 }
 
-void Player::Play(const std::vector<std::shared_ptr<IView>>& views, std::function<void()> gameover)
+void Player::Play(std::function<void()> gameover)
 {
+    //m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     while (m_Game->IsAnotherThrowAllowed())
     {
         m_Game->ThrowBall();

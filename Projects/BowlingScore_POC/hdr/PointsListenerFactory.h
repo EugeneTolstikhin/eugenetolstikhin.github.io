@@ -9,6 +9,11 @@ public:
     PointsListenerFactory();
     virtual ~PointsListenerFactory();
 
+    PointsListenerFactory(const PointsListenerFactory&) = delete;
+    PointsListenerFactory(PointsListenerFactory&&) = delete;
+    PointsListenerFactory& operator = (const PointsListenerFactory&) = delete;
+    PointsListenerFactory&& operator = (PointsListenerFactory&&) = delete;
+
     virtual IPointsListener* CreatePointsListener(const ListenerType&) override;
 };
 

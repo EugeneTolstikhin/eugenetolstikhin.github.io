@@ -6,17 +6,17 @@
 #include <numeric>
 #include <algorithm>
 
-Game::Game(const std::vector<std::shared_ptr<IView>>& views, GetPointsFunction getPoints) :
+Game::Game(IView* view, GetPointsFunction getPoints) :
     m_getPoints(getPoints)
-    ,m_Views(views)
     ,m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
-    ,m_frameTotalPoints(0)
+    ,m_view(view)
 {
+    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     size_t counter = 0;
     while (++counter <= MAX_FRAME_AMOUNT)
     {
-        m_Frames.emplace_back(new Frame(counter == MAX_FRAME_AMOUNT, m_Views));
+        m_Frames.emplace_back(new Frame(counter == MAX_FRAME_AMOUNT, m_view));
     }
 
     m_currFrame = std::make_pair(m_Frames.front(), m_Frames.begin());
@@ -24,11 +24,12 @@ Game::Game(const std::vector<std::shared_ptr<IView>>& views, GetPointsFunction g
 
 Game::~Game()
 {
-    //
+    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
 }
 
 void Game::ThrowBall()
 {
+    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     auto points = m_getPoints();
 
     m_gameOver = m_lastFrameCounter == 0;
@@ -36,13 +37,14 @@ void Game::ThrowBall()
     
     if (!m_lastFlags.empty())
     {
-        if (m_lastFlags.front() == Flag::NOTHING)
+        if (m_lastFlags.front() == Flag::NOTHING || m_lastFlags.front() == Flag::ZERO)
         {
             m_lastFlags.pop_front();
         }
 
         switch (flag)
         {
+            case Flag::ZERO:
             case Flag::NOTHING:
             {
                 if (    m_currFrame.first->isLastFrame()
@@ -56,7 +58,7 @@ void Game::ThrowBall()
                     if (    m_lastFlags.back() == Flag::STRIKE
                         &&  !(
                                 m_currFrame.first->isLastFrame() 
-                            &&  m_gameOver))
+                            ||  m_gameOver))
                     {
                         UpdateTotalScore(-2);
                         m_lastFlags.pop_front();
@@ -68,15 +70,14 @@ void Game::ThrowBall()
                             UpdateTotalScore(m_lastFrameCounter);
                             m_lastFlags.pop_front();
 
-                            if (m_lastFlags.front() == Flag::NOTHING)
+                            if (m_lastFlags.front() == Flag::NOTHING || m_lastFlags.front() == Flag::ZERO)
                             {
                                 UpdateTotalScore(0);
                                 m_lastFlags.pop_front();
                             }
                             else
                             {
-                                m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
-                                throw std::runtime_error("Unimplemented functionality");
+                                m_lastFlags.pop_front();
                             }
                         }
                         else
@@ -87,8 +88,7 @@ void Game::ThrowBall()
                     }
                     else
                     {
-                        m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
-                        throw std::runtime_error("Unimplemented functionality");
+                        //
                     }
                 }
 
@@ -109,17 +109,24 @@ void Game::ThrowBall()
             {
                 if (!m_currFrame.first->isLastFrame())
                 {
-                    if (m_lastFlags.size() == 2)
+                    switch (m_lastFlags.size())
                     {
-                        UpdateTotalScore(-2);
-                        m_lastFlags.pop_front();
-                    }
+                        case 2:
+                        {
+                            UpdateTotalScore(-2);
+                            m_lastFlags.pop_front();
+                            break;
+                        }
 
-                    if (    m_lastFlags.size() == 1
-                        &&  m_lastFlags.front() == Flag::SPARE)
-                    {
-                        UpdateTotalScore(-1);
-                        m_lastFlags.pop_front();
+                        case 1:
+                        {
+                            if (m_lastFlags.front() == Flag::SPARE)
+                            {
+                                UpdateTotalScore(-1);
+                                m_lastFlags.pop_front();
+                            }
+                            break;
+                        }
                     }
                 }
                 else
@@ -137,7 +144,8 @@ void Game::ThrowBall()
 
                             case 1:
                             {
-                                 if (m_lastFrameCounter == -2)
+                                 if (m_lastFrameCounter == -2
+                                 && m_lastFlags.front() == Flag::SPARE)
                                 {
                                     UpdateTotalScore(-1);
                                 }
@@ -157,7 +165,7 @@ void Game::ThrowBall()
             }
             case Flag::SPARE:
             {
-                if (m_lastFlags.size() >= 2)    // == ???
+                if (m_lastFlags.size() >= 2)
                 {
                     UpdateTotalScore(-1);
                     m_lastFlags.pop_front();
@@ -181,16 +189,21 @@ void Game::ThrowBall()
 
 void Game::UpdateTotalScore(const short shift)
 {
+    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     m_frameTotalPoints += m_currFrame.first->GetTotalFramePoints();
 
-    for (auto& view : m_Views)
+    if (m_view != nullptr)
     {
-        view->UpdateScore(m_frameTotalPoints, shift, m_gameOver);
+        m_view->UpdateScore(m_frameTotalPoints, shift, m_gameOver);
 
         if (shift == 0)
         {
-            view->SetNextFrameActive(true);
+            m_view->SetNextFrameActive(true);
         }
+    }
+    else
+    {
+        m_log->LogMe(__FILE__, __LINE__, "view is UNAVAILABLE");
     }
 
     if (shift == -2)
@@ -201,11 +214,13 @@ void Game::UpdateTotalScore(const short shift)
 
 bool Game::IsAnotherThrowAllowed() const noexcept
 {
+    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     return m_currFrame.first->isAllowedThrow();
 }
 
 void Game::CloseGame(std::function<void()> gameOver) 
 {
+    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     if (++m_currFrame.second == m_Frames.end())
     {
         gameOver();

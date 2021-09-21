@@ -15,6 +15,11 @@ public:
     Lane();
     virtual ~Lane();
 
+    Lane(const Lane&) = delete;
+    Lane(Lane&&) = delete;
+    Lane& operator = (const Lane&) = delete;
+    Lane&& operator = (Lane&&) = delete;
+
     virtual void Init(const std::vector<std::string>&) override;
     virtual void Play(std::function<void()> gameover) override;
     virtual void Finish() override;
@@ -29,9 +34,10 @@ private:
     std::unique_ptr<ILogger> m_log;
     std::unique_ptr<IPointsListenerFactory> m_pointsListenerFactory;
     std::unique_ptr<IPointsListener> m_listener;
+    
+    std::shared_ptr<IView> m_view;
 
     std::vector<std::unique_ptr<IPlayer>> m_Players;
-    std::vector<std::shared_ptr<IView>> m_Views;
 };
 
 #endif // __LANE_H__

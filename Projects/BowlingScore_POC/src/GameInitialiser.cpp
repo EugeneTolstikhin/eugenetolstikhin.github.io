@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sstream>
 #include <unistd.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
@@ -15,19 +16,19 @@ GameInitialiser::GameInitialiser() :
     m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
-    //
+    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
 }
 
 //TODO: Create different thread for communication with admin
 std::vector<std::string> GameInitialiser::Init()
 {
-    m_log->LogMe(__FILE__, __LINE__, "Init");
+    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     int sockfd, newsockfd, portno;
     socklen_t clilen;
     char buffer[256];
     struct sockaddr_in serv_addr, cli_addr;
     int n;
-    std::vector<std::string> players = {"A", "B"};
+    std::vector<std::string> players;
 
     m_log->LogMe(__FILE__, __LINE__, "Open socket");
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -69,24 +70,44 @@ std::vector<std::string> GameInitialiser::Init()
             m_log->LogMe(__FILE__, __LINE__, "ERROR reading from socket");
             return std::move(players);
         }
-        else if (buffer[0] =='1')
+        else
         {
             m_log->LogMe(__FILE__, __LINE__, std::string("Buffer = ") + std::string(buffer));
-            send(newsockfd, "Accepted", strlen(buffer), 0);
+            std::istringstream iss(buffer);
+            std::string str;
+            bool headerReceived = false;
+
+            while (iss >> str)
+            {
+                if (str == HEADER)
+                {
+                    headerReceived = true;
+                    std::string answer("Accepted");
+                    m_log->LogMe(__FILE__, __LINE__, std::string("Correct buffer = ") + std::string(buffer));
+                    send(newsockfd, answer.c_str(), answer.length(), 0);
+                    continue;
+                }
+
+                if (headerReceived)
+                {
+                    players.push_back(str);
+                }
+            }
 
             //TODO: Pass this value to the main thread
             // yield, etc.
 
-            m_log->LogMe(__FILE__, __LINE__, "Close connection 1");
+            m_log->LogMe(__FILE__, __LINE__, "Close connection");
             close(newsockfd);
-            break;
-
+            if (headerReceived)
+            {
+                break;
+            }
+            else
+            {
+                continue;
+            }
         }
-
-        m_log->LogMe(__FILE__, __LINE__, std::string("Buffer = ") + std::string(buffer));
-
-        m_log->LogMe(__FILE__, __LINE__, "Close connection 2");
-        close(newsockfd);
     }
 
     m_log->LogMe(__FILE__, __LINE__, "Close main socket");

@@ -15,7 +15,6 @@
 ConsoleView::ConsoleView() :
     m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
-    ,m_ActiveFrame(nullptr)
 {
     setlocale(LC_ALL, "");
     initscr();
@@ -218,6 +217,11 @@ void ConsoleView::UpdateFrameScore(const unsigned short score, const Flag& flag)
             res = std::to_string(score);
             break;
         }
+        case Flag::ZERO:
+        {
+            res = "-";
+            break;
+        }
         default:
             break;
     }
@@ -228,36 +232,45 @@ void ConsoleView::UpdateFrameScore(const unsigned short score, const Flag& flag)
     usleep(SLEEP_TIME);
 }
 
-void ConsoleView::UpdateScore(const unsigned short score, const short prevIdxShift, bool gameover)
+void ConsoleView::UpdateScore(const unsigned short score, const short prevIdxShift, const bool gameover)
 {
-    auto frames = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx);
     if (gameover)
     {
         m_log->LogMe(__FILE__, __LINE__, "Gameover");
         UpdateScoreFrame(score, 0);
     }
-    else if (   frames.at(frames.size() - 2).second == Flag::SPARE
-            ||  frames.at(frames.size() - 3).second == Flag::STRIKE)
-    {
-        if (prevIdxShift < 0)
-        {
-            UpdateScoreFrame(score, prevIdxShift);
-        }
-    }
     else
     {
-        UpdateScoreFrame(score, prevIdxShift);
+        if (m_ActiveFramesIdx <= m_normalFramesAmount)
+        {
+            auto frames = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx);
+            if (   frames.at(frames.size() - 2).second == Flag::SPARE
+                ||  frames.at(frames.size() - 3).second == Flag::STRIKE)
+            {
+                if (prevIdxShift < 0)
+                {
+                    UpdateScoreFrame(score, prevIdxShift);
+                }
+            }
+            else
+            {
+                UpdateScoreFrame(score, prevIdxShift);
+            }
+        }
     }
 }
 
 void ConsoleView::UpdateScoreFrame(const unsigned short score, const short prevIdxShift)
 {
-    auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx + prevIdxShift).back();
-    std::string sscore = std::to_string(score);
-    mvwprintw(frame.first, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 2, std::to_string(score).c_str());
-    wrefresh(frame.first);
-    sscore.clear();
-    usleep(SLEEP_TIME);
+    if (m_ActiveFramesIdx <= m_normalFramesAmount)
+    {
+        auto frame = m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx + prevIdxShift).back();
+        std::string sscore = std::to_string(score);
+        mvwprintw(frame.first, m_cellWidth / 2, m_cellWidth + sscore.length() / 2 - 2, std::to_string(score).c_str());
+        wrefresh(frame.first);
+        sscore.clear();
+        usleep(SLEEP_TIME);
+    }
 }
 
 void ConsoleView::CleanScore()
@@ -315,7 +328,10 @@ void ConsoleView::SetNextFrameActive(const bool last)
         m_ActiveFrameIdx = 0;
     }
 
-    m_ActiveFrame = &m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx).at(m_ActiveFrameIdx);
+    if (m_ActiveFramesIdx <= m_normalFramesAmount)
+    {
+        m_ActiveFrame = &m_wGames.at(m_ActivePlayerIdx).at(m_ActiveFramesIdx).at(m_ActiveFrameIdx);
+    }
 }
 
 void ConsoleView::PrintPlayerName(WINDOW* w, const std::string& name)

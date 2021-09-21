@@ -9,6 +9,11 @@ public:
     LoggerFactory();
     virtual ~LoggerFactory();
 
+    LoggerFactory(const LoggerFactory&) = delete;
+    LoggerFactory(LoggerFactory&&) = delete;
+    LoggerFactory& operator = (const LoggerFactory&) = delete;
+    LoggerFactory&& operator = (LoggerFactory&&) = delete;
+
     virtual ILogger* CreateLogger(const LoggerType&) override;
 };
 

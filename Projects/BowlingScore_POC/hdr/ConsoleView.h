@@ -19,9 +19,14 @@ public:
     ConsoleView();
     virtual ~ConsoleView();
 
+    ConsoleView(const ConsoleView&) = delete;
+    ConsoleView(ConsoleView&&) = delete;
+    ConsoleView& operator = (const ConsoleView&) = delete;
+    ConsoleView&& operator = (ConsoleView&&) = delete;
+
     virtual void Draw(const ViewElement&, void*) override;
     virtual void UpdateFrameScore(const unsigned short, const Flag&) override;
-    virtual void UpdateScore(const unsigned short, const short, bool) override;
+    virtual void UpdateScore(const unsigned short, const short, const bool) override;
     virtual void CleanScore() override;
     virtual void SetNextFrameActive(const bool) override;
 
@@ -59,7 +64,7 @@ private:
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
     std::unique_ptr<ILogger> m_log;
 
-    FRAME* m_ActiveFrame;
+    FRAME* m_ActiveFrame = nullptr;
 
     const unsigned int SLEEP_TIME = 1000000;
 };

@@ -12,17 +12,19 @@ Lane::Lane() :
     ,m_log(m_factoryLogger->CreateLogger(m_typeLogger))
     ,m_pointsListenerFactory(new PointsListenerFactory)
     ,m_listener(m_pointsListenerFactory->CreatePointsListener(m_listenerType))
+    ,m_view(m_factoryViews->CreateView(m_typeView))
 {
-    m_Views.emplace_back(m_factoryViews->CreateView(m_typeView));
+    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
 }
 
 Lane::~Lane()
 {
-    //
+    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
 }
 
 void Lane::Init(const std::vector<std::string>& players)
 {
+    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     auto getPoints = [this]()->unsigned short {
         return m_listener->Receive();
     };
@@ -31,28 +33,33 @@ void Lane::Init(const std::vector<std::string>& players)
         m_Players.reserve(players.size());
         for (size_t i = 0; i < players.size(); ++i)
         {
-            m_Players.emplace(m_Players.begin() + i, new Player(players.at(i), m_Views, getPoints));
+            m_Players.emplace(m_Players.begin() + i, new Player(players.at(i), m_view.get(), getPoints));
         }
     }
     else
     {
-        m_Players.emplace_back(new Player(m_Views, getPoints));
+        m_Players.emplace_back(new Player(m_view.get(), getPoints));
     }
 
-    for (auto& view : m_Views)
+    if (m_view.get() != nullptr)
     {
-        view->Draw(ViewElement::FLUSH);
+        m_view->Draw(ViewElement::FLUSH);
+    }
+    else
+    {
+        m_log->LogMe(__FILE__, __LINE__, "view is UNAVAILABLE");
     }
 }
 
 void Lane::Play(std::function<void()> gameover)
 {
+    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     size_t counterGameovers = 0;
     while (counterGameovers < m_Players.size())
     {
         for (auto& player: m_Players)
         {
-            player->Play(m_Views, [&counterGameovers]{
+            player->Play([&counterGameovers]{
                 ++counterGameovers;
             });
         }
@@ -63,9 +70,15 @@ void Lane::Play(std::function<void()> gameover)
 
 void Lane::Finish()
 {
+    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     m_Players.clear();
-    for (auto& view : m_Views)
+
+    if (m_view.get() != nullptr)
     {
-        view->CleanScore();
+        m_view->CleanScore();
+    }
+    else
+    {
+        m_log->LogMe(__FILE__, __LINE__, "view is UNAVAILABLE");
     }
 }
