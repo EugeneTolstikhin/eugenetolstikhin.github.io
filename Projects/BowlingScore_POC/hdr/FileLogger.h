@@ -10,6 +10,11 @@ public:
     FileLogger();
     virtual ~FileLogger();
 
+    FileLogger(const FileLogger&) = delete;
+    FileLogger(FileLogger&&) = delete;
+    FileLogger& operator = (const FileLogger&) = delete;
+    FileLogger&& operator = (FileLogger&&) = delete;
+
     virtual void LogMe(const std::string&, int, const std::string&, ...) override;
 
 private:

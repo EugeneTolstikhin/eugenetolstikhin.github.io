@@ -9,6 +9,11 @@ public:
     ViewFactory();
     virtual ~ViewFactory();
 
+    ViewFactory(const ViewFactory&) = delete;
+    ViewFactory(ViewFactory&&) = delete;
+    ViewFactory& operator = (const ViewFactory&) = delete;
+    ViewFactory&& operator = (ViewFactory&&) = delete;
+
     virtual IView* CreateView(const ViewType&) override;
 };
 

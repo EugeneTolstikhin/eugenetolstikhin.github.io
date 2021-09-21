@@ -11,7 +11,7 @@ class Frame : public IFrame
 public:
 
     Frame() = delete;
-    Frame(bool, const std::vector<std::shared_ptr<IView>>&);
+    Frame(bool, IView*);
     virtual ~Frame();
 
     Frame(const Frame&) = delete;
@@ -35,8 +35,9 @@ private:
     bool m_AllowThrow = true;
 
     std::vector<unsigned short> m_TrialPoints = {0, 0, 0};
-    std::vector<std::shared_ptr<IView>> m_Views;
-
+    
+    IView* m_view;
+    
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
     std::unique_ptr<ILogger> m_log;
 };

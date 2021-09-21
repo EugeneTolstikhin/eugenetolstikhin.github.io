@@ -5,35 +5,46 @@
 
 int main(int argc, char** argv)
 {
-    try
+    //try
     {
+        bool newGame = false;
         std::vector<std::string> players;
-        if (argc == 1)
+        while (true)
         {
-            GameInitialiser game;
-            players = game.Init();
-        }
-        else if (argc > 1)
-        {
-            players.reserve(argc - 1);
-
-            for (int i = 1; i < argc; ++i)
+            if (argc == 1 || newGame)
             {
-                players.push_back(argv[i]);
+                GameInitialiser game;
+                players = game.Init();
             }
-        }
+            else if (argc > 1)
+            {
+                players.reserve(argc - 1);
 
-        std::unique_ptr<ILane> lane(new Lane);
-        lane->Init(players);
-        lane->Play([&lane]{
-            lane->Finish();
-        });
+                for (int i = 1; i < argc; ++i)
+                {
+                    players.push_back(argv[i]);
+                }
+            }
+
+            // Let lane destroy itself after finishing is completed
+            {
+                std::unique_ptr<ILane> lane(new Lane);
+                lane->Init(players);
+                lane->Play([&lane]()
+                {
+                    lane->Finish();
+                });
+            }
+
+            newGame = true;
+            players.clear();
+        }
     }
-    catch(const std::exception& e)
+    /*catch(const std::exception& e)
     {
         std::cerr << e.what() << std::endl;
         return 1;
-    }
+    }*/
     
     return 0;
 }

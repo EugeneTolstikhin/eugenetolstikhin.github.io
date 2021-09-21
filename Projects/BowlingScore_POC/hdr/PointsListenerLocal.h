@@ -19,6 +19,11 @@ public:
     PointsListenerLocal();
     virtual ~PointsListenerLocal();
 
+    PointsListenerLocal(const PointsListenerLocal&) = delete;
+    PointsListenerLocal(PointsListenerLocal&&) = delete;
+    PointsListenerLocal& operator = (const PointsListenerLocal&) = delete;
+    PointsListenerLocal&& operator = (PointsListenerLocal&&) = delete;
+
     virtual unsigned short Receive() override;
 
 private:
