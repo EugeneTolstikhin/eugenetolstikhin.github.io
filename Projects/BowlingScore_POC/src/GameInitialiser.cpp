@@ -1,6 +1,7 @@
 #include "GameInitialiser.h"
 #include "LoggerFactory.h"
 #include "FileLogger.h"
+#include "SocketServer.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,106 +13,53 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#include <vector>
+#include <thread>
+
 GameInitialiser::GameInitialiser() :
     m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
+    //
 }
 
 //TODO: Create different thread for communication with admin
 std::vector<std::string> GameInitialiser::Init()
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
-    int sockfd, newsockfd, portno;
-    socklen_t clilen;
-    char buffer[256];
-    struct sockaddr_in serv_addr, cli_addr;
-    int n;
-    std::vector<std::string> players;
+	std::string buf;
+	std::vector<std::string> players;
+	std::unique_ptr<SocketServer> server(new SocketServer);
+	while(true)
+	{
+		server->acceptClient();
+		buf = server->readFromClient("Test");
 
-    m_log->LogMe(__FILE__, __LINE__, "Open socket");
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
-    {
-        m_log->LogMe(__FILE__, __LINE__, "ERROR opening socket");
-        return std::move(players);
-    }
+		std::istringstream iss(buf);
+        std::string str;
+        bool headerReceived = false;
 
-    bzero((char *) &serv_addr, sizeof(serv_addr));
-
-    portno = 8888;
-
-    serv_addr.sin_family = AF_INET;  
-    serv_addr.sin_addr.s_addr = INADDR_ANY;  
-    serv_addr.sin_port = htons(portno);
-
-    m_log->LogMe(__FILE__, __LINE__, "Bind socket");
-    if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
-    {
-        m_log->LogMe(__FILE__, __LINE__, "ERROR on binding");
-        return std::move(players);
-    }
-
-    m_log->LogMe(__FILE__, __LINE__, "Listen to socket");
-    listen(sockfd,5);
-
-    clilen = sizeof(cli_addr);
-
-    m_log->LogMe(__FILE__, __LINE__, "Accept new connection");
-    while ((newsockfd = accept(sockfd, (struct sockaddr *) &cli_addr, &clilen)) >= 0)
-    {
-        bzero(buffer,256);
-
-        m_log->LogMe(__FILE__, __LINE__, "Read data");
-        n = read(newsockfd, buffer, 255);
-        if (n < 0)
+        while (iss >> str)
         {
-            m_log->LogMe(__FILE__, __LINE__, "ERROR reading from socket");
-            return std::move(players);
-        }
-        else
-        {
-            m_log->LogMe(__FILE__, __LINE__, std::string("Buffer = ") + std::string(buffer));
-            std::istringstream iss(buffer);
-            std::string str;
-            bool headerReceived = false;
-
-            while (iss >> str)
+            if (str == HEADER)
             {
-                if (str == HEADER)
-                {
-                    headerReceived = true;
-                    std::string answer("Accepted");
-                    m_log->LogMe(__FILE__, __LINE__, std::string("Correct buffer = ") + std::string(buffer));
-                    send(newsockfd, answer.c_str(), answer.length(), 0);
-                    continue;
-                }
-
-                if (headerReceived)
-                {
-                    players.push_back(str);
-                }
-            }
-
-            //TODO: Pass this value to the main thread
-            // yield, etc.
-
-            m_log->LogMe(__FILE__, __LINE__, "Close connection");
-            close(newsockfd);
-            if (headerReceived)
-            {
-                break;
-            }
-            else
-            {
+                headerReceived = true;
+                server->writeToClient("Accepted");
                 continue;
             }
-        }
-    }
 
-    m_log->LogMe(__FILE__, __LINE__, "Close main socket");
-    close(sockfd);
+            if (headerReceived)
+            {
+                players.push_back(str);
+            }
+        }
+
+		server->closeClient();
+
+		if (headerReceived)
+			break;
+		else
+			continue;
+	}
 
     return std::move(players);
 }

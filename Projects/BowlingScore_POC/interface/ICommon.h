@@ -10,5 +10,6 @@ enum class Flag : unsigned short
 };
 
 static const unsigned short MAX_FRAME_AMOUNT = 10;
+static const unsigned short MAX_POINTS = 10;
 
 #endif // __ICOMMON_H__

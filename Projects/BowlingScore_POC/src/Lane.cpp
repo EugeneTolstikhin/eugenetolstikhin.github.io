@@ -14,19 +14,18 @@ Lane::Lane() :
     ,m_listener(m_pointsListenerFactory->CreatePointsListener(m_listenerType))
     ,m_view(m_factoryViews->CreateView(m_typeView))
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
+    //
 }
 
 Lane::~Lane()
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
+    //
 }
 
 void Lane::Init(const std::vector<std::string>& players)
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     auto getPoints = [this]()->unsigned short {
-        return m_listener->Receive();
+		return m_listener->Receive();
     };
     if (players.size() > 0)
     {
@@ -53,7 +52,6 @@ void Lane::Init(const std::vector<std::string>& players)
 
 void Lane::Play(std::function<void()> gameover)
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     size_t counterGameovers = 0;
     while (counterGameovers < m_Players.size())
     {
@@ -70,7 +68,6 @@ void Lane::Play(std::function<void()> gameover)
 
 void Lane::Finish()
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     m_Players.clear();
 
     if (m_view.get() != nullptr)
