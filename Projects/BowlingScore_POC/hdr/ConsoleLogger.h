@@ -14,7 +14,7 @@ public:
     ConsoleLogger& operator = (const ConsoleLogger&) = delete;
     ConsoleLogger&& operator = (ConsoleLogger&&) = delete;
 
-    virtual void LogMe(const std::string&, int, const std::string&, ...) override;
+    virtual void LogMe(const char*, int, const char*, ...) override;
 };
 
 #endif //__CONSOLE_LOGGER_H__

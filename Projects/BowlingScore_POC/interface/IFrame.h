@@ -12,8 +12,6 @@ enum class Trial : short
     THIRD
 };
 
-static const unsigned short MAX_POINTS = 10;
-
 class IFrame
 {
 public:

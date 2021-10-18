@@ -2,15 +2,23 @@
 #define __POINTS_LISTENER_H__
 
 #include "IPointsListener.h"
+#include "SocketClient.h"
 #include "ILoggerFactory.h"
 
-#include <sys/types.h> 
+#ifdef __linux__
+#include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
-#include <unistd.h>
 #include <netdb.h>
-#include <stdio.h>
+#include <arpa/inet.h>
+#elif defined _WIN32
+#include <winsock2.h>
+#include <WS2tcpip.h>
+
+#pragma comment(lib, "Ws2_32.lib")
+#endif
+
+#include <sys/types.h> 
 #include <memory>
 
 class PointsListenerLocal : public IPointsListener
@@ -27,23 +35,17 @@ public:
     virtual unsigned short Receive() override;
 
 private:
-    static constexpr int BUFFER_SIZE = 256;
-
-    std::unique_ptr<ILoggerFactory> m_loggerFactory;
+	std::unique_ptr<ILoggerFactory> m_loggerFactory;
     std::unique_ptr<ILogger> m_log;
-
     LoggerType m_typeLogger = LoggerType::TO_FILE;
 
-    const int BACKLOG_SIZE = 5;
-    const unsigned short PORT = 8080;
-    const std::string HOSTNAME = "127.0.0.1";
     const int PROTOCOL = 0;
-    const std::string CLIENT_TO_SERVER_MESSAGE = "Wait for points";
+    const std::string CLIENT_TO_SERVER_MESSAGE = "Give me the points!";
+	const std::string READY_MESSAGE = "Wait for command!";
+	const std::string ANSWER_SECRET_KEY = "I give you: ";
 
-    char buf[BUFFER_SIZE];
-    struct sockaddr_in serv_addr;
-    int sockfd;
     struct hostent *server;
+	struct addrinfo hints, *addrs = nullptr;
 };
 
 #endif //__POINTS_LISTENER_H__

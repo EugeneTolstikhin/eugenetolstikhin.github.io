@@ -12,7 +12,6 @@ Game::Game(IView* view, GetPointsFunction getPoints) :
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
     ,m_view(view)
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     size_t counter = 0;
     while (++counter <= MAX_FRAME_AMOUNT)
     {
@@ -24,12 +23,11 @@ Game::Game(IView* view, GetPointsFunction getPoints) :
 
 Game::~Game()
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
+    //
 }
 
 void Game::ThrowBall()
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     auto points = m_getPoints();
 
     m_gameOver = m_lastFrameCounter == 0;
@@ -189,7 +187,6 @@ void Game::ThrowBall()
 
 void Game::UpdateTotalScore(const short shift)
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     m_frameTotalPoints += m_currFrame.first->GetTotalFramePoints();
 
     if (m_view != nullptr)
@@ -214,13 +211,11 @@ void Game::UpdateTotalScore(const short shift)
 
 bool Game::IsAnotherThrowAllowed() const noexcept
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     return m_currFrame.first->isAllowedThrow();
 }
 
 void Game::CloseGame(std::function<void()> gameOver) 
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     if (++m_currFrame.second == m_Frames.end())
     {
         gameOver();

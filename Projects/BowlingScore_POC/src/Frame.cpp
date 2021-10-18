@@ -10,7 +10,6 @@ Frame::Frame(bool isLastFrame, IView* view) :
     ,m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
 
     if (m_view != nullptr)
     {
@@ -24,12 +23,11 @@ Frame::Frame(bool isLastFrame, IView* view) :
 
 Frame::~Frame()
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
+    //
 }
 
 Flag& Frame::SetTrialPoints(const unsigned short points)
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     unsigned short p = points; //TMP
     switch (m_CurrentTrial)
     {
@@ -37,7 +35,7 @@ Flag& Frame::SetTrialPoints(const unsigned short points)
         {
             if (points > MAX_POINTS)
             {
-                m_log->LogMe(__FILE__, __LINE__, std::string("Amount of points = ") + std::to_string(points));
+                m_log->LogMe(__FILE__, __LINE__, "Amount of points = %d", points);
                 throw std::runtime_error("Amount of points is more then allowed for the 1st trial");
             }
 
@@ -92,20 +90,17 @@ Flag& Frame::SetTrialPoints(const unsigned short points)
 
 bool Frame::isAllowedThrow() const noexcept 
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     return m_AllowThrow;
 }
 
 unsigned short Frame::GetTotalFramePoints() const noexcept 
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     auto sum = std::accumulate(m_TrialPoints.begin(), m_TrialPoints.end(), 0);
     return sum;
 }
 
 void Frame::incTrial(const unsigned short points)
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     bool specialCase = m_isLastFrame && MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial));
     switch (m_CurrentTrial)
     {
@@ -129,8 +124,7 @@ void Frame::incTrial(const unsigned short points)
                 }
                 else
                 {
-                    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
-                    m_log->LogMe(__FILE__, __LINE__, std::string("points = ") + std::to_string(points));
+                    m_log->LogMe(__FILE__, __LINE__, "points = %d", points);
                     throw std::runtime_error("Unimplemented functionality");
                 }
             }
@@ -164,7 +158,7 @@ void Frame::incTrial(const unsigned short points)
                 }
                 else
                 {
-                    m_log->LogMe(__FILE__, __LINE__, std::string("1st points = ") + std::to_string(m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST))) + std::string("2nd points = ") + std::to_string(m_TrialPoints.at(static_cast<unsigned short>(Trial::SECOND)))); // Check the conditions when the program enter here
+                    m_log->LogMe(__FILE__, __LINE__, "1st points = %d, 2nd points = %d", m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)), m_TrialPoints.at(static_cast<unsigned short>(Trial::SECOND))); // Check the conditions when the program enter here
                     
                     m_Flag = m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) == 0
                             ? Flag::ZERO
@@ -242,6 +236,5 @@ void Frame::incTrial(const unsigned short points)
 
 bool Frame::isLastFrame() const noexcept
 {
-    m_log->LogMe(__FILE__, __LINE__, __FUNCTION__);
     return m_isLastFrame;
 }

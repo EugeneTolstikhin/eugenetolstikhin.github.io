@@ -15,7 +15,7 @@ public:
     FileLogger& operator = (const FileLogger&) = delete;
     FileLogger&& operator = (FileLogger&&) = delete;
 
-    virtual void LogMe(const std::string&, int, const std::string&, ...) override;
+    virtual void LogMe(const char*, int, const char*, ...) override;
 
 private:
     std::ofstream log;

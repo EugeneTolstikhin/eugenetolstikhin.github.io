@@ -17,3 +17,9 @@ file(GLOB SOURCES "src/*.cpp")
 
 add_executable(Bowling ${SOURCES})
 target_link_libraries(Bowling curses)
+
+add_custom_command(
+        TARGET Bowling POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_SOURCE_DIR}/config.cfg
+                ${CMAKE_CURRENT_BINARY_DIR}/config.cfg)

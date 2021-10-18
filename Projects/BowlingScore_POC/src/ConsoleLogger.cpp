@@ -15,68 +15,16 @@ ConsoleLogger::~ConsoleLogger()
     //
 }
 
-void ConsoleLogger::LogMe(const std::string& file, int line, const std::string& message, ...) 
+void ConsoleLogger::LogMe(const char* file, int line, const char* message, ...) 
 {
-    va_list args;
-    std::istringstream iss(message);
-    std::string str;
-    std::vector<std::string> tokens;
-    int count = 0;
-
-    while (iss >> str)
-    {
-        if (str.find("%") != -1)
-        {
-            if (str.length() > 1)
-            {
-                ++count;
-            }
-            else
-            {
-                throw std::runtime_error("Invalid token found");
-            }
-        }
-
-        tokens.push_back(std::move(str));
-    }
-
-    std::string s;
-    va_start(args, count);
-    for (auto& val: tokens)
-    {
-        if (val.find("%") != std::string::npos)
-        {
-            auto sub = str.substr(1);
-            if (sub.find("s") != std::string::npos)
-            {
-                s += va_arg(args, const char *);
-            }
-            else if (sub.find("d") != std::string::npos)
-            {
-                s += va_arg(args, int);
-            }
-            else if (sub.find("f") != std::string::npos)
-            {
-                s += va_arg(args, double);
-            }
-            else if (sub.find("%") != std::string::npos)
-            {
-                s += "%";
-            }
-            /* And so on */
-        }
-        else
-        {
-            s += val;
-        }
-
-        s += " ";
-    }
-
-    va_end(args);
+    char buffer[256];
+	va_list args;
+	va_start (args, message);
+	vsprintf (buffer, message, args);
+	va_end (args);
     
     std::cout   << " File: " << file << std::endl
                 << " Line: " << line << std::endl
-                << " Message: " << s << std::endl
+                << " Message: " << buffer << std::endl
                 << std::flush;
 }
