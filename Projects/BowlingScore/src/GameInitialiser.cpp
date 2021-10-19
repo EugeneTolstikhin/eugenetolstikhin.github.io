@@ -17,7 +17,7 @@
 #include <thread>
 
 GameInitialiser::GameInitialiser() :
-    m_loggerFactory(new LoggerFactory)
+    m_loggerFactory(std::make_unique<LoggerFactory>())
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
 	//
@@ -28,7 +28,7 @@ std::vector<std::string> GameInitialiser::Init()
 {
 	std::string buf;
 	std::vector<std::string> players;
-	std::unique_ptr<SocketServer> server(new SocketServer);
+	std::unique_ptr<SocketServer> server(std::make_unique<SocketServer>());
 	while(true)
 	{
 		server->acceptClient();

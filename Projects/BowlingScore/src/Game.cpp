@@ -8,7 +8,7 @@
 
 Game::Game(IView* view, GetPointsFunction getPoints) :
     m_getPoints(getPoints)
-    ,m_loggerFactory(new LoggerFactory)
+    ,m_loggerFactory(std::make_unique<LoggerFactory>())
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
     ,m_view(view)
 {
@@ -23,7 +23,7 @@ Game::Game(IView* view, GetPointsFunction getPoints) :
 
 Game::~Game()
 {
-    //
+	//
 }
 
 void Game::ThrowBall()

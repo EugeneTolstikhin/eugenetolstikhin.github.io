@@ -1,7 +1,6 @@
 #include "ConfigFactory.h"
 #include "ConfigFile.h"
 #include <stdexcept>
-#include <stdarg.h>
 
 ConfigFactory::ConfigFactory()
 {

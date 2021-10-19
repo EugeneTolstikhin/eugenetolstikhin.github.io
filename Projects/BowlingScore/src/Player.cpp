@@ -6,8 +6,8 @@
 Player::Player(IView* view, GetPointsFunction getPoints) :
     m_PlayerName("Test")
     ,m_view(view)
-    ,m_Game(new Game(view, getPoints))
-    ,m_loggerFactory(new LoggerFactory)
+    ,m_Game(std::make_unique<Game>(view, getPoints))
+    ,m_loggerFactory(std::make_unique<LoggerFactory>())
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
     if (m_view != nullptr)
@@ -23,7 +23,7 @@ Player::Player(IView* view, GetPointsFunction getPoints) :
 Player::Player(const std::string& name, IView* view, GetPointsFunction getPoints) :
         m_PlayerName(name)
         ,m_view(view)
-        ,m_Game(new Game(view, getPoints))
+        ,m_Game(std::make_unique<Game>(view, getPoints))
 {
     if (m_view != nullptr)
     {
@@ -37,7 +37,7 @@ Player::Player(const std::string& name, IView* view, GetPointsFunction getPoints
 
 Player::~Player()
 {
-    //
+	//
 }
 
 void Player::Play(std::function<void()> gameover)

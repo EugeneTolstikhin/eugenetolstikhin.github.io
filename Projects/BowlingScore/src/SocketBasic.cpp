@@ -37,7 +37,7 @@ int SocketBasic::getPoolSize()
 
 void SocketBasic::init(const char* configPath, const ConfigType& typeConfig)
 {
-	std::unique_ptr<IConfigFactory> m_configFactory(new ConfigFactory);
+	std::unique_ptr<IConfigFactory> m_configFactory(std::make_unique<ConfigFactory>());
 	std::unique_ptr<IConfig> m_config(m_configFactory->CreateConfig(typeConfig));
 	
 	m_config->initPath(configPath);

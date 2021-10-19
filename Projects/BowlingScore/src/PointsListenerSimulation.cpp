@@ -1,7 +1,5 @@
 #include "PointsListenerSimulation.h"
 
-#include <stdexcept>
-
 PointsListenerSimulation::PointsListenerSimulation() :
     m_generator(m_device())
     ,m_distrib(0, 10)

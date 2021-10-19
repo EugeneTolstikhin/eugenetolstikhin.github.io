@@ -13,7 +13,7 @@
 
 
 PointsListenerLocal::PointsListenerLocal() :
-    m_loggerFactory(new LoggerFactory)
+    m_loggerFactory(std::make_unique<LoggerFactory>())
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
 	struct addrinfo hints;
@@ -43,7 +43,7 @@ unsigned short PointsListenerLocal::Receive()
 	std::string buf;
 	
 	{
-		std::unique_ptr<SocketClient> client(new SocketClient(*m_addrs));
+		std::unique_ptr<SocketClient> client(std::make_unique<SocketClient>(*m_addrs));
 		client->readFromSocket(READY_MESSAGE.c_str());
 		client->writeToSocket(CLIENT_TO_SERVER_MESSAGE.c_str());
 		buf = client->readFromSocket(ANSWER_SECRET_KEY.c_str());

@@ -13,7 +13,7 @@
 #endif
 
 ConsoleView::ConsoleView() :
-    m_loggerFactory(new LoggerFactory)
+    m_loggerFactory(std::make_unique<LoggerFactory>())
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
     setlocale(LC_ALL, "");
