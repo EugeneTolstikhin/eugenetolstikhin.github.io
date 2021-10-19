@@ -1,4 +1,4 @@
-# Project "Bowling"
+# Project "Bowling"  [![Build Status](https://travis-ci.com/EugeneTolstikhin/eugenetolstikhin.github.io.svg?branch=main)](https://travis-ci.com/EugeneTolstikhin/eugenetolstikhin.github.io)
 ----
 ## Preview
 
