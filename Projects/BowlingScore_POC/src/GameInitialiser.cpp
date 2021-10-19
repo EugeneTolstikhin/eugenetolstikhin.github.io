@@ -20,7 +20,7 @@ GameInitialiser::GameInitialiser() :
     m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
-    //
+	//
 }
 
 //TODO: Create different thread for communication with admin
@@ -32,7 +32,9 @@ std::vector<std::string> GameInitialiser::Init()
 	while(true)
 	{
 		server->acceptClient();
-		buf = server->readFromClient("Test");
+		buf = server->readFromClient(HEADER.c_str());
+
+		if (buf.empty()) continue;
 
 		std::istringstream iss(buf);
         std::string str;
@@ -43,7 +45,7 @@ std::vector<std::string> GameInitialiser::Init()
             if (str == HEADER)
             {
                 headerReceived = true;
-                server->writeToClient("Accepted");
+                server->writeToClient(ANSWER.c_str());
                 continue;
             }
 
@@ -54,11 +56,6 @@ std::vector<std::string> GameInitialiser::Init()
         }
 
 		server->closeClient();
-
-		if (headerReceived)
-			break;
-		else
-			continue;
 	}
 
     return std::move(players);

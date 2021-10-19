@@ -14,7 +14,7 @@ Lane::Lane() :
     ,m_listener(m_pointsListenerFactory->CreatePointsListener(m_listenerType))
     ,m_view(m_factoryViews->CreateView(m_typeView))
 {
-    //
+	//
 }
 
 Lane::~Lane()

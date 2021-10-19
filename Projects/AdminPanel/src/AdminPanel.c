@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 
     char buffer[128];
     char header[256];
-    portno = 8888;
+    portno = 12002;
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0) 
         error("ERROR opening socket");
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
     printf("Please enter the names of players: ");
     bzero(buffer,128);
     fgets(buffer,127,stdin);
-    strcpy(header, "1 ");
+    strcpy(header, "Test ");
     strcat(header, buffer);
     printf("%s", header);
     n = write(sockfd, header, strlen(header));

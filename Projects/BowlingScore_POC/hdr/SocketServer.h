@@ -16,6 +16,8 @@ public:
 	void closeClient() const;
 	
 private:
+	void closeSocket(int) const;
+	
 	int m_sockfd = 0;
 	int m_clisockfd = 0;
 };

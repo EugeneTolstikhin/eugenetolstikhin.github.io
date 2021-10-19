@@ -26,9 +26,8 @@ Frame::~Frame()
     //
 }
 
-Flag& Frame::SetTrialPoints(const unsigned short points)
+Flag& Frame::SetTrialPoints(unsigned short points)
 {
-    unsigned short p = points; //TMP
     switch (m_CurrentTrial)
     {
         case Trial::FIRST:
@@ -49,7 +48,7 @@ Flag& Frame::SetTrialPoints(const unsigned short points)
             {
                 if (points > MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)))
                 {
-                    p = MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
+                    points = MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
                 }
             }
 
@@ -73,7 +72,7 @@ Flag& Frame::SetTrialPoints(const unsigned short points)
             }
             else if (points > MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::SECOND)))
             {
-                p = MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
+                points = MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
             }
 
             break;
@@ -81,9 +80,8 @@ Flag& Frame::SetTrialPoints(const unsigned short points)
         default:
             break;
     }
-    m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) = p;//points;
-
-    incTrial(p);
+    m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) = points;
+    incTrial(points);
 
     return m_Flag;
 }
