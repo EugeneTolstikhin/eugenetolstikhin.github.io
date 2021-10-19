@@ -13,4 +13,4 @@ install:
   - cd ${TRAVIS_BUILD_DIR}
 
 script:
-  - ./scripts/build.sh
+  - ./Projects/scripts/build.sh
