@@ -13,10 +13,10 @@
 class Game : public IGame
 {
 public:
-    Game() = delete;
     Game(IView*, GetPointsFunction);
     virtual ~Game();
 
+	Game() = delete;
     Game(const Game&) = delete;
     Game(Game&&) = delete;
     Game& operator = (const Game&) = delete;

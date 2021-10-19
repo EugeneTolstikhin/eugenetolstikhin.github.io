@@ -1,5 +1,8 @@
 cd Projects/AdminPanel
-mkdir build
+if [[ ! -d "build" ]]
+then
+	mkdir build
+fi
 cd build
 cmake _DCMAKE_BUILD_TYPE=Release ..
 make
@@ -7,7 +10,10 @@ make
 cd ../../..
 
 cd Projects/BowlingScore
-mkdir build
+if [[ ! -d "build" ]]
+then
+	mkdir build
+fi
 cd build
 cmake _DCMAKE_BUILD_TYPE=Release ..
 make
@@ -15,7 +21,10 @@ make
 cd ../../..
 
 cd Projects/PointsGenerator
-mkdir build
+if [[ ! -d "build" ]]
+then
+	mkdir build
+fi
 cd build
 cmake _DCMAKE_BUILD_TYPE=Release ..
 make

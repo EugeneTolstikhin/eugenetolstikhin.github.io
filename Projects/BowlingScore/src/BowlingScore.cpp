@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 
             // Let lane destroy itself after finishing is completed
             {
-                std::unique_ptr<ILane> lane(new Lane);
+                std::unique_ptr<ILane> lane(std::make_unique<Lane>());
                 lane->Init(players);
                 lane->Play([&lane]()
                 {

@@ -9,11 +9,10 @@
 class Frame : public IFrame
 {
 public:
-
-    Frame() = delete;
     Frame(bool, IView*);
     virtual ~Frame();
 
+	Frame() = delete;
     Frame(const Frame&) = delete;
     Frame(Frame&&) = delete;
     Frame& operator = (const Frame&) = delete;

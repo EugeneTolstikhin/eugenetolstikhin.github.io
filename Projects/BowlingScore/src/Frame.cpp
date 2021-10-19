@@ -7,7 +7,7 @@
 Frame::Frame(bool isLastFrame, IView* view) :
     m_isLastFrame(isLastFrame)
     ,m_view(view)
-    ,m_loggerFactory(new LoggerFactory)
+    ,m_loggerFactory(std::make_unique<LoggerFactory>())
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
 
@@ -23,7 +23,7 @@ Frame::Frame(bool isLastFrame, IView* view) :
 
 Frame::~Frame()
 {
-    //
+	//
 }
 
 Flag& Frame::SetTrialPoints(unsigned short points)

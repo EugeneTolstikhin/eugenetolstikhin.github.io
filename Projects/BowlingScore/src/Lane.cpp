@@ -7,10 +7,10 @@
 #include "PointsListenerFactory.h"
 
 Lane::Lane() :
-    m_factoryViews(new ViewFactory)
-    ,m_factoryLogger(new LoggerFactory)
+    m_factoryViews(std::make_unique<ViewFactory>())
+    ,m_factoryLogger(std::make_unique<LoggerFactory>())
     ,m_log(m_factoryLogger->CreateLogger(m_typeLogger))
-    ,m_pointsListenerFactory(new PointsListenerFactory)
+    ,m_pointsListenerFactory(std::make_unique<PointsListenerFactory>())
     ,m_listener(m_pointsListenerFactory->CreatePointsListener(m_listenerType))
     ,m_view(m_factoryViews->CreateView(m_typeView))
 {
@@ -19,7 +19,7 @@ Lane::Lane() :
 
 Lane::~Lane()
 {
-    //
+	//
 }
 
 void Lane::Init(const std::vector<std::string>& players)

@@ -9,11 +9,11 @@
 class Player : public IPlayer
 {
 public:
-    Player() = delete;
     Player(IView*, GetPointsFunction);
     Player(const std::string&, IView*, GetPointsFunction);
     virtual ~Player();
 
+	Player() = delete;
     Player(const Player&) = delete;
     Player(Player&&) = delete;
     Player& operator = (const Player&) = delete;
