@@ -1,7 +1,7 @@
-#language: cpp
+language: cpp
 
-#compiler:
-#  - gcc
+compiler:
+  - gcc
 
 install:
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
@@ -12,13 +12,5 @@ install:
   - PATH=${DEPS_DIR}/cmake-install:${DEPS_DIR}/cmake-install/bin:$PATH
   - cd ${TRAVIS_BUILD_DIR}
 
-
-#before_script:
-#  - cd Projects/BowlingScore
-#  - mkdir build
-#  - cd build
-#  - cmake ..
-
-#script:
-#  - make
-#  - make test
+script:
+  - ./scripts/build.sh
