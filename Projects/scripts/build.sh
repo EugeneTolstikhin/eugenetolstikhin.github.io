@@ -1,22 +1,20 @@
-cd ..				# Projects
-
-cd AdminPanel		# Projects/AdminPanel
+cd Projects/AdminPanel
 mkdir build
 cd build
 cmake _DCMAKE_BUILD_TYPE=Release ..
 make
 
-cd ../..
+cd ../../..
 
-cd BowlingScore_POC	# Projects/BowlingScore_POC
+cd Projects/BowlingScore_POC
 mkdir build
 cd build
 cmake _DCMAKE_BUILD_TYPE=Release ..
 make
 
-cd ../..
+cd ../../..
 
-cd PointsGenerator # Projects/PointsGenerator
+cd Projects/PointsGenerator
 mkdir build
 cd build
 cmake _DCMAKE_BUILD_TYPE=Release ..
