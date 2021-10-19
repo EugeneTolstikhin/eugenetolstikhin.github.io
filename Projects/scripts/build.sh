@@ -6,7 +6,7 @@ make
 
 cd ../../..
 
-cd Projects/BowlingScore_POC
+cd Projects/BowlingScore
 mkdir build
 cd build
 cmake _DCMAKE_BUILD_TYPE=Release ..
