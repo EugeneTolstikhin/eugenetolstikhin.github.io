@@ -1,16 +1,19 @@
-//Server.c
-
-/* The port number is passed as an argument */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <limits.h>
+#include <stdbool.h>
+#include <signal.h>
+#include <time.h>
+#include <stdarg.h>
 
 #ifdef __linux__
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <errno.h>
 #elif defined _WIN32
 #include <winsock2.h>
 #include <WS2tcpip.h>
@@ -18,13 +21,60 @@
 #pragma comment(lib, "Ws2_32.lib")
 #endif
 
-#include <errno.h>
-#include <limits.h>
-#include <stdbool.h>
+/***************************
+*  Platform dependent code *
+****************************/
+void closeSocket(int sockfd)
+{
+#ifdef __linux__
+        close(sockfd);
+#elif defined _WIN32
+        closesocket(sockfd);
+#endif
+}
 
-#include <signal.h>
-#include <time.h>
+void newsprintf(char** str, const char* format, ...)
+{
+	va_list args;
+	va_start (args, format);
 
+#ifdef __linux__
+	vsprintf (*str, format, args);
+#elif defined _WIN32
+	vsprintf_s (*str, format, args);
+#endif
+
+	va_end (args);
+}
+
+FILE* newfopen(const char* filePath, const char* mode)
+{
+	FILE* f;
+
+#ifdef __linux__
+    f = fopen(filePath, mode);
+#elif defined _WIN32
+    fopen_s(&f, filePath, mode);
+#endif
+
+	return f;
+}
+
+void setupSignalInterception(int sigName, void(*callBack)(int))
+{
+#ifdef __linux__
+    struct sigaction act;
+    memset(&act, '\0', sizeof(act));
+    act.sa_handler = callBack;
+    sigaction(sigName, &act, NULL);
+#elif defined _WIN32
+    signal(sigName, callBack);
+#endif
+}
+
+/****************************
+* Platform independent code *
+*****************************/
 static bool keepRunning = true;
 
 static void intHandler(int dummy)
@@ -82,25 +132,11 @@ int parseConfigLine(const char* line, const char* param, long min, long max)
 
 int main(int argc, char* argv[])
 {
-#ifdef __linux__
-    struct sigaction act;
-    memset(&act, '\0', sizeof(act));
-    act.sa_handler = intHandler;
-    sigaction(SIGINT, &act, NULL);
-#elif defined _WIN32
-    signal(SIGINT, intHandler);
-#endif
-
+	setupSignalInterception(SIGINT, intHandler);
     srand(time(NULL));
 
     // Open config file
-    FILE* cfg;
-#ifdef __linux__
-    cfg = fopen("config.cfg", "r");
-#elif defined _WIN32
-    fopen_s(&cfg, "config.cfg", "r");
-#endif
-
+    FILE* cfg = newfopen("config.cfg", "r");
     if (cfg == NULL)
     {
         error("Cannot open config file");
@@ -173,12 +209,7 @@ int main(int argc, char* argv[])
 
     if (listen(sockfd, POOL_SIZE) < 0)
     {
-#ifdef __linux__
-        close(sockfd);
-#elif defined _WIN32
-        closesocket(sockfd);
-#endif
-
+		closeSocket(sockfd);
         error("SERVER ERROR on listening");
     }
 
@@ -200,15 +231,8 @@ int main(int argc, char* argv[])
         if (n < 0)
         {
             free(buffer);
-
-            #ifdef __linux__
-                close(newsockfd);
-                close(sockfd);
-            #elif defined _WIN32
-                closesocket(newsockfd);
-                closesocket(sockfd);
-            #endif
-
+			closeSocket(newsockfd);
+			closeSocket(sockfd);
             error("ERROR reading from socket");
         }
         else if (strstr(buffer, SECRET_KEY) != NULL)
@@ -217,34 +241,18 @@ int main(int argc, char* argv[])
 			fflush(stdin);
             int r = rand() % RAND_MAXIMUM;
             char* answer = (char*)malloc(strlen(SECRET_KEY_ANSWER) + 2);
-
-#ifdef __linux__
-            sprintf(answer, "%s%d", SECRET_KEY_ANSWER, r);
-#elif defined _WIN32
-            sprintf_s(answer, "%s%d", SECRET_KEY_ANSWER, r);
-#endif
-
+			newsprintf(&answer, "%s%d", SECRET_KEY_ANSWER, r);
 			printf("Answer: %s\n", answer);
 			fflush(stdin);
             send(newsockfd, answer, strlen(answer), 0);
 			free(answer);
         }
 
-#ifdef __linux__
-        close(newsockfd);
-#elif defined _WIN32
-        closesocket(newsockfd);
-#endif
-
+		closeSocket(newsockfd);
         if (!keepRunning) break;
     }
 
     free(buffer);
-#ifdef __linux__
-    close(sockfd);
-#elif defined _WIN32
-	closesocket(newsockfd);
-#endif
-
+	closeSocket(sockfd);
     return 0;
 }

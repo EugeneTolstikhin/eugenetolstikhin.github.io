@@ -27,7 +27,7 @@ public:
 private:
     ViewType m_typeView = ViewType::CLS;
     LoggerType m_typeLogger = LoggerType::TO_FILE;
-    ListenerType m_listenerType = ListenerType::SIMULATION;
+    ListenerType m_listenerType = ListenerType::LOCAL;
 
     std::unique_ptr<IViewFactory> m_factoryViews;
     std::unique_ptr<ILoggerFactory> m_factoryLogger;
