@@ -3,6 +3,9 @@
 
 #include <stdexcept>
 #include <cstring>
+#include <csignal>
+#include <cstdio>
+#include <fcntl.h>
 
 #ifdef __linux__
 #include <unistd.h>
@@ -10,6 +13,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <errno.h>
 #elif defined _WIN32
 #include <winsock2.h>
 #include <WS2tcpip.h>
@@ -17,10 +21,16 @@
 #pragma comment(lib, "Ws2_32.lib")
 #endif
 
+#ifdef __linux__
+#define GETSOCKETERRNO() (errno)
+#elif defined _WIN32
+#define GETSOCKETERRNO() (WSAGetLastError())
+#endif
+
 SocketServer::SocketServer() :
 
 	/*************************************************************/
-	/* Create an AF_INET stream socket to receive incoming      */
+	/* Create an AF_INET stream socket to receive incoming       */
 	/* connections on                                            */
 	/*************************************************************/
 	m_sockfd(socket(AF_INET, SOCK_STREAM, 0))
@@ -30,29 +40,21 @@ SocketServer::SocketServer() :
         throw std::runtime_error("Cannot open socket");
     }
 
-	int err = 0;
-
 	/*************************************************************/
-	/* Allow socket descriptor to be reuseable                   */
+	/* Let the socket be reusable                                */
 	/*************************************************************/
-	err = setsockopt(m_sockfd, SOL_SOCKET,  SO_REUSEADDR,
-					(char *)&on, sizeof(on));
+	int yes = 1;
+	int err = setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, (void*)&yes, sizeof(yes));
 	if (err < 0)
 	{
-		throw std::runtime_error("setsockopt() failed");
+		char error[100];
+		sprintf(error, "ERROR on setsockopt. Error code = %d", GETSOCKETERRNO());
+		throw std::runtime_error(error);
 	}
 
 	/*************************************************************/
-	/* Set socket to be nonblocking. All of the sockets for      */
-	/* the incoming connections will also be nonblocking since   */
-	/* they will inherit that state from the listening socket.   */
+	/* Bind the socket                                           */
 	/*************************************************************/
-	err = ioctl(listen_sd, FIONBIO, (char *)&on);
-	if (err < 0)
-	{
-		throw std::runtime_error("ioctl() failed");
-	}
-
 	struct sockaddr_in serv_addr;
     memset((char*)&serv_addr, '\0', sizeof(serv_addr));
 
@@ -60,46 +62,35 @@ SocketServer::SocketServer() :
     serv_addr.sin_addr.s_addr = INADDR_ANY;
     serv_addr.sin_port = htons(SocketBasic::getPortServer());
 
-	/*************************************************************/
-	/* Bind the socket                                           */
-	/*************************************************************/
 	err = bind(m_sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     if (err < 0)
     {
-        throw std::runtime_error("ERROR on binding");
+		char error[100];
+		sprintf(error, "ERROR on binding. Error code = %d", GETSOCKETERRNO());
+        throw std::runtime_error(error);
     }
 
 	/*************************************************************/
-	/* Set the listen back log                                   */
+	/* Set the listen backlog                                   */
 	/*************************************************************/
 	err = listen(m_sockfd, SocketBasic::getPoolSize());
 	if (err < 0)
     {
-        throw std::runtime_error("SERVER ERROR on listening");
+		char error[100];
+		sprintf(error, "ERROR on listening. Error code = %d", GETSOCKETERRNO());
+        throw std::runtime_error(error);
     }
 }
 
 SocketServer::~SocketServer()
 {
-#ifdef __linux__
-    close(m_sockfd);
-#elif defined _WIN32
-	closesocket(m_sockfd);
-#endif
+	closeSocket(m_sockfd);
 }
 
 void SocketServer::acceptClient()
 {
 	struct sockaddr_in cli_addr;
-	struct timeval timeout;
 	socklen_t clilen = sizeof(cli_addr);
-
-	/*************************************************************/
-	/* Initialize the timeval struct to 3 minutes.  If no        */
-	/* activity after 3 minutes this program will end.           */
-	/*************************************************************/
-	timeout.tv_sec  = 3 * 60;
-	timeout.tv_usec = 0;
 
 	do
 	{
@@ -109,26 +100,21 @@ void SocketServer::acceptClient()
 
 std::string SocketServer::readFromClient(const char* secretKey)
 {
-	bool ready = false;
-	auto bufSize = SocketBasic::getBufferLength();
 	std::string res;
-
-	char* buf = new char[bufSize];
-	while(!ready)
+	auto bufSize = SocketBasic::getBufferLength();
+	char* buf = new char[bufSize + 1];
+	memset(buf, '\0', bufSize + 1);
+	int err = read(m_clisockfd, buf, bufSize);
+	if (err == 0)
 	{
-		memset(buf, '\0', bufSize);
-		int err = read(m_clisockfd, buf, bufSize - 1);
-		res = buf;
-		if (err == 0)
-		{
-			delete[] buf;
-			throw std::runtime_error("Socket is closed for reading");
-		}
-		else if (res.find(secretKey) != std::string::npos)
-		{
-			ready = true;
-		}
+		delete[] buf;
+		throw std::runtime_error("Socket is closed for reading");
 	}
+	else if (strstr(buf, secretKey) != nullptr)
+	{
+		res = buf;
+	}
+	
 	delete[] buf;
 
 	return res;
@@ -145,9 +131,14 @@ void SocketServer::writeToClient(const char* message) const
 
 void SocketServer::closeClient() const
 {
+	closeSocket(m_clisockfd);
+}
+
+void SocketServer::closeSocket(int sockfd) const
+{
 #ifdef __linux__
-    close(m_clisockfd);
+    close(sockfd);
 #elif defined _WIN32
-	closesocket(m_clisockfd);
+	closesocket(sockfd);
 #endif
 }

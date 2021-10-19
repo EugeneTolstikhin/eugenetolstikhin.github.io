@@ -6,6 +6,13 @@
 #include <memory>
 #include "ILoggerFactory.h"
 
+#include <csignal>
+
+#ifdef __linux__
+#include <unistd.h>
+#include <sys/wait.h>
+#endif
+
 class GameInitialiser final
 {
 public:
@@ -19,7 +26,8 @@ public:
 
     std::vector<std::string> Init();
 private:
-    const std::string HEADER = "1";
+    const std::string HEADER = "Test";
+	const std::string ANSWER = "Accepted";
     LoggerType m_typeLogger = LoggerType::TO_FILE;
 
     std::unique_ptr<ILoggerFactory> m_loggerFactory;

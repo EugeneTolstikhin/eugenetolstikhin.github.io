@@ -16,17 +16,18 @@ PointsListenerLocal::PointsListenerLocal() :
     m_loggerFactory(new LoggerFactory)
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
 {
+	struct addrinfo hints;
     memset(&hints, 0, (sizeof hints));
 	hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_protocol = IPPROTO_TCP;
 
-	int err = getaddrinfo(SocketBasic::getHost(), SocketBasic::getPortClient(), &hints, &addrs);
+	int err = getaddrinfo(SocketBasic::getHost(), SocketBasic::getPortClient(), &hints, &m_addrs);
 	if (err != 0)
     {
         throw std::runtime_error("Cannot get address information");
     }
-	else if (addrs == nullptr)
+	else if (m_addrs == nullptr)
 	{
 		throw std::runtime_error("Address info data is empty");
 	}
@@ -34,7 +35,7 @@ PointsListenerLocal::PointsListenerLocal() :
     
 PointsListenerLocal::~PointsListenerLocal()
 {
-    if (addrs) free(addrs);
+    if (m_addrs) free(m_addrs);
 }
 
 unsigned short PointsListenerLocal::Receive()
@@ -42,7 +43,7 @@ unsigned short PointsListenerLocal::Receive()
 	std::string buf;
 	
 	{
-		std::unique_ptr<SocketClient> client(new SocketClient(*addrs));
+		std::unique_ptr<SocketClient> client(new SocketClient(*m_addrs));
 		client->readFromSocket(READY_MESSAGE.c_str());
 		client->writeToSocket(CLIENT_TO_SERVER_MESSAGE.c_str());
 		buf = client->readFromSocket(ANSWER_SECRET_KEY.c_str());

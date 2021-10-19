@@ -44,8 +44,8 @@ private:
 	const std::string READY_MESSAGE = "Wait for command!";
 	const std::string ANSWER_SECRET_KEY = "I give you: ";
 
-    struct hostent *server;
-	struct addrinfo hints, *addrs = nullptr;
+    struct hostent *m_server;
+	struct addrinfo *m_addrs = nullptr;
 };
 
 #endif //__POINTS_LISTENER_H__

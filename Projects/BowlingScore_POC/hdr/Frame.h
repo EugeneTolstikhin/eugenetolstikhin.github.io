@@ -19,7 +19,7 @@ public:
     Frame& operator = (const Frame&) = delete;
     Frame&& operator = (Frame&&) = delete;
 
-    virtual Flag& SetTrialPoints(const unsigned short) override;
+    virtual Flag& SetTrialPoints(unsigned short) override;
     virtual bool isAllowedThrow() const noexcept override;
     virtual unsigned short GetTotalFramePoints() const noexcept override;
     virtual bool isLastFrame() const noexcept override;
