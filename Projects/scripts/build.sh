@@ -1,30 +1,16 @@
-cd Projects/AdminPanel
-if [[ ! -d "build" ]]
-then
-	mkdir build
-fi
-cd build
-cmake _DCMAKE_BUILD_TYPE=Release ..
-make
+build () {
+	cd Projects/$1
+	if [[ ! -d "build" ]]
+	then
+		mkdir build
+	fi
+	cd build
+	cmake -DCMAKE_BUILD_TYPE=Debug ..
+	make
 
-cd ../../..
+	cd ../../..
+}
 
-cd Projects/BowlingScore
-if [[ ! -d "build" ]]
-then
-	mkdir build
-fi
-cd build
-cmake _DCMAKE_BUILD_TYPE=Release ..
-make
-
-cd ../../..
-
-cd Projects/PointsGenerator
-if [[ ! -d "build" ]]
-then
-	mkdir build
-fi
-cd build
-cmake _DCMAKE_BUILD_TYPE=Release ..
-make
+build AdminPanel
+build BowlingScore
+build PointsGenerator

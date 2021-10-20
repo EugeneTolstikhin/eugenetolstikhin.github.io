@@ -14,9 +14,16 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <errno.h>
+
+#define SocketType int
+#define INVALID_SOCKET -1
+#define SD_SEND 1
+
 #elif defined _WIN32
 #include <winsock2.h>
 #include <WS2tcpip.h>
+
+#define SocketType SOCKET
 
 #pragma comment(lib, "Ws2_32.lib")
 #endif
@@ -24,32 +31,34 @@
 /***************************
 *  Platform dependent code *
 ****************************/
-void closeSocket(int sockfd)
+void cleanup()
 {
 #ifdef __linux__
-        close(sockfd);
+    // No extra cleanup is needed
 #elif defined _WIN32
-        closesocket(sockfd);
+    WSACleanup();
 #endif
 }
 
 void newsprintf(char** str, const char* format, ...)
 {
-	va_list args;
-	va_start (args, format);
+    va_list args;
+    va_start(args, format);
 
 #ifdef __linux__
-	vsprintf (*str, format, args);
+    vsprintf(*str, format, args);
 #elif defined _WIN32
-	vsprintf_s (*str, format, args);
+    int len = _vscprintf(format, args)  // _vscprintf doesn't count
+        + 1; // terminating '\0'
+    vsprintf_s(*str, len, format, args);
 #endif
 
-	va_end (args);
+    va_end(args);
 }
 
 FILE* newfopen(const char* filePath, const char* mode)
 {
-	FILE* f;
+    FILE* f;
 
 #ifdef __linux__
     f = fopen(filePath, mode);
@@ -57,7 +66,7 @@ FILE* newfopen(const char* filePath, const char* mode)
     fopen_s(&f, filePath, mode);
 #endif
 
-	return f;
+    return f;
 }
 
 void setupSignalInterception(int sigName, void(*callBack)(int))
@@ -70,6 +79,56 @@ void setupSignalInterception(int sigName, void(*callBack)(int))
 #elif defined _WIN32
     signal(sigName, callBack);
 #endif
+}
+
+void zeroMemory(void** data, size_t amount)
+{
+#ifdef __linux__
+    bzero(*data, amount);
+#elif defined _WIN32
+    ZeroMemory(*data, amount);
+#endif
+}
+
+void closeSocket(SocketType sockfd)
+{
+#ifdef __linux__
+        close(sockfd);
+#elif defined _WIN32
+        closesocket(sockfd);
+#endif
+}
+
+bool isSocketValid(SocketType sockfd)
+{
+#ifdef __linux__
+    if (sockfd < 0)
+#elif defined _WIN32
+    if (sockfd == INVALID_SOCKET)
+#endif
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+bool isSocketOK(int err)
+{
+#ifdef __linux__
+    if (err < 0)
+#elif defined _WIN32
+    if (err == SOCKET_ERROR)
+#endif
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
 }
 
 /****************************
@@ -92,10 +151,10 @@ int parseConfigLine(const char* line, const char* param, long min, long max)
 {
     int res = -1;
 
-    int headerLen = strlen(param);
-    int len = strlen(line) - headerLen;
+    size_t headerLen = strlen(param);
+    size_t len = strlen(line) - headerLen;
 
-    char* str = (char*)malloc(len + 1);
+    char* str = (char*)malloc(len + 1ULL);
     if (str == NULL)
     {
         //error("Cannot allocate memory for port");
@@ -132,8 +191,8 @@ int parseConfigLine(const char* line, const char* param, long min, long max)
 
 int main(int argc, char* argv[])
 {
-	setupSignalInterception(SIGINT, intHandler);
-    srand(time(NULL));
+    setupSignalInterception(SIGINT, intHandler);
+    srand((unsigned int)time(NULL));
 
     // Open config file
     FILE* cfg = newfopen("config.cfg", "r");
@@ -144,15 +203,15 @@ int main(int argc, char* argv[])
 
     int port = 0;
     int lineSize = 0;
-    size_t len = 0, buflen = 0;
+    size_t buflen = 0;
     char* line = NULL, * host = NULL;
 
     const char PORT[] = "PORT: ";
     const char BUFFER_LENGTH[] = "BUFFER_LENGTH: ";
-    const size_t MAX_BUFFER_LENGTH = 1024;
+    const long MAX_BUFFER_LENGTH = 1024;
     const int POOL_SIZE = 5;
     const int RAND_MAXIMUM = 11;
-	const size_t MAX_LINE_LENGTH = 100;
+    const int MAX_LINE_LENGTH = 100;
 
     // Parse config file
     line = (char*)malloc(MAX_LINE_LENGTH);
@@ -174,7 +233,7 @@ int main(int argc, char* argv[])
         {
             int res = parseConfigLine(line, BUFFER_LENGTH, 1, MAX_BUFFER_LENGTH);
 
-            if (res < 0)
+            if (res < 0 || buflen > INT_MAX)
             {
                 if (line) free(line);
                 fclose(cfg);
@@ -189,63 +248,122 @@ int main(int argc, char* argv[])
     fclose(cfg);
     if (line) free(line);
 
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
+    int err = 0;
+	SocketType sockfd = INVALID_SOCKET;
+
+#if defined _WIN32
+    WSADATA wsaData;
+    err = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (err != 0)
     {
-        error("ERROR opening socket");
+        error("WSAStartup failed");
+    }
+#endif
+
+    struct addrinfo* result = NULL;
+    struct addrinfo* hints = (struct addrinfo*)malloc(sizeof(struct addrinfo));
+
+    zeroMemory(&hints, sizeof(struct addrinfo));
+    hints->ai_family = AF_INET;
+    hints->ai_socktype = SOCK_STREAM;
+    hints->ai_protocol = IPPROTO_TCP;
+    hints->ai_flags = AI_PASSIVE;
+
+    const unsigned int PORT_LENGTH = 6;
+    char* portStr = (char*)malloc(PORT_LENGTH);   // Max port value = USHRT_MAX (65535)
+    zeroMemory(&portStr, PORT_LENGTH);
+    newsprintf(&portStr, "%d", port);
+    // Resolve the server address and port
+    err = getaddrinfo(NULL, portStr, hints, &result);
+    free(hints);
+    free(portStr);
+
+    if (err != 0)
+    {
+        cleanup();
+        error("getaddrinfo failed");
     }
 
-    struct sockaddr_in serv_addr, cli_addr;
-    memset((char*)&serv_addr, '\0', sizeof(serv_addr));
-
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_addr.s_addr = INADDR_ANY;
-    serv_addr.sin_port = htons(port);
-
-    if (bind(sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr)) < 0)
+    sockfd = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+	if (!isSocketValid(sockfd))
     {
-        error("ERROR on binding");
+        freeaddrinfo(result);
+        cleanup();
+        error("opening socket failed");
     }
 
-    if (listen(sockfd, POOL_SIZE) < 0)
+    err = bind(sockfd, result->ai_addr, (int)result->ai_addrlen);
+	if (!isSocketOK(err))
+    {
+        freeaddrinfo(result);
+		closeSocket(sockfd);
+        cleanup();
+        error("binding socket failed");
+    }
+
+    freeaddrinfo(result);
+
+    err = listen(sockfd, POOL_SIZE);
+	if (!isSocketOK(err))
     {
 		closeSocket(sockfd);
-        error("SERVER ERROR on listening");
+        cleanup();
+        error("listening failed");
     }
 
-    socklen_t clilen = sizeof(cli_addr);
-
     const char SECRET_KEY[] = "Give me the points!";
-	const char SECRET_KEY_ANSWER[] = "I give you: ";
+    const char SECRET_KEY_ANSWER[] = "I give you: ";
     const char READY_MESSAGE[] = "Wait for command!";
 
-    int newsockfd;
+	SocketType newsockfd = INVALID_SOCKET;
     char* buffer = (char*)malloc(buflen);
-    while ((newsockfd = accept(sockfd, (struct sockaddr*)&cli_addr, &clilen)) >= 0)
+    while ((newsockfd = accept(sockfd, NULL, NULL)) >= 0)
     {
-        send(newsockfd, READY_MESSAGE, strlen(READY_MESSAGE), 0);
-        memset(buffer, '\0', buflen);
+        int len = 0;
+        size_t slen = strlen(READY_MESSAGE);
+        if (slen < INT_MAX)
+        {
+            len = (int)slen;
+        }
+        else
+        {
+            error("Ready message is too long");
+        }
+        send(newsockfd, READY_MESSAGE, len, 0);
+        zeroMemory(&buffer, buflen);
 
-    	int n = recv(newsockfd, buffer, buflen - 1, 0);
+        err = recv(newsockfd, buffer, (int)buflen - 1, 0);
 
-        if (n < 0)
+        if (err < 0)
         {
             free(buffer);
 			closeSocket(newsockfd);
 			closeSocket(sockfd);
-            error("ERROR reading from socket");
+            error("reading from socket failed");
         }
         else if (strstr(buffer, SECRET_KEY) != NULL)
         {
-			printf("Buffer: %s\n", buffer);
-			fflush(stdin);
+            printf("Buffer: %s\n", buffer);
+            fflush(stdin);
             int r = rand() % RAND_MAXIMUM;
-            char* answer = (char*)malloc(strlen(SECRET_KEY_ANSWER) + 2);
-			newsprintf(&answer, "%s%d", SECRET_KEY_ANSWER, r);
-			printf("Answer: %s\n", answer);
-			fflush(stdin);
-            send(newsockfd, answer, strlen(answer), 0);
-			free(answer);
+
+            len = 0;
+            slen = strlen(SECRET_KEY_ANSWER);
+            if (slen < INT_MAX)
+            {
+                len = (int)slen;
+            }
+            else
+            {
+                error("Secret key answer is too long");
+            }
+
+            char* answer = (char*)malloc(slen + 2ULL);
+            newsprintf(&answer, "%s%d", SECRET_KEY_ANSWER, r);
+            printf("Answer: %s\n", answer);
+            fflush(stdin);
+            send(newsockfd, answer, len + 2, 0);
+            free(answer);
         }
 
 		closeSocket(newsockfd);
@@ -253,6 +371,17 @@ int main(int argc, char* argv[])
     }
 
     free(buffer);
+
+    // shutdown the connection since we're done
+    err = shutdown(sockfd, SD_SEND);
+	if (!isSocketOK(err))
+    {
+		closeSocket(sockfd);
+        cleanup();
+        error("shutdown failed");
+    }
+
 	closeSocket(sockfd);
+    cleanup();
     return 0;
 }
