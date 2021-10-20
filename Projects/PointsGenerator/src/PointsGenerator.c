@@ -28,6 +28,12 @@
 #pragma comment(lib, "Ws2_32.lib")
 #endif
 
+void error(const char* msg)
+{
+    perror(msg);
+    exit(1);
+}
+
 /***************************
 *  Platform dependent code *
 ****************************/
@@ -93,9 +99,9 @@ void zeroMemory(void** data, size_t amount)
 void closeSocket(SocketType sockfd)
 {
 #ifdef __linux__
-        close(sockfd);
+    close(sockfd);
 #elif defined _WIN32
-        closesocket(sockfd);
+    closesocket(sockfd);
 #endif
 }
 
@@ -106,13 +112,13 @@ bool isSocketValid(SocketType sockfd)
 #elif defined _WIN32
     if (sockfd == INVALID_SOCKET)
 #endif
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
 
 bool isSocketOK(int err)
@@ -122,13 +128,27 @@ bool isSocketOK(int err)
 #elif defined _WIN32
     if (err == SOCKET_ERROR)
 #endif
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+void initSocket()
+{
+#ifdef __linux__
+    //No additional initialisation is needed 
+#elif defined _WIN32
+    WSADATA wsaData;
+    int err = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (err != 0)
+    {
+        error("WSAStartup failed");
+    }
+#endif
 }
 
 /****************************
@@ -139,12 +159,6 @@ static bool keepRunning = true;
 static void intHandler(int dummy)
 {
     keepRunning = false;
-}
-
-void error(const char* msg)
-{
-    perror(msg);
-    exit(1);
 }
 
 int parseConfigLine(const char* line, const char* param, long min, long max)
@@ -249,16 +263,8 @@ int main(int argc, char* argv[])
     if (line) free(line);
 
     int err = 0;
-	SocketType sockfd = INVALID_SOCKET;
-
-#if defined _WIN32
-    WSADATA wsaData;
-    err = WSAStartup(MAKEWORD(2, 2), &wsaData);
-    if (err != 0)
-    {
-        error("WSAStartup failed");
-    }
-#endif
+    SocketType sockfd = INVALID_SOCKET;
+    initSocket();
 
     struct addrinfo* result = NULL;
     struct addrinfo* hints = (struct addrinfo*)malloc(sizeof(struct addrinfo));
@@ -285,7 +291,7 @@ int main(int argc, char* argv[])
     }
 
     sockfd = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
-	if (!isSocketValid(sockfd))
+    if (!isSocketValid(sockfd))
     {
         freeaddrinfo(result);
         cleanup();
@@ -293,10 +299,10 @@ int main(int argc, char* argv[])
     }
 
     err = bind(sockfd, result->ai_addr, (int)result->ai_addrlen);
-	if (!isSocketOK(err))
+    if (!isSocketOK(err))
     {
         freeaddrinfo(result);
-		closeSocket(sockfd);
+        closeSocket(sockfd);
         cleanup();
         error("binding socket failed");
     }
@@ -304,9 +310,9 @@ int main(int argc, char* argv[])
     freeaddrinfo(result);
 
     err = listen(sockfd, POOL_SIZE);
-	if (!isSocketOK(err))
+    if (!isSocketOK(err))
     {
-		closeSocket(sockfd);
+        closeSocket(sockfd);
         cleanup();
         error("listening failed");
     }
@@ -315,7 +321,7 @@ int main(int argc, char* argv[])
     const char SECRET_KEY_ANSWER[] = "I give you: ";
     const char READY_MESSAGE[] = "Wait for command!";
 
-	SocketType newsockfd = INVALID_SOCKET;
+    SocketType newsockfd = INVALID_SOCKET;
     char* buffer = (char*)malloc(buflen);
     while ((newsockfd = accept(sockfd, NULL, NULL)) >= 0)
     {
@@ -337,8 +343,8 @@ int main(int argc, char* argv[])
         if (err < 0)
         {
             free(buffer);
-			closeSocket(newsockfd);
-			closeSocket(sockfd);
+            closeSocket(newsockfd);
+            closeSocket(sockfd);
             error("reading from socket failed");
         }
         else if (strstr(buffer, SECRET_KEY) != NULL)
@@ -366,7 +372,7 @@ int main(int argc, char* argv[])
             free(answer);
         }
 
-		closeSocket(newsockfd);
+        closeSocket(newsockfd);
         if (!keepRunning) break;
     }
 
@@ -374,14 +380,14 @@ int main(int argc, char* argv[])
 
     // shutdown the connection since we're done
     err = shutdown(sockfd, SD_SEND);
-	if (!isSocketOK(err))
+    if (!isSocketOK(err))
     {
-		closeSocket(sockfd);
+        closeSocket(sockfd);
         cleanup();
         error("shutdown failed");
     }
 
-	closeSocket(sockfd);
+    closeSocket(sockfd);
     cleanup();
     return 0;
 }
