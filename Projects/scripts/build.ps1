@@ -1,6 +1,8 @@
 Function Invoke-CMakeBuild {
   Param(
     [Parameter()]
+    [string] $buildPath = '.',
+    [Parameter()]
     [ValidateSet('Release','Debug')]
     [string] $buildType = 'Release',
     [ValidateSet('ninja','vs2019')]
@@ -26,6 +28,14 @@ Function Invoke-CMakeBuild {
 
   Write-Host $genCall;
   Invoke-Expression $genCall
+
+  # Create the build call
+  $buildArgs += @('--build', $buildPath, '--target install');
+
+  $buildCall = ('cmake {0}' -f ($buildArgs -Join ' '));
+
+  Write-Host $buildCall;
+  Invoke-Expression $buildCall;
  }
 
 Set-Location -Path Projects\AdminPanel
