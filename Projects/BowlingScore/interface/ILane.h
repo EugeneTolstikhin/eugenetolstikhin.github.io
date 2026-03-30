@@ -2,6 +2,7 @@
 #define __ILANE_H__
 
 #include <functional>
+#include <string>
 #include <vector>
 
 class ILane
