@@ -56,23 +56,28 @@ Flag& Frame::SetTrialPoints(unsigned short points)
         }
         case Trial::THIRD:
         {
-            bool specialCase = m_isLastFrame && MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(Trial::SECOND));
+            const auto firstTrial = static_cast<unsigned short>(Trial::FIRST);
+            const auto secondTrial = static_cast<unsigned short>(Trial::SECOND);
+            const bool firstWasStrike = m_TrialPoints.at(firstTrial) == MAX_POINTS;
+            const bool fillAfterSpare = !firstWasStrike && m_TrialPoints.at(firstTrial) + m_TrialPoints.at(secondTrial) == MAX_POINTS;
+            const bool fillAfterDoubleStrike = firstWasStrike && m_TrialPoints.at(secondTrial) == MAX_POINTS;
+            const bool fullRackAvailable = m_isLastFrame && (fillAfterSpare || fillAfterDoubleStrike);
             
             if (!m_isLastFrame)
             {
                 throw std::runtime_error("Only the last frame contains the 3rd trial");
             }
 
-            if (specialCase)
+            if (fullRackAvailable)
             {
                 if (points > MAX_POINTS)
                 {
-                    throw std::runtime_error("Amount of points is more then allowed for the 2nd trial");
+                    throw std::runtime_error("Amount of points is more then allowed for the 3rd trial");
                 }
             }
-            else if (points > MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::SECOND)))
+            else if (points > MAX_POINTS - m_TrialPoints.at(secondTrial))
             {
-                points = MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
+                points = MAX_POINTS - m_TrialPoints.at(secondTrial);
             }
 
             break;
