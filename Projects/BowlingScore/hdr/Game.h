@@ -1,10 +1,10 @@
 #ifndef __GAME_H__
 #define __GAME_H__
 
-#include <memory>
-#include <vector>
-#include <list>
 #include <functional>
+#include <memory>
+#include <optional>
+#include <vector>
 #include "IGame.h"
 #include "IFrame.h"
 #include "IView.h"
@@ -28,6 +28,10 @@ public:
     virtual void UpdateTotalScore(const short shift = 0) override;
 
 private:
+    void recordRoll(unsigned short);
+    std::vector<unsigned short> collectBonusRolls(std::size_t, std::size_t) const;
+    std::optional<unsigned short> tryGetFrameScore(std::size_t) const;
+
     LoggerType m_typeLogger = LoggerType::TO_FILE;
 
     GetPointsFunction m_getPoints;
@@ -35,19 +39,15 @@ private:
     std::pair<std::shared_ptr<IFrame>, std::vector<std::shared_ptr<IFrame>>::iterator> m_currFrame;
 
     std::vector<std::shared_ptr<IFrame>> m_Frames;
-    std::vector<unsigned short> m_framePoints;
-
-    std::list<Flag> m_lastFlags;
+    std::vector<std::vector<unsigned short>> m_frameRolls;
+    std::vector<std::optional<unsigned short>> m_reportedCumulativeScores;
 
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
     std::unique_ptr<ILogger> m_log;
     
     IView* m_view;
 
-    unsigned short m_frameTotalPoints = 0;
-    short m_lastFrameCounter = -2;
-
-    bool m_gameOver = false;
+    std::size_t m_currentFrameIndex = 0;
 };
 
 #endif // __GAME_H__
