@@ -34,7 +34,11 @@ std::vector<std::string> GameInitialiser::Init()
 		server->acceptClient();
 		buf = server->readFromClient(HEADER.c_str());
 
-		if (buf.empty()) continue;
+		if (buf.empty())
+        {
+		    server->closeClient();
+            continue;
+        }
 
 		std::istringstream iss(buf);
         std::string str;
@@ -56,7 +60,12 @@ std::vector<std::string> GameInitialiser::Init()
         }
 
 		server->closeClient();
+
+        if (!players.empty())
+        {
+            break;
+        }
 	}
 
-    return std::move(players);
+    return players;
 }
