@@ -6,8 +6,68 @@
 #include "IPointsListener.h"
 #include "PointsListenerFactory.h"
 
+#include <cstdlib>
+#include <string>
+
+namespace
+{
+std::string normaliseValue(const char* value)
+{
+    std::string normalised = value == nullptr ? "" : value;
+    for (char& ch : normalised)
+    {
+        if (ch >= 'A' && ch <= 'Z')
+        {
+            ch = static_cast<char>(ch - 'A' + 'a');
+        }
+    }
+
+    return normalised;
+}
+
+ViewType resolveViewType()
+{
+    const std::string envView = normaliseValue(std::getenv("BOWLING_VIEW"));
+    if (envView.empty())
+    {
+        return ViewType::CLS;
+    }
+
+    if (envView == "text")
+    {
+        return ViewType::TEXT;
+    }
+
+    return ViewType::CLS;
+}
+
+ListenerType resolveListenerType()
+{
+    const std::string envListener = normaliseValue(std::getenv("BOWLING_LISTENER"));
+    if (envListener.empty())
+    {
+        return ListenerType::SIMULATION;
+    }
+
+    if (envListener == "local")
+    {
+        return ListenerType::LOCAL;
+    }
+
+    if (envListener == "network")
+    {
+        return ListenerType::NETWORK;
+    }
+
+    return ListenerType::SIMULATION;
+}
+}
+
 Lane::Lane() :
-    m_factoryViews(std::make_unique<ViewFactory>())
+    m_typeView(resolveViewType())
+    ,m_typeLogger(LoggerType::TO_FILE)
+    ,m_listenerType(resolveListenerType())
+    ,m_factoryViews(std::make_unique<ViewFactory>())
     ,m_factoryLogger(std::make_unique<LoggerFactory>())
     ,m_log(m_factoryLogger->CreateLogger(m_typeLogger))
     ,m_pointsListenerFactory(std::make_unique<PointsListenerFactory>())

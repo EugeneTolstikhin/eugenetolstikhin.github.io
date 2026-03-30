@@ -4,6 +4,7 @@
 enum class ViewType
 {
     CLS,
+    TEXT,
     UI,
     WEB
 };

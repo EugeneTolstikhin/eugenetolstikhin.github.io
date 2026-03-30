@@ -191,13 +191,18 @@ char* parseConfigLineString(const char* line, const char* param)
 {
     size_t headerLen = strlen(param);
     size_t len = strlen(line) - headerLen;
-    char* result = (char*)malloc(len);
+    while (len > 0 && (line[headerLen + len - 1] == '\n' || line[headerLen + len - 1] == '\r'))
+    {
+        --len;
+    }
+
+    char* result = (char*)malloc(len + 1);
     if (result == NULL)
     {
         return NULL;
     }
 
-    memcpy(result, &line[headerLen], len - 1);
+    memcpy(result, &line[headerLen], len);
     result[len] = '\0';
 
     return result;

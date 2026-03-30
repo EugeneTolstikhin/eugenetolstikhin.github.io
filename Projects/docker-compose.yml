@@ -1,0 +1,48 @@
+services:
+  points-generator:
+    image: et-test-points-generator:latest
+    build:
+      context: ./PointsGenerator
+    container_name: points-generator
+    environment:
+      POINTS_GENERATOR_HOST: 0.0.0.0
+      POINTS_GENERATOR_PORT: 12001
+      POINTS_GENERATOR_BUFFER_LENGTH: 256
+    ports:
+      - "12001:12001"
+    restart: unless-stopped
+
+  bowling-score:
+    image: et-test-bowling-score:latest
+    build:
+      context: ./BowlingScore
+    container_name: bowling-score
+    depends_on:
+      - points-generator
+    environment:
+      BOWLING_HOST: points-generator
+      BOWLING_LISTENER: local
+      BOWLING_PORT_CLIENT: 12001
+      BOWLING_PORT_SERVER: 12002
+      BOWLING_BUFFER_LENGTH: 256
+      BOWLING_POOL_SIZE: 5
+      BOWLING_VIEW: text
+      TERM: xterm-256color
+    ports:
+      - "12002:12002"
+    restart: unless-stopped
+
+  admin-panel:
+    image: et-test-admin-panel:latest
+    build:
+      context: ./AdminPanel
+    container_name: admin-panel
+    depends_on:
+      - bowling-score
+    environment:
+      ADMIN_PANEL_HOST: bowling-score
+      ADMIN_PANEL_PORT: 12002
+      ADMIN_PANEL_BUFFER_LENGTH: 256
+      TERM: xterm-256color
+    stdin_open: true
+    tty: true

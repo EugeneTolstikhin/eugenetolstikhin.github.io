@@ -1,5 +1,6 @@
 #include "ViewFactory.h"
 #include "ConsoleView.h"
+#include "PlainTextView.h"
 
 #include <stdexcept>
 
@@ -19,6 +20,8 @@ IView* ViewFactory::CreateView(const ViewType& type)
     {
         case ViewType::CLS:
             return new ConsoleView;
+        case ViewType::TEXT:
+            return new PlainTextView;
         case ViewType::UI:
         case ViewType::WEB:
             //TODO: return the proper instance of class here when it will be implemented
