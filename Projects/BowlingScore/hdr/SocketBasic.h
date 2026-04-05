@@ -2,6 +2,7 @@
 #define __SOCKET__BASIC__H__
 
 #include <string>
+#include <cstdint>
 #include "IConfigFactory.h"
 
 class SocketBasic final
@@ -25,3 +26,4 @@ private:
 };
 
 #endif // __SOCKET__BASIC__H__
+

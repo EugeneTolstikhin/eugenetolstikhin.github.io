@@ -14,7 +14,8 @@ public:
     ConfigFactory& operator = (const ConfigFactory&) = delete;
     ConfigFactory&& operator = (ConfigFactory&&) = delete;
 
-    virtual IConfig* CreateConfig(const ConfigType&) override;
+    virtual std::unique_ptr<IConfig> CreateConfig(const ConfigType&) override;
 };
 
 #endif //__CONFIG_FACTORY_H__
+

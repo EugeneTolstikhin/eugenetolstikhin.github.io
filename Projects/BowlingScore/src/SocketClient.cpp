@@ -2,7 +2,9 @@
 #include "SocketBasic.h"
 
 #include <stdexcept>
-#include <cstring>
+#include <ranges>
+#include <span>
+#include <vector>
 
 #ifdef __linux__
 #include <unistd.h>
@@ -17,70 +19,94 @@
 #pragma comment(lib, "Ws2_32.lib")
 #endif
 
-SocketClient::SocketClient(struct addrinfo addrs) :
-	m_sockfd(socket(addrs.ai_family, addrs.ai_socktype, addrs.ai_protocol))
+namespace
 {
-	while (m_sockfd <= 0)
+void close_socket_handle(const int sockfd)
+{
+#ifdef __linux__
+	close(sockfd);
+#elif defined _WIN32
+	closesocket(sockfd);
+#endif
+}
+
+void write_all(const int sockfd, std::string_view message)
+{
+    auto remaining = std::span{message.data(), message.size()};
+    while (!remaining.empty())
+    {
+        const auto written = write(sockfd, remaining.data(), remaining.size());
+        if (written <= 0)
+        {
+            throw std::runtime_error("Cannot write to socket");
+        }
+
+        remaining = remaining.subspan(static_cast<std::size_t>(written));
+    }
+}
+}
+
+SocketClient::SocketClient(const struct addrinfo& addrs)
+{
+	const auto* current = &addrs;
+    while (current != nullptr)
 	{
-		if (addrs.ai_next != nullptr)
+        m_sockfd = socket(current->ai_family, current->ai_socktype, current->ai_protocol);
+        if (m_sockfd <= 0)
         {
-			addrs = *addrs.ai_next;
-			m_sockfd = socket(addrs.ai_family, addrs.ai_socktype, addrs.ai_protocol);
+            current = current->ai_next;
+            continue;
         }
-        else
+
+        if (connect(m_sockfd, current->ai_addr, current->ai_addrlen) == 0)
         {
-        	throw std::runtime_error("ERROR no proper socket found");
+            return;
         }
+
+        close_socket_handle(m_sockfd);
+        m_sockfd = 0;
+        current = current->ai_next;
 	}
 
-	int err = connect(m_sockfd, addrs.ai_addr, addrs.ai_addrlen);
-    if (err != 0)
-    {
-        throw std::runtime_error("Cannot connect to socket");
-    }
+    throw std::runtime_error("Cannot connect to socket");
 }
 
 SocketClient::~SocketClient()
 {
-#ifdef __linux__
-	close(m_sockfd);
-#elif defined _WIN32
-	closesocket(m_sockfd);
-#endif
-}
-
-std::string SocketClient::readFromSocket(const char* secretKey)
-{
-	bool ready = false;
-	auto bufSize = SocketBasic::getBufferLength();
-	std::string res;
-
-	char* buf = new char[bufSize];
-	while(!ready)
-	{
-		memset(buf, '\0', bufSize);
-		int err = read(m_sockfd, buf, bufSize - 1);
-		res = buf;
-		if (err == 0)
-		{
-			delete[] buf;
-			throw std::runtime_error("Socket is closed for reading");
-		}
-		else if (res.find(secretKey) != std::string::npos)
-		{
-			ready = true;
-		}
-	}
-	delete[] buf;
-
-	return res;
-}
-
-void SocketClient::writeToSocket(const char* message) const
-{
-	int err = write(m_sockfd, message, strlen(message));
-    if (err <= 0)
+    if (m_sockfd > 0)
     {
-        throw std::runtime_error("Cannot write to socket");
+	    close_socket_handle(m_sockfd);
     }
 }
+
+std::string SocketClient::readFromSocket(std::string_view secretKey)
+{
+	auto bufSize = SocketBasic::getBufferLength();
+	std::vector<char> buf(bufSize, '\0');
+
+	while (true)
+	{
+		std::ranges::fill(buf, '\0');
+		const auto err = read(m_sockfd, buf.data(), bufSize - 1);
+		if (err == 0)
+		{
+			throw std::runtime_error("Socket is closed for reading");
+		}
+        if (err < 0)
+        {
+            throw std::runtime_error("Cannot read from socket");
+        }
+
+        std::string response(buf.data(), static_cast<std::size_t>(err));
+		if (std::string_view(response).contains(secretKey))
+		{
+			return response;
+		}
+	}
+}
+
+void SocketClient::writeToSocket(std::string_view message) const
+{
+    write_all(m_sockfd, message);
+}
+

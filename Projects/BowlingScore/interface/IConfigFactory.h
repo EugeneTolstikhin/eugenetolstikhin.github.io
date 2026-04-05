@@ -1,6 +1,8 @@
 #ifndef __ICONFIG_FACTORY_H__
 #define __ICONFIG_FACTORY_H__
 
+#include <memory>
+
 enum class ConfigType
 {
     FILE,
@@ -14,7 +16,8 @@ public:
     IConfigFactory() = default;
     virtual ~IConfigFactory() = default;
 
-    virtual IConfig* CreateConfig(const ConfigType&) = 0;
+    virtual std::unique_ptr<IConfig> CreateConfig(const ConfigType&) = 0;
 };
 
 #endif //__ICONFIG_FACTORY_H__
+

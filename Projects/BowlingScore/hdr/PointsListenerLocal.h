@@ -20,6 +20,7 @@
 
 #include <sys/types.h> 
 #include <memory>
+#include <charconv>
 
 class PointsListenerLocal : public IPointsListener
 {
@@ -35,17 +36,21 @@ public:
     virtual unsigned short Receive() override;
 
 private:
+    LoggerType m_typeLogger = LoggerType::TO_FILE;
 	std::unique_ptr<ILoggerFactory> m_loggerFactory;
     std::unique_ptr<ILogger> m_log;
-    LoggerType m_typeLogger = LoggerType::TO_FILE;
 
     const int PROTOCOL = 0;
     const std::string CLIENT_TO_SERVER_MESSAGE = "Give me the points!";
 	const std::string READY_MESSAGE = "Wait for command!";
 	const std::string ANSWER_SECRET_KEY = "I give you: ";
 
-    struct hostent *m_server;
-	struct addrinfo *m_addrs = nullptr;
+    using AddrInfoPtr = std::unique_ptr<struct addrinfo, decltype(&freeaddrinfo)>;
+
+    static unsigned short parseScore(std::string_view);
+
+	AddrInfoPtr m_addrs{nullptr, freeaddrinfo};
 };
 
 #endif //__POINTS_LISTENER_H__
+

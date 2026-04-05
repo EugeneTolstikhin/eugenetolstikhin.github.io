@@ -3,10 +3,13 @@
 #include "FileLogger.h"
 #include "SocketServer.h"
 
+#include <cctype>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sstream>
+#include <algorithm>
+#include <exception>
+#include <ranges>
 #include <unistd.h>
 #include <sys/types.h> 
 #include <sys/socket.h>
@@ -14,7 +17,6 @@
 #include <arpa/inet.h>
 
 #include <vector>
-#include <thread>
 
 GameInitialiser::GameInitialiser() :
     m_loggerFactory(std::make_unique<LoggerFactory>())
@@ -26,46 +28,73 @@ GameInitialiser::GameInitialiser() :
 //TODO: Create different thread for communication with admin
 std::vector<std::string> GameInitialiser::Init()
 {
-	std::string buf;
-	std::vector<std::string> players;
-	std::unique_ptr<SocketServer> server(std::make_unique<SocketServer>());
-	while(true)
-	{
-		server->acceptClient();
-		buf = server->readFromClient(HEADER.c_str());
+    std::promise<PlayerList> playersPromise;
+    auto playersFuture = playersPromise.get_future();
 
-		if (buf.empty())
+	std::jthread acceptWorker([promise = std::move(playersPromise)](std::stop_token) mutable
+    {
+        try
         {
-		    server->closeClient();
-            continue;
+            SocketServer server;
+	        while (true)
+	        {
+		        server.acceptClient();
+		        const auto payload = server.readFromClient(HEADER);
+
+		        if (payload.empty())
+                {
+		            server.closeClient();
+                    continue;
+                }
+
+                server.writeToClient(ANSWER);
+                auto parsedPlayers = parsePlayers(payload);
+		        server.closeClient();
+
+                if (!parsedPlayers.has_value() || parsedPlayers->empty())
+                {
+                    continue;
+                }
+
+                promise.set_value(std::move(*parsedPlayers));
+                return;
+	        }
         }
-
-		std::istringstream iss(buf);
-        std::string str;
-        bool headerReceived = false;
-
-        while (iss >> str)
+        catch (...)
         {
-            if (str == HEADER)
-            {
-                headerReceived = true;
-                server->writeToClient(ANSWER.c_str());
-                continue;
-            }
-
-            if (headerReceived)
-            {
-                players.push_back(str);
-            }
+            promise.set_exception(std::current_exception());
         }
+    });
 
-		server->closeClient();
-
-        if (!players.empty())
-        {
-            break;
-        }
-	}
-
-    return players;
+    return playersFuture.get();
 }
+
+std::expected<GameInitialiser::PlayerList, std::string> GameInitialiser::parsePlayers(const std::string_view payload)
+{
+    PlayerList tokens;
+    for (auto&& part : payload | std::views::split(' '))
+    {
+        std::string token;
+        for (const auto ch : part)
+        {
+            if (!std::isspace(static_cast<unsigned char>(ch)))
+            {
+                token.push_back(static_cast<char>(ch));
+            }
+        }
+
+        if (!token.empty())
+        {
+            tokens.push_back(std::move(token));
+        }
+    }
+
+    if (tokens.empty() || tokens.front() != HEADER)
+    {
+        return std::unexpected("Missing admin handshake header");
+    }
+
+    tokens.erase(tokens.begin());
+    return tokens;
+}
+

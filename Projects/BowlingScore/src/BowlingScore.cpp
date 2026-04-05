@@ -8,7 +8,7 @@
 
 static bool keepRunning = true;
 
-static void intHandler(int dummy)
+static void intHandler(int)
 {
     keepRunning = false;
 }
@@ -69,3 +69,4 @@ int main(int argc, char** argv)
     
     return 0;
 }
+

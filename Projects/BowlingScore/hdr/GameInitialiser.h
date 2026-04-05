@@ -1,8 +1,12 @@
 #ifndef __GAME_INITIALISER_H__
 #define __GAME_INITIALISER_H__
 
+#include <expected>
+#include <future>
+#include <thread>
 #include <vector>
 #include <string>
+#include <string_view>
 #include <memory>
 #include "ILoggerFactory.h"
 
@@ -26,8 +30,12 @@ public:
 
     std::vector<std::string> Init();
 private:
-    const std::string HEADER = "Test";
-	const std::string ANSWER = "Accepted";
+    using PlayerList = std::vector<std::string>;
+
+    static std::expected<PlayerList, std::string> parsePlayers(std::string_view);
+
+    static constexpr std::string_view HEADER = "Test";
+	static constexpr std::string_view ANSWER = "Accepted";
     LoggerType m_typeLogger = LoggerType::TO_FILE;
 
     std::unique_ptr<ILoggerFactory> m_loggerFactory;
@@ -35,3 +43,4 @@ private:
 };
 
 #endif // __GAME_INITIALISER_H__
+

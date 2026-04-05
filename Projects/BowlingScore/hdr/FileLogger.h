@@ -22,3 +22,4 @@ private:
 };
 
 #endif //__FILE_LOGGER_H__
+

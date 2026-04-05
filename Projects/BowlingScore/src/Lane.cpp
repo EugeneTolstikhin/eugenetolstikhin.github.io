@@ -6,34 +6,37 @@
 #include "IPointsListener.h"
 #include "PointsListenerFactory.h"
 
+#include <algorithm>
+#include <cctype>
 #include <cstdlib>
 #include <string>
+#include <string_view>
 
 namespace
 {
+constexpr std::string_view DEFAULT_VIEW = "cls";
+constexpr std::string_view TEXT_VIEW = "text";
+constexpr std::string_view DEFAULT_LISTENER = "simulation";
+constexpr std::string_view LOCAL_LISTENER = "local";
+constexpr std::string_view NETWORK_LISTENER = "network";
+
 std::string normaliseValue(const char* value)
 {
     std::string normalised = value == nullptr ? "" : value;
-    for (char& ch : normalised)
+    std::ranges::transform(normalised, normalised.begin(), [](const unsigned char ch)
     {
-        if (ch >= 'A' && ch <= 'Z')
-        {
-            ch = static_cast<char>(ch - 'A' + 'a');
-        }
-    }
+        return static_cast<char>(std::tolower(ch));
+    });
 
     return normalised;
 }
 
 ViewType resolveViewType()
 {
-    const std::string envView = normaliseValue(std::getenv("BOWLING_VIEW"));
-    if (envView.empty())
-    {
-        return ViewType::CLS;
-    }
+    const auto envView = normaliseValue(std::getenv("BOWLING_VIEW"));
+    const std::string_view view = envView.empty() ? DEFAULT_VIEW : envView;
 
-    if (envView == "text")
+    if (view == TEXT_VIEW)
     {
         return ViewType::TEXT;
     }
@@ -43,18 +46,15 @@ ViewType resolveViewType()
 
 ListenerType resolveListenerType()
 {
-    const std::string envListener = normaliseValue(std::getenv("BOWLING_LISTENER"));
-    if (envListener.empty())
-    {
-        return ListenerType::SIMULATION;
-    }
+    const auto envListener = normaliseValue(std::getenv("BOWLING_LISTENER"));
+    const std::string_view listener = envListener.empty() ? DEFAULT_LISTENER : envListener;
 
-    if (envListener == "local")
+    if (listener == LOCAL_LISTENER)
     {
         return ListenerType::LOCAL;
     }
 
-    if (envListener == "network")
+    if (listener == NETWORK_LISTENER)
     {
         return ListenerType::NETWORK;
     }
@@ -84,20 +84,22 @@ Lane::~Lane()
 
 void Lane::Init(const std::vector<std::string>& players)
 {
-    auto getPoints = [this]()->unsigned short {
+    const auto getPoints = [this]() -> unsigned short
+    {
 		return m_listener->Receive();
     };
-    if (players.size() > 0)
+
+    if (!players.empty())
     {
         m_Players.reserve(players.size());
-        for (size_t i = 0; i < players.size(); ++i)
+        for (const auto& playerName : players)
         {
-            m_Players.emplace(m_Players.begin() + i, new Player(players.at(i), m_view.get(), getPoints));
+            m_Players.emplace_back(std::make_unique<Player>(playerName, m_view.get(), getPoints));
         }
     }
     else
     {
-        m_Players.emplace_back(new Player(m_view.get(), getPoints));
+        m_Players.emplace_back(std::make_unique<Player>(m_view.get(), getPoints));
     }
 
     if (m_view.get() != nullptr)
@@ -139,3 +141,4 @@ void Lane::Finish()
         m_log->LogMe(__FILE__, __LINE__, "view is UNAVAILABLE");
     }
 }
+

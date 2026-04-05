@@ -11,4 +11,4 @@ BUFFER_LENGTH: ${BOWLING_BUFFER_LENGTH:-256}
 POOL_SIZE: ${BOWLING_POOL_SIZE:-5}
 EOF
 
-exec /app/Bowling "$@"
+exec /app/BowlingScore "$@"

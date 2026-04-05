@@ -28,3 +28,4 @@ void ConsoleLogger::LogMe(const char* file, int line, const char* message, ...)
                 << " Message: " << buffer << std::endl
                 << std::flush;
 }
+

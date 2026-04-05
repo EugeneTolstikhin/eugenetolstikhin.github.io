@@ -49,3 +49,4 @@ void SocketBasic::init(const char* configPath, const ConfigType& typeConfig)
 	m_host = m_config->getStringValue("HOST");
 	m_poolSize = m_config->getUIntValue("POOL_SIZE");
 }
+

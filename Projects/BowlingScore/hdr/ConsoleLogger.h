@@ -18,3 +18,4 @@ public:
 };
 
 #endif //__CONSOLE_LOGGER_H__
+

@@ -35,9 +35,10 @@ private:
     std::unique_ptr<IPointsListenerFactory> m_pointsListenerFactory;
     std::unique_ptr<IPointsListener> m_listener;
     
-    std::shared_ptr<IView> m_view;
+    std::unique_ptr<IView> m_view;
 
     std::vector<std::unique_ptr<IPlayer>> m_Players;
 };
 
 #endif // __LANE_H__
+

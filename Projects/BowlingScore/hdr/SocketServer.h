@@ -3,6 +3,7 @@
 
 #include <sys/types.h> 
 #include <string>
+#include <string_view>
 
 class SocketServer final
 {
@@ -11,8 +12,8 @@ public:
 	~SocketServer();
 
 	void acceptClient();
-	std::string readFromClient(const char*);
-	void writeToClient(const char*) const;
+	std::string readFromClient(std::string_view);
+	void writeToClient(std::string_view) const;
 	void closeClient() const;
 	
 private:
@@ -23,3 +24,4 @@ private:
 };
 
 #endif // __SOCKET__SERVER__H__
+

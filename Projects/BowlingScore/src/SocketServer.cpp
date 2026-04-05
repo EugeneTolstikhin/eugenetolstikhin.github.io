@@ -1,11 +1,14 @@
 #include "SocketServer.h"
 #include "SocketBasic.h"
 
-#include <stdexcept>
 #include <cstring>
+#include <stdexcept>
+#include <ranges>
 #include <csignal>
-#include <cstdio>
 #include <fcntl.h>
+#include <span>
+#include <vector>
+#include <string>
 
 #ifdef __linux__
 #include <unistd.h>
@@ -27,6 +30,29 @@
 #define GETSOCKETERRNO() (WSAGetLastError())
 #endif
 
+namespace
+{
+std::string socket_error_message(const std::string_view action)
+{
+    return std::string(action) + ". Error code = " + std::to_string(GETSOCKETERRNO());
+}
+
+void write_all(const int sockfd, std::string_view message)
+{
+    auto remaining = std::span{message.data(), message.size()};
+    while (!remaining.empty())
+    {
+        const auto written = write(sockfd, remaining.data(), remaining.size());
+        if (written <= 0)
+        {
+            throw std::runtime_error("Cannot write to socket");
+        }
+
+        remaining = remaining.subspan(static_cast<std::size_t>(written));
+    }
+}
+}
+
 SocketServer::SocketServer() :
 
 	/*************************************************************/
@@ -47,9 +73,7 @@ SocketServer::SocketServer() :
 	int err = setsockopt(m_sockfd, SOL_SOCKET, SO_REUSEADDR, (void*)&yes, sizeof(yes));
 	if (err < 0)
 	{
-		char error[100];
-		sprintf(error, "ERROR on setsockopt. Error code = %d", GETSOCKETERRNO());
-		throw std::runtime_error(error);
+		throw std::runtime_error(socket_error_message("ERROR on setsockopt"));
 	}
 
 	/*************************************************************/
@@ -65,9 +89,7 @@ SocketServer::SocketServer() :
 	err = bind(m_sockfd, (struct sockaddr*)&serv_addr, sizeof(serv_addr));
     if (err < 0)
     {
-		char error[100];
-		sprintf(error, "ERROR on binding. Error code = %d", GETSOCKETERRNO());
-        throw std::runtime_error(error);
+        throw std::runtime_error(socket_error_message("ERROR on binding"));
     }
 
 	/*************************************************************/
@@ -76,9 +98,7 @@ SocketServer::SocketServer() :
 	err = listen(m_sockfd, SocketBasic::getPoolSize());
 	if (err < 0)
     {
-		char error[100];
-		sprintf(error, "ERROR on listening. Error code = %d", GETSOCKETERRNO());
-        throw std::runtime_error(error);
+        throw std::runtime_error(socket_error_message("ERROR on listening"));
     }
 }
 
@@ -98,35 +118,32 @@ void SocketServer::acceptClient()
 	} while (m_clisockfd < 0);
 }
 
-std::string SocketServer::readFromClient(const char* secretKey)
+std::string SocketServer::readFromClient(std::string_view secretKey)
 {
-	std::string res;
 	auto bufSize = SocketBasic::getBufferLength();
-	char* buf = new char[bufSize + 1];
-	memset(buf, '\0', bufSize + 1);
-	int err = read(m_clisockfd, buf, bufSize);
+	std::vector<char> buf(bufSize + 1, '\0');
+	int err = read(m_clisockfd, buf.data(), bufSize);
 	if (err == 0)
 	{
-		delete[] buf;
 		throw std::runtime_error("Socket is closed for reading");
 	}
-	else if (strstr(buf, secretKey) != nullptr)
-	{
-		res = buf;
-	}
-	
-	delete[] buf;
+    if (err < 0)
+    {
+        throw std::runtime_error("Cannot read from client socket");
+    }
 
-	return res;
+    std::string payload(buf.data(), static_cast<std::size_t>(err));
+    if (std::string_view(payload).contains(secretKey))
+    {
+		return payload;
+    }
+
+	return {};
 }
 
-void SocketServer::writeToClient(const char* message) const
+void SocketServer::writeToClient(std::string_view message) const
 {
-	int err = write(m_clisockfd, message, strlen(message));
-    if (err <= 0)
-    {
-        throw std::runtime_error("Cannot write to socket");
-    }
+    write_all(m_clisockfd, message);
 }
 
 void SocketServer::closeClient() const
@@ -142,3 +159,4 @@ void SocketServer::closeSocket(int sockfd) const
 	closesocket(sockfd);
 #endif
 }
+

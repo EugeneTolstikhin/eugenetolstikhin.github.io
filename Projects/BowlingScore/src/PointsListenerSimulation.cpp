@@ -17,3 +17,4 @@ unsigned short PointsListenerSimulation::Receive()
     auto res = m_distrib(m_generator);
     return res;
 }
+

@@ -339,3 +339,4 @@ void ConsoleView::PrintPlayerName(WINDOW* w, const std::string& name)
     mvwprintw(w, m_cellWidth - 1, 1, name.c_str());   // OK only for ASCII symbols
     wrefresh(w);
 }
+

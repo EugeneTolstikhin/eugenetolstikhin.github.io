@@ -14,7 +14,8 @@ public:
     LoggerFactory& operator = (const LoggerFactory&) = delete;
     LoggerFactory&& operator = (LoggerFactory&&) = delete;
 
-    virtual ILogger* CreateLogger(const LoggerType&) override;
+    virtual std::unique_ptr<ILogger> CreateLogger(const LoggerType&) override;
 };
 
 #endif //__LOGGER_FACTORY_H__
+

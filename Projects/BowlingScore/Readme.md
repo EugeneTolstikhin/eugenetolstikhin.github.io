@@ -1,5 +1,7 @@
-# Project "Bowling"  [![Build Status](https://travis-ci.com/EugeneTolstikhin/eugenetolstikhin.github.io.svg?branch=main)](https://travis-ci.com/github/EugeneTolstikhin/eugenetolstikhin.github.io)
+# Project "BowlingScore"
 ----
+This directory contains the maintained C++23 version of `BowlingScore`.
+
 ## Preview
 
 In this section the architectures' principles will be described, which are used for this project
@@ -127,3 +129,4 @@ Every class (Lane, Player, Game, Frame) has the visual representation inside the
 - [X] Fill in readme
 - [X] Create the process (independent app) relates for throwing the ball and calculating the points which will send the amount of points to the score app
 - [X] Create the process (independent app) relates to lane management and other admin parts
+

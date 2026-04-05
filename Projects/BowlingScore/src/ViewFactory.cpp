@@ -14,14 +14,14 @@ ViewFactory::~ViewFactory()
     //
 }
 
-IView* ViewFactory::CreateView(const ViewType& type)
+std::unique_ptr<IView> ViewFactory::CreateView(const ViewType& type)
 {
     switch (type)
     {
         case ViewType::CLS:
-            return new ConsoleView;
+            return std::make_unique<ConsoleView>();
         case ViewType::TEXT:
-            return new PlainTextView;
+            return std::make_unique<PlainTextView>();
         case ViewType::UI:
         case ViewType::WEB:
             //TODO: return the proper instance of class here when it will be implemented
@@ -30,5 +30,6 @@ IView* ViewFactory::CreateView(const ViewType& type)
             throw std::out_of_range("Unknown type of View");
     }
     
-    return nullptr;
+    return {};
 }
+

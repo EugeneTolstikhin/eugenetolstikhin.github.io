@@ -32,6 +32,29 @@ services:
       - "12002:12002"
     restart: unless-stopped
 
+  bowling-score-tui:
+    image: et-test-bowling-score:latest
+    build:
+      context: ./BowlingScore
+    container_name: bowling-score-tui
+    depends_on:
+      - points-generator
+    environment:
+      BOWLING_HOST: points-generator
+      BOWLING_LISTENER: local
+      BOWLING_PORT_CLIENT: 12001
+      BOWLING_PORT_SERVER: 12003
+      BOWLING_BUFFER_LENGTH: 256
+      BOWLING_POOL_SIZE: 5
+      TERM: xterm-256color
+    ports:
+      - "12003:12003"
+    stdin_open: true
+    tty: true
+    profiles:
+      - tui
+    restart: unless-stopped
+
   admin-panel:
     image: et-test-admin-panel:latest
     build:
@@ -46,3 +69,20 @@ services:
       TERM: xterm-256color
     stdin_open: true
     tty: true
+
+  admin-panel-tui:
+    image: et-test-admin-panel:latest
+    build:
+      context: ./AdminPanel
+    container_name: admin-panel-tui
+    depends_on:
+      - bowling-score-tui
+    environment:
+      ADMIN_PANEL_HOST: bowling-score-tui
+      ADMIN_PANEL_PORT: 12003
+      ADMIN_PANEL_BUFFER_LENGTH: 256
+      TERM: xterm-256color
+    stdin_open: true
+    tty: true
+    profiles:
+      - tui

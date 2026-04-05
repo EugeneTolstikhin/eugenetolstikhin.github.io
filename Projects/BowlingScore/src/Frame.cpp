@@ -28,6 +28,10 @@ Frame::~Frame()
 
 Flag& Frame::SetTrialPoints(unsigned short points)
 {
+    const auto firstTrial = enum_index(Trial::FIRST);
+    const auto secondTrial = enum_index(Trial::SECOND);
+    const auto currentTrial = enum_index(m_CurrentTrial);
+
     switch (m_CurrentTrial)
     {
         case Trial::FIRST:
@@ -42,13 +46,13 @@ Flag& Frame::SetTrialPoints(unsigned short points)
         }
         case Trial::SECOND:
         {
-            bool specialCase = m_isLastFrame && MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
+            const bool specialCase = m_isLastFrame && MAX_POINTS == m_TrialPoints.at(firstTrial);
 
             if (!specialCase)
             {
-                if (points > MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)))
+                if (points > MAX_POINTS - m_TrialPoints.at(firstTrial))
                 {
-                    points = MAX_POINTS - m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST));
+                    points = MAX_POINTS - m_TrialPoints.at(firstTrial);
                 }
             }
 
@@ -56,8 +60,6 @@ Flag& Frame::SetTrialPoints(unsigned short points)
         }
         case Trial::THIRD:
         {
-            const auto firstTrial = static_cast<unsigned short>(Trial::FIRST);
-            const auto secondTrial = static_cast<unsigned short>(Trial::SECOND);
             const bool firstWasStrike = m_TrialPoints.at(firstTrial) == MAX_POINTS;
             const bool fillAfterSpare = !firstWasStrike && m_TrialPoints.at(firstTrial) + m_TrialPoints.at(secondTrial) == MAX_POINTS;
             const bool fillAfterDoubleStrike = firstWasStrike && m_TrialPoints.at(secondTrial) == MAX_POINTS;
@@ -85,7 +87,7 @@ Flag& Frame::SetTrialPoints(unsigned short points)
         default:
             break;
     }
-    m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) = points;
+    m_TrialPoints.at(currentTrial) = points;
     incTrial(points);
 
     return m_Flag;
@@ -104,22 +106,25 @@ unsigned short Frame::GetTotalFramePoints() const noexcept
 
 void Frame::incTrial(const unsigned short points)
 {
-    bool specialCase = m_isLastFrame && MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial));
+    const auto firstTrial = enum_index(Trial::FIRST);
+    const auto secondTrial = enum_index(Trial::SECOND);
+    const auto currentTrial = enum_index(m_CurrentTrial);
+    const bool specialCase = m_isLastFrame && MAX_POINTS == m_TrialPoints.at(currentTrial);
     switch (m_CurrentTrial)
     {
         case Trial::FIRST:
         {
             if (!specialCase)
             {
-                if (MAX_POINTS > m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)))
+                if (MAX_POINTS > m_TrialPoints.at(currentTrial))
                 {
-                    m_Flag = m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) == 0
+                    m_Flag = m_TrialPoints.at(currentTrial) == 0
                                 ? Flag::ZERO
                                 : Flag::NOTHING;
                     m_CurrentTrial = Trial::SECOND;
                     m_AllowThrow = true;
                 }
-                else if (MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)))
+                else if (MAX_POINTS == m_TrialPoints.at(currentTrial))
                 {
                     m_Flag = Flag::STRIKE;
                     m_CurrentTrial = m_isLastFrame ? Trial::SECOND : Trial::FIRST;
@@ -143,17 +148,17 @@ void Frame::incTrial(const unsigned short points)
         {
             if (!specialCase)
             {
-                if (MAX_POINTS > m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) + m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)))
+                if (MAX_POINTS > m_TrialPoints.at(currentTrial) + m_TrialPoints.at(firstTrial))
                 {
-                    m_Flag = m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) == 0
+                    m_Flag = m_TrialPoints.at(currentTrial) == 0
                             ? Flag::ZERO
                             : Flag::NOTHING;
                     m_CurrentTrial = Trial::FIRST;
                     m_AllowThrow = false;
                 }
-                else if (MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) + m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)))
+                else if (MAX_POINTS == m_TrialPoints.at(currentTrial) + m_TrialPoints.at(firstTrial))
                 {
-                    m_Flag = (m_isLastFrame && m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)) == MAX_POINTS)
+                    m_Flag = (m_isLastFrame && m_TrialPoints.at(firstTrial) == MAX_POINTS)
                         ? Flag::ZERO // Very special case at 10th: "X - <smth>"
                         : Flag::SPARE;
                     m_CurrentTrial = m_isLastFrame ? Trial::THIRD : Trial::FIRST;
@@ -161,9 +166,9 @@ void Frame::incTrial(const unsigned short points)
                 }
                 else
                 {
-                    m_log->LogMe(__FILE__, __LINE__, "1st points = %d, 2nd points = %d", m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)), m_TrialPoints.at(static_cast<unsigned short>(Trial::SECOND))); // Check the conditions when the program enter here
+                    m_log->LogMe(__FILE__, __LINE__, "1st points = %d, 2nd points = %d", m_TrialPoints.at(firstTrial), m_TrialPoints.at(secondTrial)); // Check the conditions when the program enter here
                     
-                    m_Flag = m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) == 0
+                    m_Flag = m_TrialPoints.at(currentTrial) == 0
                             ? Flag::ZERO
                             : Flag::NOTHING;
                     m_CurrentTrial = m_isLastFrame ? Trial::THIRD : Trial::FIRST;
@@ -172,7 +177,7 @@ void Frame::incTrial(const unsigned short points)
             }
             else
             {
-                m_Flag = m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)) == MAX_POINTS
+                m_Flag = m_TrialPoints.at(firstTrial) == MAX_POINTS
                         ? Flag::STRIKE
                         : Flag::SPARE;
                 m_CurrentTrial = Trial::THIRD;
@@ -182,15 +187,15 @@ void Frame::incTrial(const unsigned short points)
         }
         case Trial::THIRD:
         {
-            if ((MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(Trial::SECOND)))
+            if ((MAX_POINTS == m_TrialPoints.at(secondTrial))
             ||
-                (m_TrialPoints.at(static_cast<unsigned short>(Trial::SECOND)) + m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)) == MAX_POINTS))
+                (m_TrialPoints.at(secondTrial) + m_TrialPoints.at(firstTrial) == MAX_POINTS))
             {
-                if (MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)))
+                if (MAX_POINTS == m_TrialPoints.at(currentTrial))
                 {
                     m_Flag = Flag::STRIKE;
                 }
-                else if (m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)) == 0)
+                else if (m_TrialPoints.at(currentTrial) == 0)
                 {
                     m_Flag = Flag::ZERO;
                 }
@@ -199,15 +204,15 @@ void Frame::incTrial(const unsigned short points)
                     m_Flag = Flag::NOTHING;
                 }
             }
-            else if ((MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(Trial::FIRST)))
+            else if ((MAX_POINTS == m_TrialPoints.at(firstTrial))
                  &&
-                     (MAX_POINTS > m_TrialPoints.at(static_cast<unsigned short>(Trial::SECOND))))
+                     (MAX_POINTS > m_TrialPoints.at(secondTrial)))
             {
-                if (MAX_POINTS == m_TrialPoints.at(static_cast<unsigned short>(Trial::SECOND)) + m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)))
+                if (MAX_POINTS == m_TrialPoints.at(secondTrial) + m_TrialPoints.at(currentTrial))
                 {
                     m_Flag = Flag::SPARE;
                 }
-                else if (0 == m_TrialPoints.at(static_cast<unsigned short>(m_CurrentTrial)))
+                else if (0 == m_TrialPoints.at(currentTrial))
                 {
                     m_Flag = Flag::ZERO;
                 }
@@ -241,3 +246,4 @@ bool Frame::isLastFrame() const noexcept
 {
     return m_isLastFrame;
 }
+

@@ -1,4 +1,4 @@
-FROM debian:bookworm-slim AS build
+FROM ubuntu:24.04 AS build
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends build-essential cmake libncurses-dev \
@@ -10,7 +10,7 @@ COPY . .
 RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
     && cmake --build build --config Release
 
-FROM debian:bookworm-slim AS runtime
+FROM ubuntu:24.04 AS runtime
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends libncurses6 \
@@ -18,7 +18,7 @@ RUN apt-get update \
 
 WORKDIR /app
 
-COPY --from=build /src/build/Bowling /app/Bowling
+COPY --from=build /src/build/BowlingScore /app/BowlingScore
 COPY entrypoint.sh /app/entrypoint.sh
 
 RUN chmod +x /app/entrypoint.sh

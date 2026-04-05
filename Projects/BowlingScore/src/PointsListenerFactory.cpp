@@ -14,14 +14,14 @@ PointsListenerFactory::~PointsListenerFactory()
     //
 }
 
-IPointsListener* PointsListenerFactory::CreatePointsListener(const ListenerType& type)
+std::unique_ptr<IPointsListener> PointsListenerFactory::CreatePointsListener(const ListenerType& type)
 {
     switch (type)
     {
         case ListenerType::SIMULATION:
-            return new PointsListenerSimulation;
+            return std::make_unique<PointsListenerSimulation>();
         case ListenerType::LOCAL:
-            return new PointsListenerLocal;
+            return std::make_unique<PointsListenerLocal>();
         case ListenerType::NETWORK:
             //TODO: return the proper instance of class here when it will be implemented
             throw std::runtime_error("Unimplemented type of Listener");
@@ -29,5 +29,6 @@ IPointsListener* PointsListenerFactory::CreatePointsListener(const ListenerType&
             throw std::out_of_range("Unknown type of Listener");
     }
     
-    return nullptr;
+    return {};
 }
+

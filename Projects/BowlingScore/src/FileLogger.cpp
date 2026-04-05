@@ -30,5 +30,6 @@ void FileLogger::LogMe(const char* file, int line, const char* message, ...)
     log << " File: " << file << std::endl
         << " Line: " << line << std::endl
         << " Message: " << buffer << std::endl
-        << std::fflush;
+        << std::flush;
 }
+

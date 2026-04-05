@@ -14,7 +14,8 @@ public:
     PointsListenerFactory& operator = (const PointsListenerFactory&) = delete;
     PointsListenerFactory&& operator = (PointsListenerFactory&&) = delete;
 
-    virtual IPointsListener* CreatePointsListener(const ListenerType&) override;
+    virtual std::unique_ptr<IPointsListener> CreatePointsListener(const ListenerType&) override;
 };
 
 #endif //__POINTS_LISTENER_LOCAL_FACTORY_H__
+

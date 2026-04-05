@@ -41,6 +41,35 @@ docker compose run --rm --no-deps admin-panel
 After `Accepted`, the `BowlingScore` terminal should print plain-text game progress.
 In Docker, `BowlingScore` now uses a plain-text view and the local socket listener so the full three-project flow is visible in terminal output.
 
+## TUI mode
+
+If you want to test the original `ncurses` UI in Docker, use the dedicated TUI profile.
+
+Terminal 1:
+
+```powershell
+docker compose --profile tui up -d --build points-generator
+```
+
+Terminal 2:
+
+```powershell
+docker compose --profile tui up --build bowling-score-tui
+```
+
+Terminal 3:
+
+```powershell
+docker compose --profile tui run --rm --no-deps admin-panel-tui
+```
+
+Notes:
+
+- `bowling-score-tui` uses the original `ncurses` view.
+- It listens on `12003` so it does not collide with the default plain-text `bowling-score` service on `12002`.
+- `admin-panel-tui` is pointed at `bowling-score-tui` automatically.
+- For the cleanest experience, run the TUI profile without the default plain-text `bowling-score` service at the same time.
+
 ## Alternative startup
 
 ```powershell
@@ -94,10 +123,12 @@ docker run --rm -it -p 12001:12001 et-test-points-generator:latest
   - `POINTS_GENERATOR_BUFFER_LENGTH`
 - `BowlingScore`
   - `BOWLING_HOST`
+  - `BOWLING_LISTENER`
   - `BOWLING_PORT_CLIENT`
   - `BOWLING_PORT_SERVER`
   - `BOWLING_BUFFER_LENGTH`
   - `BOWLING_POOL_SIZE`
+  - `BOWLING_VIEW`
 - `AdminPanel`
   - `ADMIN_PANEL_HOST`
   - `ADMIN_PANEL_PORT`

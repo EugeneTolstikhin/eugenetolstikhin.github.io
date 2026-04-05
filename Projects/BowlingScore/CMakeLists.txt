@@ -1,39 +1,47 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20)
 
-set (CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE} CACHE STRING "" FORCE)
-project(Bowling)
+set(CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE} CACHE STRING "" FORCE)
+
+project(BowlingScore LANGUAGES CXX)
 
 find_package(Curses REQUIRED)
 include(CTest)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -lncurses")
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-include_directories("/usr/lib/x86_64-linux-gnu")
-include_directories(interface)
-include_directories(hdr)
+file(GLOB SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 
-file(GLOB SOURCES "src/*.cpp")
+add_executable(BowlingScore ${SOURCES})
 
-add_executable(Bowling ${SOURCES})
-target_link_libraries(Bowling curses)
+target_compile_features(BowlingScore PRIVATE cxx_std_23)
+target_include_directories(BowlingScore PRIVATE interface hdr /usr/lib/x86_64-linux-gnu)
+target_link_libraries(BowlingScore PRIVATE ${CURSES_LIBRARIES})
+
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(BowlingScore PRIVATE -Wall -Wextra -Wpedantic)
+endif()
 
 add_custom_command(
-        TARGET Bowling POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-                ${CMAKE_SOURCE_DIR}/config.cfg
-                ${CMAKE_CURRENT_BINARY_DIR}/config.cfg)
+    TARGET BowlingScore POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_SOURCE_DIR}/config.cfg
+            ${CMAKE_CURRENT_BINARY_DIR}/config.cfg)
 
 if(BUILD_TESTING)
-    add_executable(BowlingScoringRulesTests
+    add_executable(BowlingScoreScoringRulesTests
         tests/ScoringRulesTests.cpp
         src/Game.cpp
         src/Frame.cpp
         src/LoggerFactory.cpp
         src/FileLogger.cpp
         src/ConsoleLogger.cpp)
-    target_include_directories(BowlingScoringRulesTests PRIVATE interface hdr /usr/lib/x86_64-linux-gnu)
-    target_compile_features(BowlingScoringRulesTests PRIVATE cxx_std_17)
-    add_test(NAME BowlingScoringRulesTests COMMAND BowlingScoringRulesTests)
+    target_compile_features(BowlingScoreScoringRulesTests PRIVATE cxx_std_23)
+    target_include_directories(BowlingScoreScoringRulesTests PRIVATE interface hdr /usr/lib/x86_64-linux-gnu)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+        target_compile_options(BowlingScoreScoringRulesTests PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+    add_test(NAME BowlingScoreScoringRulesTests COMMAND BowlingScoreScoringRulesTests)
 endif()
+

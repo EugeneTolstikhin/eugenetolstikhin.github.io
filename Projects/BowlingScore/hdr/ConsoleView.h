@@ -70,3 +70,4 @@ private:
 };
 
 #endif //__CONSOLE_VIEW_H__
+

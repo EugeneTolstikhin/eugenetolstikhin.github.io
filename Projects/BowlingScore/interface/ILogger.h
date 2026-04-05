@@ -13,3 +13,4 @@ public:
 };
 
 #endif // __ILOGGER_H__
+

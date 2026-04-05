@@ -3,7 +3,7 @@
 
 #include "IConfig.h"
 #include <fstream>
-#include <map>
+#include <unordered_map>
 #include <string>
 
 class ConfigFile : public IConfig
@@ -24,7 +24,8 @@ public:
 	
 private:
 	std::ifstream file;
-	std::map<std::string, std::string> fileContent;
+	std::unordered_map<std::string, std::string> fileContent;
 };
 
 #endif // __CONFIG__FILE__H__
+

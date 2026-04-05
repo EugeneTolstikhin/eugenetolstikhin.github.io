@@ -4,6 +4,7 @@
 #include "IFrame.h"
 #include "IView.h"
 #include "ILoggerFactory.h"
+#include <array>
 #include <memory>
 
 class Frame : public IFrame
@@ -33,7 +34,7 @@ private:
     bool m_isLastFrame = false;
     bool m_AllowThrow = true;
 
-    std::vector<unsigned short> m_TrialPoints = {0, 0, 0};
+    std::array<unsigned short, 3> m_TrialPoints{0, 0, 0};
     
     IView* m_view;
     
@@ -42,3 +43,4 @@ private:
 };
 
 #endif // __FRAME_H__
+

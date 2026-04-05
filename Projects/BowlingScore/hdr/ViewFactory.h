@@ -14,7 +14,8 @@ public:
     ViewFactory& operator = (const ViewFactory&) = delete;
     ViewFactory&& operator = (ViewFactory&&) = delete;
 
-    virtual IView* CreateView(const ViewType&) override;
+    virtual std::unique_ptr<IView> CreateView(const ViewType&) override;
 };
 
 #endif //__VIEW_FACTORY_H__
+

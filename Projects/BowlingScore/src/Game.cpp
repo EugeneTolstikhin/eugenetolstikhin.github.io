@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <numeric>
+#include <ranges>
 #include <stdexcept>
 
 Game::Game(IView* view, GetPointsFunction getPoints) :
@@ -13,15 +14,10 @@ Game::Game(IView* view, GetPointsFunction getPoints) :
     ,m_log(m_loggerFactory->CreateLogger(m_typeLogger))
     ,m_view(view)
 {
-    size_t counter = 0;
-    while (++counter <= MAX_FRAME_AMOUNT)
+    for (const auto frameIndex : std::views::iota(std::size_t{0}, static_cast<std::size_t>(MAX_FRAME_AMOUNT)))
     {
-        m_Frames.emplace_back(new Frame(counter == MAX_FRAME_AMOUNT, m_view));
+        m_Frames.at(frameIndex) = std::make_unique<Frame>(frameIndex + 1 == MAX_FRAME_AMOUNT, m_view);
     }
-
-    m_currFrame = std::make_pair(m_Frames.front(), m_Frames.begin());
-    m_frameRolls.resize(MAX_FRAME_AMOUNT);
-    m_reportedCumulativeScores.resize(MAX_FRAME_AMOUNT);
 }
 
 Game::~Game()
@@ -32,7 +28,7 @@ Game::~Game()
 void Game::ThrowBall()
 {
     const auto points = m_getPoints();
-    m_currFrame.first->SetTrialPoints(points);
+    currentFrame().SetTrialPoints(points);
     recordRoll(points);
 }
 
@@ -82,23 +78,20 @@ void Game::UpdateTotalScore(const short)
 
 bool Game::IsAnotherThrowAllowed() const noexcept
 {
-    return m_currFrame.first->isAllowedThrow();
+    return currentFrame().isAllowedThrow();
 }
 
 void Game::CloseGame(std::function<void()> gameOver)
 {
-    auto nextFrame = m_currFrame.second;
-    ++nextFrame;
-    if (nextFrame == m_Frames.end())
+    if (++m_currentFrameIndex >= m_Frames.size())
     {
         gameOver();
     }
-    else
-    {
-        m_currFrame.second = nextFrame;
-        m_currFrame.first = *m_currFrame.second;
-        ++m_currentFrameIndex;
-    }
+}
+
+IFrame& Game::currentFrame() const
+{
+    return *m_Frames.at(m_currentFrameIndex);
 }
 
 void Game::recordRoll(const unsigned short points)

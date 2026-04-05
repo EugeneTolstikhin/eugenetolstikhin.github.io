@@ -1,6 +1,8 @@
 #ifndef __IVIEW_FACTORY_H__
 #define __IVIEW_FACTORY_H__
 
+#include <memory>
+
 enum class ViewType
 {
     CLS,
@@ -16,7 +18,8 @@ public:
     IViewFactory() = default;
     virtual ~IViewFactory() = default;
 
-    virtual IView* CreateView(const ViewType&) = 0;
+    virtual std::unique_ptr<IView> CreateView(const ViewType&) = 0;
 };
 
 #endif //__IVIEW_FACTORY_H__
+
