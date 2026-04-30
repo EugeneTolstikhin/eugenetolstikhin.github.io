@@ -16,6 +16,7 @@ namespace
 {
 constexpr std::string_view DEFAULT_VIEW = "cls";
 constexpr std::string_view TEXT_VIEW = "text";
+constexpr std::string_view UI_VIEW = "ui";
 constexpr std::string_view DEFAULT_LISTENER = "simulation";
 constexpr std::string_view LOCAL_LISTENER = "local";
 constexpr std::string_view NETWORK_LISTENER = "network";
@@ -39,6 +40,11 @@ ViewType resolveViewType()
     if (view == TEXT_VIEW)
     {
         return ViewType::TEXT;
+    }
+
+    if (view == UI_VIEW)
+    {
+        return ViewType::UI;
     }
 
     return ViewType::CLS;

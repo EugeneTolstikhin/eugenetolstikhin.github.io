@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file>BowlingScore.qml</file>
+    </qresource>
+</RCC>
