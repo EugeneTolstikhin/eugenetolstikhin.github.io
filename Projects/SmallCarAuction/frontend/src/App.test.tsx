@@ -30,6 +30,10 @@ const auction: Auction = {
       id: 'bid-1',
       amount: 28000,
       createdAt: '2029-12-31T10:30:00.000Z',
+      buyer: {
+        id: 'buyer-1',
+        email: 'buyer@example.com',
+      },
     },
   ],
 };
@@ -66,6 +70,7 @@ describe('App auction flow', () => {
         amount: 29000,
         createdAt: '2029-12-31T10:35:00.000Z',
       },
+      isWinningBid: true,
     });
   });
 
@@ -82,7 +87,7 @@ describe('App auction flow', () => {
     await user.type(screen.getByLabelText(/bid amount/i), '29000');
     await user.click(screen.getByRole('button', { name: /make a bid/i }));
 
-    expect(await screen.findByText(/your bid was accepted/i)).toBeInTheDocument();
+    expect(await screen.findByText(/you are currently leading/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /return to auction list/i })).toBeInTheDocument();
   });
 });

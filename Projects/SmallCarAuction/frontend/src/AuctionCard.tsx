@@ -9,10 +9,14 @@ import type { Auction } from './types';
 type Props = {
   auction: Auction;
   csrfToken?: string;
-  onBid: (auctionId: string, amount: number) => Promise<void>;
+  currentUserId?: string;
+  onBid: (
+    auctionId: string,
+    amount: number,
+  ) => Promise<{ isWinningBid?: boolean } | void>;
 };
 
-export function AuctionCard({ auction, csrfToken, onBid }: Props) {
+export function AuctionCard({ auction, csrfToken, currentUserId, onBid }: Props) {
   const [state, dispatch] = useReducer(auctionCardReducer, { value: 'list' });
   const [amount, setAmount] = useState('');
   const [message, setMessage] = useState<{ tone: 'success' | 'error'; text: string }>();
@@ -22,6 +26,32 @@ export function AuctionCard({ auction, csrfToken, onBid }: Props) {
   const isHover = state.value === 'hover';
   const topBid = auction.bids?.[0];
   const highestBid = topBid?.amount ?? auction.currentPrice;
+  const isCurrentUserLeading = Boolean(
+    currentUserId && topBid?.buyer?.id === currentUserId,
+  );
+  const isEnded = auction.state === 'ENDED';
+  const didCurrentUserWin = Boolean(
+    isEnded &&
+      currentUserId &&
+      (auction.winnerBuyerId === currentUserId || topBid?.buyer?.id === currentUserId),
+  );
+  const hasAnotherLeader = Boolean(topBid && currentUserId && !isCurrentUserLeading);
+  const bidStatusTitle = didCurrentUserWin
+    ? 'You won this auction'
+    : isEnded
+      ? 'Auction won by another buyer'
+      : isCurrentUserLeading
+        ? 'Your bid is currently highest'
+        : 'Another buyer is leading';
+  const bidStatusDescription = didCurrentUserWin
+    ? 'Your bid is the winning bid.'
+    : isEnded
+      ? 'This auction is closed.'
+      : isCurrentUserLeading
+        ? 'If the auction ends now, this bid wins.'
+        : hasAnotherLeader
+          ? 'Raise your bid above the current amount to take the lead.'
+          : 'Place a bid to compete for this auction.';
   const title = `${auction.vehicle.brand} ${auction.vehicle.model}`;
 
   useEffect(() => {
@@ -66,11 +96,13 @@ export function AuctionCard({ auction, csrfToken, onBid }: Props) {
     setIsSubmitting(true);
 
     try {
-      await onBid(auction.id, bidAmount);
+      const bidResult = await onBid(auction.id, bidAmount);
       setAmount('');
       setMessage({
         tone: 'success',
-        text: 'Your bid was accepted. The auction price has been updated.',
+        text: bidResult?.isWinningBid
+          ? 'Your bid was accepted. You are currently leading this auction.'
+          : 'Your bid was accepted, but an earlier bid at the same amount is still leading. Raise your bid to take the lead.',
       });
     } catch (error) {
       setMessage({
@@ -150,6 +182,20 @@ export function AuctionCard({ auction, csrfToken, onBid }: Props) {
               Return to Auction list
             </button>
 
+            {topBid && (
+              <section
+                className={`bid-status-tile ${
+                  isCurrentUserLeading || didCurrentUserWin
+                    ? 'bid-status-tile--leading'
+                    : 'bid-status-tile--outbid'
+                }`}
+                aria-live="polite"
+              >
+                <strong>{bidStatusTitle}</strong>
+                <span>{bidStatusDescription}</span>
+              </section>
+            )}
+
             <form className="bid-form" onSubmit={handleSubmit}>
               <label htmlFor={`bid-${auction.id}`}>Bid amount</label>
               <div className="bid-form__row">
@@ -224,7 +270,7 @@ function humanizeBidError(message: string) {
   }
 
   if (message.includes('current price')) {
-    return 'Your bid must be higher than the current price.';
+    return 'Your bid must be equal to or higher than the current price.';
   }
 
   return message;

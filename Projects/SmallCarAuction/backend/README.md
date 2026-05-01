@@ -6,15 +6,26 @@ When an active auction expires, the backend finalizes it by assigning `winnerBuy
 
 Auction creation is VIN-idempotent. Retrying the same create request for the same VIN returns the existing auction, but a different request for a VIN already assigned to an auction is rejected. A vehicle that is sold or currently active cannot be assigned to another auction.
 
-## Run locally
+## Run Backend Only
 
 ```bash
 docker compose up -d
 ```
 
-The API, database, Redis session store, Mailpit test SMTP server, and Jaeger tracing stack all run in Docker.
+From `Projects/SmallCarAuction/backend`, this starts only the backend stack: API, database, Redis session store, Mailpit test SMTP server, and Jaeger tracing.
+
+## Run Full Stack
+
+From `Projects/SmallCarAuction`, run:
+
+```bash
+docker compose up -d
+```
+
+This starts the backend stack plus the Next.js frontend.
 
 - API: http://localhost:3000
+- Frontend: http://localhost:5173
 - API docs: http://localhost:3000/docs
 - OpenAPI JSON: http://localhost:3000/docs-json
 - Mailpit: http://localhost:8025
@@ -56,9 +67,10 @@ Production deployments should set a strong `SESSION_SECRET`, explicit `CORS_ORIG
 ```json
 { "email": "admin@example.com", "password": "AdminPass123!", "role": "ADMIN" }
 { "email": "buyer@example.com", "password": "BuyerPass123!", "role": "BUYER" }
+{ "email": "buyer2@example.com", "password": "BuyerTwoPass123!", "role": "BUYER" }
 ```
 
-The seed passwords can be overridden with `SEED_ADMIN_PASSWORD` and `SEED_BUYER_PASSWORD` in the API container environment.
+The seed passwords can be overridden with `SEED_ADMIN_PASSWORD`, `SEED_BUYER_PASSWORD`, and `SEED_BUYER_TWO_PASSWORD` in the API container environment.
 
 ## APIs
 

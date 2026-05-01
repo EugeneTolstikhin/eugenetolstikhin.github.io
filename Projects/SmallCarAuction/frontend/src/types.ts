@@ -34,6 +34,8 @@ export type Auction = {
   }>;
 };
 
+export type Bid = NonNullable<Auction['bids']>[number];
+
 export type BidResponse = {
   auction: Auction;
   bid: {
@@ -41,4 +43,6 @@ export type BidResponse = {
     amount: string | number;
     createdAt?: string;
   };
+  highestBid?: Bid | null;
+  isWinningBid?: boolean;
 };

@@ -238,6 +238,26 @@
     @apply grid gap-2.5 pt-1.5;
   }
 
+  .bid-status-tile {
+    @apply grid gap-1 rounded-lg border px-3 py-2 text-sm;
+  }
+
+  .bid-status-tile strong {
+    @apply text-slate-950;
+  }
+
+  .bid-status-tile span {
+    @apply text-slate-600;
+  }
+
+  .bid-status-tile--leading {
+    @apply border-emerald-300 bg-emerald-50;
+  }
+
+  .bid-status-tile--outbid {
+    @apply border-amber-300 bg-amber-50;
+  }
+
   .bid-form__row {
     @apply grid grid-cols-[minmax(0,1fr)_44px] gap-2.5;
   }

@@ -21,13 +21,17 @@ const auction: Auction = {
       id: 'bid-1',
       amount: 27500,
       createdAt: '2029-12-31T10:30:00.000Z',
+      buyer: {
+        id: 'buyer-1',
+        email: 'buyer@example.com',
+      },
     },
   ],
 };
 
 describe('AuctionCard', () => {
   it('renders the list card content by default', () => {
-    render(<AuctionCard auction={auction} csrfToken="token" onBid={vi.fn()} />);
+    render(<AuctionCard auction={auction} csrfToken="token" currentUserId="buyer-1" onBid={vi.fn()} />);
 
     expect(screen.getByRole('heading', { name: 'Toyota Supra' })).toBeInTheDocument();
     expect(screen.getByText('ACTIVE')).toBeInTheDocument();
@@ -39,7 +43,7 @@ describe('AuctionCard', () => {
 
   it('shows hover details and opens the selected card', async () => {
     const user = userEvent.setup();
-    render(<AuctionCard auction={auction} csrfToken="token" onBid={vi.fn()} />);
+    render(<AuctionCard auction={auction} csrfToken="token" currentUserId="buyer-1" onBid={vi.fn()} />);
 
     await user.hover(screen.getByTestId('auction-card-auction-1'));
 
@@ -51,12 +55,13 @@ describe('AuctionCard', () => {
     expect(screen.getByRole('button', { name: /return to auction list/i })).toBeInTheDocument();
     expect(screen.getByLabelText(/bid amount/i)).toBeInTheDocument();
     expect(screen.getByText(/bid placed/i)).toBeInTheDocument();
+    expect(screen.getByText(/your bid is currently highest/i)).toBeInTheDocument();
   });
 
   it('submits a bid and shows an accepted message', async () => {
     const user = userEvent.setup();
-    const onBid = vi.fn().mockResolvedValue(undefined);
-    render(<AuctionCard auction={auction} csrfToken="token" onBid={onBid} />);
+    const onBid = vi.fn().mockResolvedValue({ isWinningBid: true });
+    render(<AuctionCard auction={auction} csrfToken="token" currentUserId="buyer-1" onBid={onBid} />);
 
     await user.hover(screen.getByTestId('auction-card-auction-1'));
     await user.click(screen.getByRole('button', { name: /go to auction/i }));
@@ -64,15 +69,15 @@ describe('AuctionCard', () => {
     await user.click(screen.getByRole('button', { name: /make a bid/i }));
 
     expect(onBid).toHaveBeenCalledWith('auction-1', 28000);
-    expect(await screen.findByText(/your bid was accepted/i)).toBeInTheDocument();
+    expect(await screen.findByText(/you are currently leading/i)).toBeInTheDocument();
   });
 
   it('shows a friendly rejected bid message', async () => {
     const user = userEvent.setup();
     const onBid = vi
       .fn()
-      .mockRejectedValue(new Error('Bid must be greater than current price'));
-    render(<AuctionCard auction={auction} csrfToken="token" onBid={onBid} />);
+      .mockRejectedValue(new Error('Bid must be equal to or greater than current price'));
+    render(<AuctionCard auction={auction} csrfToken="token" currentUserId="buyer-1" onBid={onBid} />);
 
     await user.hover(screen.getByTestId('auction-card-auction-1'));
     await user.click(screen.getByRole('button', { name: /go to auction/i }));
@@ -80,7 +85,20 @@ describe('AuctionCard', () => {
     await user.click(screen.getByRole('button', { name: /make a bid/i }));
 
     expect(
-      await screen.findByText(/higher than the current price/i),
+      await screen.findByText(/equal to or higher than the current price/i),
     ).toBeInTheDocument();
+  });
+
+  it('shows a losing tie message when an earlier equal bid is still leading', async () => {
+    const user = userEvent.setup();
+    const onBid = vi.fn().mockResolvedValue({ isWinningBid: false });
+    render(<AuctionCard auction={auction} csrfToken="token" currentUserId="buyer-2" onBid={onBid} />);
+
+    await user.click(screen.getByRole('button', { name: /go to auction/i }));
+    expect(screen.getByText(/another buyer is leading/i)).toBeInTheDocument();
+    await user.type(screen.getByLabelText(/bid amount/i), '27500');
+    await user.click(screen.getByRole('button', { name: /make a bid/i }));
+
+    expect(await screen.findByText(/earlier bid at the same amount/i)).toBeInTheDocument();
   });
 });

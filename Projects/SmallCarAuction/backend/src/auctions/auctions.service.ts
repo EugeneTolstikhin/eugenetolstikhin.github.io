@@ -245,7 +245,22 @@ export class AuctionsService implements OnModuleInit, OnModuleDestroy {
           include: { vehicle: true },
         });
 
-        return { auction: updatedAuction, bid };
+        const highestBid = await tx.bid.findFirst({
+          where: { auctionId: id },
+          orderBy: [{ amount: 'desc' }, { createdAt: 'asc' }],
+          include: {
+            buyer: {
+              select: { id: true, email: true },
+            },
+          },
+        });
+
+        return {
+          auction: updatedAuction,
+          bid,
+          highestBid,
+          isWinningBid: highestBid?.id === bid.id,
+        };
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );

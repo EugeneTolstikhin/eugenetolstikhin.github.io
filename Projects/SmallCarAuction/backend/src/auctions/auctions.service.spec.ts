@@ -327,7 +327,7 @@ describe('AuctionsService business rules', () => {
     expect(prisma.auction.update).not.toHaveBeenCalled();
   });
 
-  it('accepts matching highest bids made before expiry and ranks the earliest one as winner', async () => {
+  it('accepts matching highest bids and marks only the earliest equal bid as winning', async () => {
     const auction = {
       id: 'auction-1',
       state: AuctionState.ACTIVE,
@@ -358,9 +358,27 @@ describe('AuctionsService business rules', () => {
         createdAt: new Date('2026-04-29T12:00:00.500Z'),
       });
     prisma.auction.update.mockResolvedValue(auction);
+    prisma.bid.findFirst
+      .mockResolvedValueOnce({
+        id: 'bid-1',
+        auctionId: 'auction-1',
+        buyerId: 'buyer-1',
+        amount: new Prisma.Decimal(12000),
+        createdAt: new Date('2026-04-29T12:00:00.100Z'),
+      })
+      .mockResolvedValueOnce({
+        id: 'bid-1',
+        auctionId: 'auction-1',
+        buyerId: 'buyer-1',
+        amount: new Prisma.Decimal(12000),
+        createdAt: new Date('2026-04-29T12:00:00.100Z'),
+      });
 
-    await service.placeBid('auction-1', 'buyer-1', { amount: 12000 });
-    await service.placeBid('auction-1', 'buyer-2', { amount: 12000 });
+    const firstBid = await service.placeBid('auction-1', 'buyer-1', { amount: 12000 });
+    const secondBid = await service.placeBid('auction-1', 'buyer-2', { amount: 12000 });
+
+    expect(firstBid.isWinningBid).toBe(true);
+    expect(secondBid.isWinningBid).toBe(false);
 
     expect(prisma.bid.create).toHaveBeenNthCalledWith(1, {
       data: {

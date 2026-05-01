@@ -73,8 +73,9 @@ export function AuctionDashboard({ initialAuctions }: { initialAuctions: Auction
       throw new Error('Sign in before placing a bid.');
     }
 
-    await placeBid(auctionId, amount, user.csrfToken);
+    const bidResult = await placeBid(auctionId, amount, user.csrfToken);
     await loadAuctions(user, { showLoading: false });
+    return { isWinningBid: bidResult.isWinningBid ?? false };
   }
 
   return (
@@ -127,6 +128,7 @@ export function AuctionDashboard({ initialAuctions }: { initialAuctions: Auction
               key={auction.id}
               auction={auction}
               csrfToken={user.csrfToken}
+              currentUserId={user.id}
               onBid={submitBid}
             />
           ))}
