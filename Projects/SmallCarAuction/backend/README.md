@@ -1,8 +1,8 @@
 # Car Auction Backend
 
-Small NestJS backend for car auctions with Prisma, PostgreSQL, Redis-backed sessions, email OTP MFA, role-based access, and an explicit auction state machine.
+Small NestJS backend for car auctions with Prisma, PostgreSQL, Redis-backed sessions, BullMQ auction expiration jobs, email OTP MFA, role-based access, and an explicit auction state machine.
 
-When an active auction expires, the backend finalizes it by assigning `winnerBuyerId` and `winningBidId` on the auction. The winning bid is the highest bid created before or at `endTime`; if multiple bids have the same amount, the earliest bid wins.
+When an active auction expires, a BullMQ delayed job finalizes it by assigning `winnerBuyerId` and `winningBidId` on the auction. The winning bid is the highest bid created before or at `endTime`; if multiple bids have the same amount, the earliest bid wins. Startup re-schedules expiration jobs for active auctions so expiration still happens even when nobody is using the app.
 
 Auction creation is VIN-idempotent. Retrying the same create request for the same VIN returns the existing auction, but a different request for a VIN already assigned to an auction is rejected. A vehicle that is sold or currently active cannot be assigned to another auction.
 
@@ -32,6 +32,8 @@ This starts the backend stack plus the Next.js frontend.
 - Jaeger UI: http://localhost:16686
 
 Mailpit receives OTP emails sent through SMTP port 1025. Jaeger receives OpenTelemetry traces through OTLP HTTP at `http://jaeger:4318/v1/traces`.
+
+Redis is used for sessions, rate limiting, and BullMQ delayed auction expiration jobs.
 
 ## Observability
 

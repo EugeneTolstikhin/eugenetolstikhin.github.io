@@ -24,6 +24,10 @@ describe('AuctionsService business rules', () => {
   let auctionEventsService: {
     publish: jest.Mock;
   };
+  let auctionExpirationQueue: {
+    registerProcessor: jest.Mock;
+    scheduleExpiration: jest.Mock;
+  };
   let service: AuctionsService;
 
   beforeEach(() => {
@@ -51,11 +55,16 @@ describe('AuctionsService business rules', () => {
     auctionEventsService = {
       publish: jest.fn(),
     };
+    auctionExpirationQueue = {
+      registerProcessor: jest.fn(),
+      scheduleExpiration: jest.fn(),
+    };
 
     service = new AuctionsService(
       prisma as never,
       new AuctionStateMachine(),
       auctionEventsService as never,
+      auctionExpirationQueue as never,
     );
   });
 
@@ -201,6 +210,28 @@ describe('AuctionsService business rules', () => {
     });
   });
 
+  it('registers a BullMQ expiration processor and schedules active auctions on startup', async () => {
+    const endTime = new Date(fixedNow.getTime() + 30_000);
+
+    prisma.auction.findMany.mockResolvedValue([
+      {
+        id: 'auction-1',
+        endTime,
+      },
+    ]);
+
+    service.onModuleInit();
+    await Promise.resolve();
+
+    expect(auctionExpirationQueue.registerProcessor).toHaveBeenCalledWith(
+      expect.any(Function),
+    );
+    expect(auctionExpirationQueue.scheduleExpiration).toHaveBeenCalledWith(
+      'auction-1',
+      endTime,
+    );
+  });
+
   it('rejects a different auction request when the VIN is already active or sold', async () => {
     const endTime = new Date('2026-04-30T12:00:00.000Z');
 
@@ -232,6 +263,39 @@ describe('AuctionsService business rules', () => {
     ).rejects.toThrow(BadRequestException);
 
     expect(prisma.auction.create).not.toHaveBeenCalled();
+  });
+
+  it('schedules a BullMQ expiration job when an auction is activated', async () => {
+    const endTime = new Date(fixedNow.getTime() + 30_000);
+    const draftAuction = {
+      id: 'auction-1',
+      state: AuctionState.DRAFT,
+      endTime,
+      vehicle: {
+        id: 'vehicle-1',
+        brand: 'Toyota',
+        model: 'Supra',
+        vin: 'JT2MA70L0H0123456',
+      },
+    };
+    const activeAuction = {
+      ...draftAuction,
+      state: AuctionState.ACTIVE,
+    };
+
+    prisma.auction.findUnique.mockResolvedValue(draftAuction);
+    prisma.auction.update.mockResolvedValue(activeAuction);
+
+    await expect(service.activate('auction-1')).resolves.toBe(activeAuction);
+
+    expect(auctionEventsService.publish).toHaveBeenCalledWith(
+      'auction.activated',
+      'auction-1',
+    );
+    expect(auctionExpirationQueue.scheduleExpiration).toHaveBeenCalledWith(
+      'auction-1',
+      endTime,
+    );
   });
 
   it('rejects bids for active auctions that are already expired', async () => {

@@ -2,37 +2,30 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  OnModuleDestroy,
   OnModuleInit,
 } from '@nestjs/common';
 import { AuctionState, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuctionEventsService } from './auction-events.service';
+import { AuctionExpirationQueueService } from './auction-expiration-queue.service';
 import { CreateAuctionDto } from './dto/create-auction.dto';
 import { PlaceBidDto } from './dto/place-bid.dto';
 import { AuctionStateMachine } from './state/auction-state-machine';
 
 @Injectable()
-export class AuctionsService implements OnModuleInit, OnModuleDestroy {
-  private expiryTimer?: NodeJS.Timeout;
-
+export class AuctionsService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
     private readonly stateMachine: AuctionStateMachine,
     private readonly auctionEventsService: AuctionEventsService,
+    private readonly auctionExpirationQueue: AuctionExpirationQueueService,
   ) {}
 
   onModuleInit() {
-    void this.expireActiveAuctions();
-    this.expiryTimer = setInterval(() => {
-      void this.expireActiveAuctions();
-    }, 1000);
-  }
-
-  onModuleDestroy() {
-    if (this.expiryTimer) {
-      clearInterval(this.expiryTimer);
-    }
+    this.auctionExpirationQueue.registerProcessor((auctionId) =>
+      this.expireAuctionIfNeeded(auctionId).then(() => undefined),
+    );
+    void this.scheduleActiveAuctionExpirations();
   }
 
   async create(dto: CreateAuctionDto) {
@@ -153,6 +146,10 @@ export class AuctionsService implements OnModuleInit, OnModuleDestroy {
     });
 
     this.auctionEventsService.publish('auction.activated', activatedAuction.id);
+    await this.auctionExpirationQueue.scheduleExpiration(
+      activatedAuction.id,
+      activatedAuction.endTime,
+    );
 
     return activatedAuction;
   }
@@ -300,6 +297,22 @@ export class AuctionsService implements OnModuleInit, OnModuleDestroy {
     expiredAuctions.forEach((auction) => {
       this.auctionEventsService.publish('auction.expired', auction.id);
     });
+  }
+
+  private async scheduleActiveAuctionExpirations() {
+    const activeAuctions = await this.prisma.auction.findMany({
+      where: { state: AuctionState.ACTIVE },
+      select: { id: true, endTime: true },
+    });
+
+    await Promise.all(
+      activeAuctions.map((auction) =>
+        this.auctionExpirationQueue.scheduleExpiration(
+          auction.id,
+          auction.endTime,
+        ),
+      ),
+    );
   }
 
   private async ensureAuctionExistsAndRefreshState(id: string) {
