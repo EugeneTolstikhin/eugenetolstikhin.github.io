@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { AuctionDashboard } from './App';
-import { listAuctions, login, placeBid, verifyOtp } from './api';
+import { listAuctions, login, placeBid, subscribeAuctionEvents, verifyOtp } from './api';
 import type { Auction } from './types';
 
 vi.mock('./api', () => ({
@@ -10,6 +10,7 @@ vi.mock('./api', () => ({
   login: vi.fn(),
   logout: vi.fn(),
   placeBid: vi.fn(),
+  subscribeAuctionEvents: vi.fn(),
   verifyOtp: vi.fn(),
 }));
 
@@ -53,6 +54,7 @@ describe('App auction flow', () => {
       csrfToken: 'csrf-token',
     });
     vi.mocked(listAuctions).mockResolvedValue([auction]);
+    vi.mocked(subscribeAuctionEvents).mockReturnValue(vi.fn());
     vi.mocked(placeBid).mockResolvedValue({
       auction: {
         ...auction,
@@ -89,5 +91,44 @@ describe('App auction flow', () => {
 
     expect(await screen.findByText(/you are currently leading/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /return to auction list/i })).toBeInTheDocument();
+  });
+
+  it('reloads auctions when a live auction event arrives', async () => {
+    const user = userEvent.setup();
+    const updatedAuction = {
+      ...auction,
+      currentPrice: 30000,
+      bids: [
+        {
+          id: 'bid-3',
+          amount: 30000,
+          createdAt: '2029-12-31T10:40:00.000Z',
+          buyer: {
+            id: 'buyer-2',
+            email: 'buyer2@example.com',
+          },
+        },
+      ],
+    };
+    let liveHandler: (() => void) | undefined;
+
+    vi.mocked(subscribeAuctionEvents).mockImplementation((handler) => {
+      liveHandler = handler;
+      return vi.fn();
+    });
+    vi.mocked(listAuctions)
+      .mockResolvedValueOnce([auction])
+      .mockResolvedValueOnce([updatedAuction]);
+
+    render(<AuctionDashboard initialAuctions={[]} />);
+
+    await user.click(await screen.findByRole('button', { name: /continue/i }));
+    await user.type(await screen.findByLabelText(/otp code/i), '123456');
+    await user.click(screen.getByRole('button', { name: /verify/i }));
+
+    expect(await screen.findByText('$28,000.00')).toBeInTheDocument();
+    liveHandler?.();
+
+    expect(await screen.findByText('$30,000.00')).toBeInTheDocument();
   });
 });

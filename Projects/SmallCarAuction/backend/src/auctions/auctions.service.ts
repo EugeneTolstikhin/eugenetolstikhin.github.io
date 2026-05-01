@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { AuctionState, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuctionEventsService } from './auction-events.service';
 import { CreateAuctionDto } from './dto/create-auction.dto';
 import { PlaceBidDto } from './dto/place-bid.dto';
 import { AuctionStateMachine } from './state/auction-state-machine';
@@ -18,6 +19,7 @@ export class AuctionsService implements OnModuleInit, OnModuleDestroy {
   constructor(
     private readonly prisma: PrismaService,
     private readonly stateMachine: AuctionStateMachine,
+    private readonly auctionEventsService: AuctionEventsService,
   ) {}
 
   onModuleInit() {
@@ -46,7 +48,7 @@ export class AuctionsService implements OnModuleInit, OnModuleDestroy {
     }
 
     try {
-      return await this.prisma.$transaction(
+      const auction = await this.prisma.$transaction(
         async (tx) => {
           const existingVehicle = await this.findVehicleWithAuction(
             tx,
@@ -101,6 +103,10 @@ export class AuctionsService implements OnModuleInit, OnModuleDestroy {
         },
         { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
       );
+
+      this.auctionEventsService.publish('auction.created', auction.id);
+
+      return auction;
     } catch (error) {
       if (!this.isCreateRaceError(error)) {
         throw error;
@@ -140,11 +146,15 @@ export class AuctionsService implements OnModuleInit, OnModuleDestroy {
 
     const nextState = this.stateMachine.transition(auction.state, 'ACTIVATE');
 
-    return this.prisma.auction.update({
+    const activatedAuction = await this.prisma.auction.update({
       where: { id },
       data: { state: nextState },
       include: { vehicle: true },
     });
+
+    this.auctionEventsService.publish('auction.activated', activatedAuction.id);
+
+    return activatedAuction;
   }
 
   async list() {
@@ -203,7 +213,7 @@ export class AuctionsService implements OnModuleInit, OnModuleDestroy {
   }
 
   async placeBid(id: string, buyerId: string, dto: PlaceBidDto) {
-    return this.prisma.$transaction(
+    const result = await this.prisma.$transaction(
       async (tx) => {
         const auction = await tx.auction.findUnique({
           where: { id },
@@ -264,6 +274,10 @@ export class AuctionsService implements OnModuleInit, OnModuleDestroy {
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable },
     );
+
+    this.auctionEventsService.publish('auction.highestBidChanged', id);
+
+    return result;
   }
 
   private async expireActiveAuctions() {
@@ -275,13 +289,17 @@ export class AuctionsService implements OnModuleInit, OnModuleDestroy {
       select: { id: true, state: true, endTime: true },
     });
 
-    await Promise.all(
+    const expiredAuctions = await Promise.all(
       activeExpiredAuctions.map((auction) =>
         this.prisma.$transaction((tx) =>
           this.finishAuction(tx, auction.id, auction.state, auction.endTime),
         ),
       ),
     );
+
+    expiredAuctions.forEach((auction) => {
+      this.auctionEventsService.publish('auction.expired', auction.id);
+    });
   }
 
   private async ensureAuctionExistsAndRefreshState(id: string) {
@@ -302,9 +320,13 @@ export class AuctionsService implements OnModuleInit, OnModuleDestroy {
       return auction;
     }
 
-    return this.prisma.$transaction((tx) =>
+    const expiredAuction = await this.prisma.$transaction((tx) =>
       this.finishAuction(tx, id, auction.state, auction.endTime),
     );
+
+    this.auctionEventsService.publish('auction.expired', expiredAuction.id);
+
+    return expiredAuction;
   }
 
   private async finishAuction(

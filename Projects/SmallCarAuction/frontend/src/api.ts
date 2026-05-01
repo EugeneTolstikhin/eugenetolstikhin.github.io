@@ -42,6 +42,30 @@ export async function placeBid(auctionId: string, amount: number, csrfToken: str
   });
 }
 
+export function subscribeAuctionEvents(onAuctionEvent: () => void) {
+  const events = new EventSource(`${API_BASE_URL}/auctions/events`, {
+    withCredentials: true,
+  });
+  const eventTypes = [
+    'auction.created',
+    'auction.activated',
+    'auction.highestBidChanged',
+    'auction.expired',
+  ];
+
+  eventTypes.forEach((eventType) => {
+    events.addEventListener(eventType, onAuctionEvent);
+  });
+  events.onmessage = onAuctionEvent;
+
+  return () => {
+    eventTypes.forEach((eventType) => {
+      events.removeEventListener(eventType, onAuctionEvent);
+    });
+    events.close();
+  };
+}
+
 async function request<T>(
   path: string,
   options: {

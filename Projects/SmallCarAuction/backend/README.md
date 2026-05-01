@@ -147,6 +147,20 @@ Buyer session only. Equal highest bids are resolved by earliest `createdAt`.
 GET /auctions/{auctionId}/highest-bid
 ```
 
+### Subscribe to live auction events
+
+Authenticated admin or buyer session. The browser receives Server-Sent Events for dashboard refreshes:
+
+- `auction.created`
+- `auction.activated`
+- `auction.highestBidChanged`
+- `auction.expired`
+
+```http
+GET /auctions/events
+Accept: text/event-stream
+```
+
 ### Place bid
 
 Buyer session only. Auction must be `ACTIVE` and not expired.

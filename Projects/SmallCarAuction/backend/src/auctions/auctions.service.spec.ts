@@ -21,6 +21,9 @@ describe('AuctionsService business rules', () => {
     };
     $transaction: jest.Mock;
   };
+  let auctionEventsService: {
+    publish: jest.Mock;
+  };
   let service: AuctionsService;
 
   beforeEach(() => {
@@ -45,10 +48,14 @@ describe('AuctionsService business rules', () => {
         callback(prisma),
       ),
     };
+    auctionEventsService = {
+      publish: jest.fn(),
+    };
 
     service = new AuctionsService(
       prisma as never,
       new AuctionStateMachine(),
+      auctionEventsService as never,
     );
   });
 

@@ -23,6 +23,7 @@ docker run --rm -p 5173:5173 -e NEXT_PUBLIC_API_BASE_URL=http://localhost:3000 s
 
 - The App Router page passes an initial auctions promise into the client dashboard, where React 19 `use()` unwraps it during render.
 - The dashboard loads protected auctions after login and OTP verification.
+- After login, the dashboard subscribes to `GET /auctions/events` with SSE and silently reloads auctions when live events arrive.
 - Auction cards use a small state machine:
   - `list`: title, status tag, no-photo placeholder, highest bid.
   - `hover`: zoomed card with enter button, VIN, highest bid, and end timing.

@@ -2,6 +2,8 @@
 
 Full-stack car auction demo with a NestJS backend and Next.js frontend.
 
+The frontend uses REST for commands and Server-Sent Events from `GET /auctions/events` for live dashboard notifications.
+
 ## Run Everything
 
 ```bash

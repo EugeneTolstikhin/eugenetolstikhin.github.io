@@ -1,8 +1,8 @@
 'use client';
 
 import { RefreshCcw } from 'lucide-react';
-import { use, useState } from 'react';
-import { listAuctions, logout, placeBid } from './api';
+import { use, useEffect, useState } from 'react';
+import { listAuctions, logout, placeBid, subscribeAuctionEvents } from './api';
 import { AuctionCard } from './AuctionCard';
 import { AuthPanel } from './AuthPanel';
 import type { Auction, SessionUser } from './types';
@@ -77,6 +77,16 @@ export function AuctionDashboard({ initialAuctions }: { initialAuctions: Auction
     await loadAuctions(user, { showLoading: false });
     return { isWinningBid: bidResult.isWinningBid ?? false };
   }
+
+  useEffect(() => {
+    if (!user) {
+      return undefined;
+    }
+
+    return subscribeAuctionEvents(() => {
+      void loadAuctions(user, { showLoading: false });
+    });
+  }, [user]);
 
   return (
     <main className="app-shell">

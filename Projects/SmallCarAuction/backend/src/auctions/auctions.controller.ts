@@ -5,7 +5,9 @@ import {
   Param,
   Post,
   Req,
+  Sse,
   UseGuards,
+  MessageEvent,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
@@ -20,10 +22,12 @@ import {
 } from '@nestjs/swagger';
 import { UserRole } from '@prisma/client';
 import { Request } from 'express';
+import { Observable } from 'rxjs';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { CsrfGuard } from '../security/csrf.guard';
+import { AuctionEventsService } from './auction-events.service';
 import { AuctionsService } from './auctions.service';
 import { CreateAuctionDto } from './dto/create-auction.dto';
 import { PlaceBidDto } from './dto/place-bid.dto';
@@ -34,7 +38,10 @@ import { PlaceBidDto } from './dto/place-bid.dto';
 @ApiCookieAuth()
 @ApiUnauthorizedResponse({ description: 'Login required.' })
 export class AuctionsController {
-  constructor(private readonly auctionsService: AuctionsService) {}
+  constructor(
+    private readonly auctionsService: AuctionsService,
+    private readonly auctionEventsService: AuctionEventsService,
+  ) {}
 
   @Post()
   @Roles(UserRole.ADMIN)
@@ -65,6 +72,14 @@ export class AuctionsController {
   @ApiForbiddenResponse({ description: 'Admin or buyer role required.' })
   list() {
     return this.auctionsService.list();
+  }
+
+  @Sse('events')
+  @Roles(UserRole.ADMIN, UserRole.BUYER)
+  @ApiOperation({ summary: 'Subscribe to live auction events' })
+  @ApiOkResponse({ description: 'Server-Sent Events stream for auction updates.' })
+  events(): Observable<MessageEvent> {
+    return this.auctionEventsService.stream();
   }
 
   @Get(':id/status')

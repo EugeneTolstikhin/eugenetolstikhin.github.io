@@ -8,6 +8,7 @@ import { AuthService } from './auth/auth.service';
 import { RolesGuard } from './auth/guards/roles.guard';
 import { SessionAuthGuard } from './auth/guards/session-auth.guard';
 import { AuctionsController } from './auctions/auctions.controller';
+import { AuctionEventsService } from './auctions/auction-events.service';
 import { AuctionsService } from './auctions/auctions.service';
 import { CsrfGuard } from './security/csrf.guard';
 
@@ -25,6 +26,9 @@ describe('SmallCarAuction API security and scenario coverage', () => {
     getHighestBid: jest.Mock;
     placeBid: jest.Mock;
   };
+  let auctionEventsService: {
+    stream: jest.Mock;
+  };
 
   beforeEach(async () => {
     authService = {
@@ -39,6 +43,9 @@ describe('SmallCarAuction API security and scenario coverage', () => {
       getHighestBid: jest.fn(),
       placeBid: jest.fn(),
     };
+    auctionEventsService = {
+      stream: jest.fn(),
+    };
 
     const moduleRef = await Test.createTestingModule({
       controllers: [AuthController, AuctionsController],
@@ -48,6 +55,7 @@ describe('SmallCarAuction API security and scenario coverage', () => {
         RolesGuard,
         { provide: AuthService, useValue: authService },
         { provide: AuctionsService, useValue: auctionsService },
+        { provide: AuctionEventsService, useValue: auctionEventsService },
       ],
     }).compile();
 
