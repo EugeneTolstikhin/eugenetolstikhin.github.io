@@ -35,6 +35,7 @@ export function AuctionCard({ auction, csrfToken, currentUserId, onBid }: Props)
       currentUserId &&
       (auction.winnerBuyerId === currentUserId || topBid?.buyer?.id === currentUserId),
   );
+  const endedOutcomeLabel = didCurrentUserWin ? 'Won' : 'Lost';
   const hasAnotherLeader = Boolean(topBid && currentUserId && !isCurrentUserLeading);
   const bidStatusTitle = didCurrentUserWin
     ? 'You won this auction'
@@ -144,7 +145,18 @@ export function AuctionCard({ auction, csrfToken, currentUserId, onBid }: Props)
       <div className="auction-card__body">
         <div className="auction-card__topline">
           <h2>{title}</h2>
-          <StatusTag state={auction.state} />
+          <div className="auction-card__badges">
+            {isEnded && currentUserId && (
+              <span
+                className={`outcome-badge ${
+                  didCurrentUserWin ? 'outcome-badge--won' : 'outcome-badge--lost'
+                }`}
+              >
+                {endedOutcomeLabel}
+              </span>
+            )}
+            <StatusTag state={auction.state} />
+          </div>
         </div>
 
         {(isHover || isSelected) && (
@@ -196,39 +208,50 @@ export function AuctionCard({ auction, csrfToken, currentUserId, onBid }: Props)
               </section>
             )}
 
-            <form className="bid-form" onSubmit={handleSubmit}>
-              <label htmlFor={`bid-${auction.id}`}>Bid amount</label>
-              <div className="bid-form__row">
-                <input
-                  id={`bid-${auction.id}`}
-                  inputMode="decimal"
-                  min="0.01"
-                  step="0.01"
-                  type="number"
-                  value={amount}
-                  onChange={(event) => setAmount(event.target.value)}
-                  placeholder="27500"
-                  disabled={!csrfToken || isSubmitting}
-                />
-                <button
-                  className="icon-button"
-                  type="submit"
-                  disabled={!csrfToken || isSubmitting}
-                  aria-label="Make a bid"
-                  title="Make a bid"
-                >
-                  <Send aria-hidden="true" />
-                </button>
-              </div>
-              {!csrfToken && (
-                <p className="form-note">Sign in as a buyer to place a bid.</p>
-              )}
-              {message && (
-                <p className={`form-message form-message--${message.tone}`} role="status">
-                  {message.text}
-                </p>
-              )}
-            </form>
+            {isEnded ? (
+              <section className="readonly-auction" aria-label="Auction closed">
+                <strong>Bidding is closed</strong>
+                <span>
+                  {didCurrentUserWin
+                    ? 'Congratulations. Your bid won this auction.'
+                    : 'This auction has ended, so new bids are no longer accepted.'}
+                </span>
+              </section>
+            ) : (
+              <form className="bid-form" onSubmit={handleSubmit}>
+                <label htmlFor={`bid-${auction.id}`}>Bid amount</label>
+                <div className="bid-form__row">
+                  <input
+                    id={`bid-${auction.id}`}
+                    inputMode="decimal"
+                    min="0.01"
+                    step="0.01"
+                    type="number"
+                    value={amount}
+                    onChange={(event) => setAmount(event.target.value)}
+                    placeholder="27500"
+                    disabled={!csrfToken || isSubmitting}
+                  />
+                  <button
+                    className="icon-button"
+                    type="submit"
+                    disabled={!csrfToken || isSubmitting}
+                    aria-label="Make a bid"
+                    title="Make a bid"
+                  >
+                    <Send aria-hidden="true" />
+                  </button>
+                </div>
+                {!csrfToken && (
+                  <p className="form-note">Sign in as a buyer to place a bid.</p>
+                )}
+                {message && (
+                  <p className={`form-message form-message--${message.tone}`} role="status">
+                    {message.text}
+                  </p>
+                )}
+              </form>
+            )}
           </>
         )}
 

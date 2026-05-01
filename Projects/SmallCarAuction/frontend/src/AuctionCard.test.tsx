@@ -101,4 +101,58 @@ describe('AuctionCard', () => {
 
     expect(await screen.findByText(/earlier bid at the same amount/i)).toBeInTheDocument();
   });
+
+  it('makes an expired winning auction read-only and shows a won badge', async () => {
+    const user = userEvent.setup();
+    const endedAuction: Auction = {
+      ...auction,
+      state: 'ENDED',
+      winnerBuyerId: 'buyer-1',
+      endTime: '2029-12-31T12:00:00.000Z',
+    };
+
+    render(
+      <AuctionCard
+        auction={endedAuction}
+        csrfToken="token"
+        currentUserId="buyer-1"
+        onBid={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('Won')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /go to auction/i }));
+
+    expect(screen.getByText(/you won this auction/i)).toBeInTheDocument();
+    expect(screen.getByText(/bidding is closed/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/bid amount/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /make a bid/i })).not.toBeInTheDocument();
+  });
+
+  it('makes an expired losing auction read-only and shows a lost badge', async () => {
+    const user = userEvent.setup();
+    const endedAuction: Auction = {
+      ...auction,
+      state: 'ENDED',
+      winnerBuyerId: 'buyer-1',
+      endTime: '2029-12-31T12:00:00.000Z',
+    };
+
+    render(
+      <AuctionCard
+        auction={endedAuction}
+        csrfToken="token"
+        currentUserId="buyer-2"
+        onBid={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText('Lost')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /go to auction/i }));
+
+    expect(screen.getByText(/auction won by another buyer/i)).toBeInTheDocument();
+    expect(screen.getByText(/bidding is closed/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/bid amount/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /make a bid/i })).not.toBeInTheDocument();
+  });
 });
