@@ -1,6 +1,8 @@
+import './tracing';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import RedisStore from 'connect-redis';
 import { json, urlencoded } from 'express';
 import session from 'express-session';
@@ -99,6 +101,10 @@ async function bootstrap() {
     }),
   );
 
+  if (config.get<string>('API_DOCS_ENABLED', 'true') === 'true') {
+    setupApiDocs(app);
+  }
+
   await app.listen(config.get<number>('PORT', 3000));
 }
 
@@ -125,4 +131,58 @@ function parsePositiveInt(value: string | undefined, fallback: number) {
   const parsed = Number.parseInt(value ?? '', 10);
 
   return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+function setupApiDocs(app: Awaited<ReturnType<typeof NestFactory.create>>) {
+  app.use(
+    '/docs',
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", 'data:'],
+          fontSrc: ["'self'", 'data:'],
+          connectSrc: ["'self'"],
+          frameAncestors: ["'none'"],
+          objectSrc: ["'none'"],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+      frameguard: { action: 'deny' },
+      referrerPolicy: { policy: 'no-referrer' },
+    }),
+  );
+
+  const document = SwaggerModule.createDocument(
+    app,
+    new DocumentBuilder()
+      .setTitle('Small Car Auction API')
+      .setDescription('Session-authenticated REST API for SmallCarAuction.')
+      .setVersion('0.1.0')
+      .addCookieAuth('small-car-auction.sid', {
+        type: 'apiKey',
+        in: 'cookie',
+        name: 'small-car-auction.sid',
+        description: 'Redis-backed session cookie issued by login and OTP verification.',
+      })
+      .addApiKey(
+        {
+          type: 'apiKey',
+          in: 'header',
+          name: 'X-CSRF-Token',
+          description: 'Required for unsafe authenticated requests.',
+        },
+        'csrf',
+      )
+      .build(),
+  );
+
+  SwaggerModule.setup('docs', app, document, {
+    jsonDocumentUrl: 'docs-json',
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 }

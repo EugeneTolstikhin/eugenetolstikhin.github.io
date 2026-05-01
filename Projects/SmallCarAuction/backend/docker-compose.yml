@@ -14,6 +14,10 @@ services:
       AUTH_RATE_LIMIT_WINDOW_SECONDS: 300
       AUTH_RATE_LIMIT_MAX_REQUESTS: 10
       SESSION_MAX_AGE_SECONDS: 3600
+      API_DOCS_ENABLED: "true"
+      TRACING_ENABLED: "true"
+      OTEL_SERVICE_NAME: small-car-auction-api
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://jaeger:4318/v1/traces
       MAIL_SMTP_HOST: mailpit
       MAIL_SMTP_PORT: 1025
       MAIL_FROM: "Small Car Auction <no-reply@small-car-auction.test>"
@@ -31,6 +35,8 @@ services:
       redis:
         condition: service_healthy
       mailpit:
+        condition: service_started
+      jaeger:
         condition: service_started
 
   postgres:
@@ -64,6 +70,15 @@ services:
     ports:
       - "1025:1025"
       - "8025:8025"
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
+      - "4318:4318"
+      - "4317:4317"
 
 volumes:
   node_modules:

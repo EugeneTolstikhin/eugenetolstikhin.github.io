@@ -12,7 +12,31 @@ Auction creation is VIN-idempotent. Retrying the same create request for the sam
 docker compose up -d
 ```
 
-The API, database, Redis session store, and Mailpit test SMTP server all run in Docker. Mailpit is available at http://localhost:8025 and receives OTP emails sent through SMTP port 1025.
+The API, database, Redis session store, Mailpit test SMTP server, and Jaeger tracing stack all run in Docker.
+
+- API: http://localhost:3000
+- API docs: http://localhost:3000/docs
+- OpenAPI JSON: http://localhost:3000/docs-json
+- Mailpit: http://localhost:8025
+- Jaeger UI: http://localhost:16686
+
+Mailpit receives OTP emails sent through SMTP port 1025. Jaeger receives OpenTelemetry traces through OTLP HTTP at `http://jaeger:4318/v1/traces`.
+
+## Observability
+
+Tracing is enabled in Docker with:
+
+```yaml
+TRACING_ENABLED: "true"
+OTEL_SERVICE_NAME: small-car-auction-api
+OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://jaeger:4318/v1/traces
+```
+
+Open Jaeger at http://localhost:16686 and select `small-car-auction-api` to inspect request traces. Set `TRACING_ENABLED=false` to disable tracing.
+
+## API documentation
+
+Swagger UI is served at http://localhost:3000/docs and the raw OpenAPI document is served at http://localhost:3000/docs-json. Set `API_DOCS_ENABLED=false` to disable API documentation in stricter environments.
 
 ## Security controls
 
@@ -25,7 +49,7 @@ The API, database, Redis session store, and Mailpit test SMTP server all run in 
 - Redis-backed rate limiting protects all endpoints, with stricter limits for login and OTP verification.
 - Production cookies are `HttpOnly`, `SameSite=Strict`, `Secure`, and can use the `__Host-` prefix when `NODE_ENV=production`.
 
-Production deployments should set a strong `SESSION_SECRET`, explicit `CORS_ORIGINS`, `NODE_ENV=production`, and `TRUST_PROXY=true` when TLS terminates at a trusted reverse proxy.
+Production deployments should set a strong `SESSION_SECRET`, explicit `CORS_ORIGINS`, `NODE_ENV=production`, `API_DOCS_ENABLED=false` unless docs are intentionally exposed, and `TRUST_PROXY=true` when TLS terminates at a trusted reverse proxy.
 
 ## Seed users
 
