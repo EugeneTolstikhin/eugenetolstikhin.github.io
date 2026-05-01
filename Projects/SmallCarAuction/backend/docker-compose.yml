@@ -1,0 +1,70 @@
+services:
+  api:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm install && npx prisma db push && npx prisma generate && npm run prisma:seed && npm run start:dev"
+    environment:
+      DATABASE_URL: postgresql://auction:auction@postgres:5432/car_auction?schema=public
+      REDIS_URL: redis://redis:6379
+      SESSION_SECRET: replace-me-with-a-long-random-secret
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+      REQUEST_BODY_LIMIT: 100kb
+      RATE_LIMIT_WINDOW_SECONDS: 60
+      RATE_LIMIT_MAX_REQUESTS: 300
+      AUTH_RATE_LIMIT_WINDOW_SECONDS: 300
+      AUTH_RATE_LIMIT_MAX_REQUESTS: 10
+      SESSION_MAX_AGE_SECONDS: 3600
+      MAIL_SMTP_HOST: mailpit
+      MAIL_SMTP_PORT: 1025
+      MAIL_FROM: "Small Car Auction <no-reply@small-car-auction.test>"
+      OTP_TTL_SECONDS: 300
+      OTP_MAX_ATTEMPTS: 5
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: auction
+      POSTGRES_PASSWORD: auction
+      POSTGRES_DB: car_auction
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auction -d car_auction"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  mailpit:
+    image: axllent/mailpit:v1.21
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  node_modules:
+  postgres_data:
