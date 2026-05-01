@@ -283,6 +283,50 @@ describe('AuctionsService business rules', () => {
     expect(prisma.bid.create).not.toHaveBeenCalled();
   });
 
+  it('rejects bids when the auction is not active', async () => {
+    prisma.auction.findUnique.mockResolvedValue({
+      id: 'auction-1',
+      state: AuctionState.DRAFT,
+      currentPrice: new Prisma.Decimal(10000),
+      endTime: new Date(fixedNow.getTime() + 60_000),
+      vehicle: {
+        id: 'vehicle-1',
+        brand: 'Toyota',
+        model: 'Supra',
+        vin: 'JT2MA70L0H0123456',
+      },
+    });
+
+    await expect(
+      service.placeBid('auction-1', 'buyer-1', { amount: 11000 }),
+    ).rejects.toThrow(BadRequestException);
+
+    expect(prisma.bid.create).not.toHaveBeenCalled();
+    expect(prisma.auction.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects bids below the current price', async () => {
+    prisma.auction.findUnique.mockResolvedValue({
+      id: 'auction-1',
+      state: AuctionState.ACTIVE,
+      currentPrice: new Prisma.Decimal(10000),
+      endTime: new Date(fixedNow.getTime() + 60_000),
+      vehicle: {
+        id: 'vehicle-1',
+        brand: 'Toyota',
+        model: 'Supra',
+        vin: 'JT2MA70L0H0123456',
+      },
+    });
+
+    await expect(
+      service.placeBid('auction-1', 'buyer-1', { amount: 9999 }),
+    ).rejects.toThrow(BadRequestException);
+
+    expect(prisma.bid.create).not.toHaveBeenCalled();
+    expect(prisma.auction.update).not.toHaveBeenCalled();
+  });
+
   it('accepts matching highest bids made before expiry and ranks the earliest one as winner', async () => {
     const auction = {
       id: 'auction-1',
