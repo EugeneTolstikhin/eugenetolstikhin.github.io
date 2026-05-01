@@ -1,0 +1,275 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    @apply bg-slate-100 text-slate-900 antialiased;
+    font-family:
+      Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+      sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  * {
+    @apply box-border;
+  }
+
+  body {
+    @apply m-0 min-h-screen min-w-80;
+  }
+
+  button,
+  input {
+    font: inherit;
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
+
+  button:disabled,
+  input:disabled {
+    @apply cursor-not-allowed opacity-60;
+  }
+
+  h1,
+  h2,
+  p {
+    @apply mt-0;
+  }
+}
+
+@layer components {
+  .app-shell {
+    @apply mx-auto w-[min(1180px,calc(100%-32px))] py-8 pb-12 max-[820px]:w-[min(100%-22px,680px)] max-[820px]:pt-5;
+  }
+
+  .page-header {
+    @apply mb-6 grid grid-cols-[minmax(0,1fr)_minmax(320px,420px)] items-start gap-6 max-[820px]:grid-cols-1;
+  }
+
+  .eyebrow {
+    @apply mb-2 text-xs font-bold uppercase tracking-normal text-slate-500;
+  }
+
+  h1 {
+    @apply mb-0 text-[clamp(2.15rem,5vw,4rem)] leading-none;
+  }
+
+  .auth-panel,
+  .empty-state,
+  .notice,
+  .toolbar,
+  .auction-card {
+    @apply rounded-lg border border-slate-200 bg-white shadow-[0_12px_34px_rgba(21,43,53,0.08)];
+  }
+
+  .auth-panel {
+    @apply p-4;
+  }
+
+  .auth-panel--ready {
+    @apply flex items-center gap-3;
+  }
+
+  .auth-panel--ready svg {
+    @apply text-emerald-700;
+  }
+
+  .auth-panel--ready span {
+    @apply mt-1 block text-sm text-slate-500;
+  }
+
+  .auth-panel--ready > div {
+    @apply min-w-0 flex-1;
+  }
+
+  .auth-panel__logout {
+    @apply shrink-0;
+  }
+
+  .auth-panel__heading {
+    @apply mb-3.5 flex items-start gap-3;
+  }
+
+  .auth-panel__heading svg {
+    @apply shrink-0 text-sky-800;
+  }
+
+  .auth-panel h2,
+  .empty-state h2 {
+    @apply mb-1 text-lg font-bold;
+  }
+
+  .auth-panel p,
+  .empty-state p {
+    @apply mb-0 text-slate-500;
+  }
+
+  .auth-form {
+    @apply grid gap-2.5;
+  }
+
+  .auth-form label,
+  .bid-form label {
+    @apply grid gap-1.5 text-sm font-bold text-slate-700;
+  }
+
+  .auth-form input,
+  .bid-form input {
+    @apply min-h-10 w-full rounded-lg border border-slate-300 bg-slate-50 px-3 text-slate-900;
+  }
+
+  .auth-panel__message {
+    @apply mt-3 text-sm;
+  }
+
+  .toolbar {
+    @apply mb-5 flex items-center justify-between gap-4 px-3.5 py-3;
+  }
+
+  .toolbar div {
+    @apply flex items-baseline gap-2 text-slate-500;
+  }
+
+  .toolbar strong {
+    @apply text-xl text-slate-900;
+  }
+
+  .icon-text-button,
+  .icon-button {
+    @apply rounded-lg border-0 bg-sky-700 text-white transition hover:bg-sky-900 hover:shadow-[0_10px_20px_rgba(31,111,141,0.22)];
+  }
+
+  .icon-text-button {
+    @apply inline-flex min-h-10 items-center justify-center gap-2 px-3.5 font-extrabold;
+  }
+
+  .icon-text-button svg,
+  .icon-button svg {
+    @apply h-4.5 w-4.5;
+  }
+
+  .icon-button {
+    @apply grid h-10 w-11 place-items-center;
+  }
+
+  .auction-grid {
+    @apply grid grid-cols-[repeat(auto-fill,minmax(270px,1fr))] items-start gap-5.5 py-2 pb-10 max-[820px]:grid-cols-1;
+  }
+
+  .auction-card {
+    @apply relative min-h-89.5 overflow-hidden transition duration-200;
+  }
+
+  .auction-card--hover {
+    @apply z-5 scale-120 border-sky-200 shadow-[0_22px_54px_rgba(21,43,53,0.18)] max-[820px]:scale-103;
+  }
+
+  .auction-card--selected {
+    @apply z-4 col-span-2 min-h-132.5 border-emerald-300 max-[820px]:col-span-1;
+  }
+
+  .auction-card__media {
+    @apply grid h-43 place-items-center gap-2.5 text-slate-500;
+    background:
+      linear-gradient(135deg, rgba(31, 111, 141, 0.14), rgba(22, 124, 86, 0.12)),
+      repeating-linear-gradient(45deg, #eef4f6 0, #eef4f6 10px, #e4edf1 10px, #e4edf1 20px);
+  }
+
+  .auction-card__media svg {
+    @apply h-10.5 w-10.5;
+  }
+
+  .auction-card__media span {
+    @apply font-extrabold;
+  }
+
+  .auction-card__body {
+    @apply grid min-h-46 gap-3.5 p-4;
+  }
+
+  .auction-card__topline {
+    @apply flex items-start justify-between gap-3;
+  }
+
+  .auction-card h2 {
+    @apply m-0 min-w-0 text-[1.18rem] leading-tight;
+  }
+
+  .status-tag {
+    @apply shrink-0 rounded-full border border-slate-300 px-2.5 py-1 text-xs font-black;
+  }
+
+  .status-tag--active {
+    @apply border-emerald-300 bg-emerald-100 text-emerald-800;
+  }
+
+  .status-tag--draft {
+    @apply border-amber-200 bg-amber-100 text-amber-800;
+  }
+
+  .status-tag--ended {
+    @apply bg-slate-100 text-slate-600;
+  }
+
+  .status-tag--cancelled {
+    @apply border-rose-200 bg-rose-100 text-rose-800;
+  }
+
+  .auction-card__vin {
+    @apply m-0 break-words text-slate-500;
+  }
+
+  .auction-card__enter,
+  .auction-card__return {
+    @apply justify-self-start;
+  }
+
+  .auction-card__action-row {
+    @apply flex pt-1;
+  }
+
+  .auction-card__action-row .auction-card__enter {
+    @apply w-full;
+  }
+
+  .bid-form {
+    @apply grid gap-2.5 pt-1.5;
+  }
+
+  .bid-form__row {
+    @apply grid grid-cols-[minmax(0,1fr)_44px] gap-2.5;
+  }
+
+  .form-note,
+  .form-message {
+    @apply m-0 text-sm;
+  }
+
+  .form-note {
+    @apply text-slate-500;
+  }
+
+  .form-message--success {
+    @apply text-emerald-800;
+  }
+
+  .form-message--error,
+  .notice--error {
+    @apply text-rose-800;
+  }
+
+  .auction-card__footer {
+    @apply mt-auto flex flex-wrap justify-between gap-x-4 gap-y-2.5 text-sm text-slate-500;
+  }
+
+  .auction-card__footer strong {
+    @apply text-slate-900;
+  }
+
+  .empty-state,
+  .notice {
+    @apply p-6;
+  }
+}
