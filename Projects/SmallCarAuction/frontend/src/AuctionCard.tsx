@@ -3,7 +3,7 @@
 import { ArrowLeft, ExternalLink, ImageOff, Send } from 'lucide-react';
 import { FormEvent, PointerEvent, useEffect, useReducer, useRef, useState } from 'react';
 import { auctionCardReducer } from './auctionCardMachine';
-import { formatDateTime, formatMoney, timeUntil } from './format';
+import { formatDateTime, formatMoney } from './format';
 import type { Auction } from './types';
 
 type Props = {
@@ -25,11 +25,13 @@ export function AuctionCard({ auction, csrfToken, currentUserId, onBid }: Props)
   const isSelected = state.value === 'selected';
   const isHover = state.value === 'hover';
   const topBid = auction.bids?.[0];
-  const highestBid = topBid?.amount ?? auction.currentPrice;
+  const hasBids = Boolean(topBid);
+  const displayPrice = topBid?.amount ?? auction.startingPrice;
   const isCurrentUserLeading = Boolean(
     currentUserId && topBid?.buyer?.id === currentUserId,
   );
   const isEnded = auction.state === 'ENDED';
+  const hasWinner = Boolean(topBid && (auction.winnerBuyerId || topBid.buyer?.id));
   const didCurrentUserWin = Boolean(
     isEnded &&
       currentUserId &&
@@ -37,22 +39,13 @@ export function AuctionCard({ auction, csrfToken, currentUserId, onBid }: Props)
   );
   const endedOutcomeLabel = didCurrentUserWin ? 'Won' : 'Lost';
   const hasAnotherLeader = Boolean(topBid && currentUserId && !isCurrentUserLeading);
-  const bidStatusTitle = didCurrentUserWin
-    ? 'You won this auction'
-    : isEnded
-      ? 'Auction won by another buyer'
-      : isCurrentUserLeading
-        ? 'Your bid is currently highest'
-        : 'Another buyer is leading';
-  const bidStatusDescription = didCurrentUserWin
-    ? 'Your bid is the winning bid.'
-    : isEnded
-      ? 'This auction is closed.'
-      : isCurrentUserLeading
-        ? 'If the auction ends now, this bid wins.'
-        : hasAnotherLeader
-          ? 'Raise your bid above the current amount to take the lead.'
-          : 'Place a bid to compete for this auction.';
+  const bidStatus = getBidStatus({
+    didCurrentUserWin,
+    hasAnotherLeader,
+    hasBids,
+    isCurrentUserLeading,
+    isEnded,
+  });
   const title = `${auction.vehicle.brand} ${auction.vehicle.model}`;
 
   useEffect(() => {
@@ -146,7 +139,7 @@ export function AuctionCard({ auction, csrfToken, currentUserId, onBid }: Props)
         <div className="auction-card__topline">
           <h2>{title}</h2>
           <div className="auction-card__badges">
-            {isEnded && currentUserId && (
+            {isEnded && currentUserId && hasWinner && (
               <span
                 className={`outcome-badge ${
                   didCurrentUserWin ? 'outcome-badge--won' : 'outcome-badge--lost'
@@ -194,17 +187,13 @@ export function AuctionCard({ auction, csrfToken, currentUserId, onBid }: Props)
               Return to Auction list
             </button>
 
-            {topBid && (
+            {bidStatus && (
               <section
-                className={`bid-status-tile ${
-                  isCurrentUserLeading || didCurrentUserWin
-                    ? 'bid-status-tile--leading'
-                    : 'bid-status-tile--outbid'
-                }`}
+                className={`bid-status-tile bid-status-tile--${bidStatus.tone}`}
                 aria-live="polite"
               >
-                <strong>{bidStatusTitle}</strong>
-                <span>{bidStatusDescription}</span>
+                <strong>{bidStatus.title}</strong>
+                <span>{bidStatus.description}</span>
               </section>
             )}
 
@@ -212,9 +201,11 @@ export function AuctionCard({ auction, csrfToken, currentUserId, onBid }: Props)
               <section className="readonly-auction" aria-label="Auction closed">
                 <strong>Bidding is closed</strong>
                 <span>
-                  {didCurrentUserWin
-                    ? 'Congratulations. Your bid won this auction.'
-                    : 'This auction has ended, so new bids are no longer accepted.'}
+                  {!hasBids
+                    ? 'This auction ended without bids.'
+                    : didCurrentUserWin
+                      ? 'Congratulations. Your bid won this auction.'
+                      : 'This auction has ended, so new bids are no longer accepted.'}
                 </span>
               </section>
             ) : (
@@ -257,7 +248,8 @@ export function AuctionCard({ auction, csrfToken, currentUserId, onBid }: Props)
 
         <footer className="auction-card__footer">
           <span>
-            Highest bid <strong>{formatMoney(highestBid)}</strong>
+            {hasBids ? 'Highest bid' : 'Starting price'}{' '}
+            <strong>{formatMoney(displayPrice)}</strong>
           </span>
           {(isHover || isSelected) && (
             <>
@@ -270,7 +262,10 @@ export function AuctionCard({ auction, csrfToken, currentUserId, onBid }: Props)
                   'No bids yet'
                 )}
               </span>
-              <span title={formatDateTime(auction.endTime)}>{timeUntil(auction.endTime)}</span>
+              <span>
+                {isEnded ? 'Ended' : 'Ends'}{' '}
+                <strong>{formatDateTime(auction.endTime)}</strong>
+              </span>
             </>
           )}
         </footer>
@@ -297,4 +292,60 @@ function humanizeBidError(message: string) {
   }
 
   return message;
+}
+
+function getBidStatus({
+  didCurrentUserWin,
+  hasAnotherLeader,
+  hasBids,
+  isCurrentUserLeading,
+  isEnded,
+}: {
+  didCurrentUserWin: boolean;
+  hasAnotherLeader: boolean;
+  hasBids: boolean;
+  isCurrentUserLeading: boolean;
+  isEnded: boolean;
+}) {
+  if (!hasBids) {
+    return {
+      description: isEnded
+        ? 'No winner was assigned.'
+        : 'Place the first bid to lead this auction.',
+      title: isEnded ? 'Auction ended without bids' : 'No bids yet',
+      tone: 'neutral',
+    } as const;
+  }
+
+  if (didCurrentUserWin) {
+    return {
+      description: 'Your bid is the winning bid.',
+      title: 'You won this auction',
+      tone: 'leading',
+    } as const;
+  }
+
+  if (isEnded) {
+    return {
+      description: 'This auction is closed.',
+      title: 'Auction won by another buyer',
+      tone: 'outbid',
+    } as const;
+  }
+
+  if (isCurrentUserLeading) {
+    return {
+      description: 'If the auction ends now, this bid wins.',
+      title: 'Your bid is currently highest',
+      tone: 'leading',
+    } as const;
+  }
+
+  return {
+    description: hasAnotherLeader
+      ? 'Raise your bid above the current amount to take the lead.'
+      : 'Place a bid to compete for this auction.',
+    title: hasAnotherLeader ? 'Another buyer is leading' : 'No bids yet',
+    tone: hasAnotherLeader ? 'outbid' : 'neutral',
+  } as const;
 }

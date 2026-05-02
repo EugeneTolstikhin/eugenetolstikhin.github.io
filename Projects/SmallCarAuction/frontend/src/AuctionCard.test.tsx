@@ -50,6 +50,9 @@ describe('AuctionCard', () => {
     expect(screen.getByText('VIN JT2MA70L0H0123456')).toBeInTheDocument();
     expect(screen.getByText(/bid placed/i)).toBeInTheDocument();
     expect(screen.getByText(/Dec 31, 2029/)).toBeInTheDocument();
+    expect(screen.getByText(/Ends/i)).toBeInTheDocument();
+    expect(screen.getByText(/Jan 1, 2030/)).toBeInTheDocument();
+    expect(screen.queryByText(/ends in/i)).not.toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: /go to auction/i }));
 
     expect(screen.getByRole('button', { name: /return to auction list/i })).toBeInTheDocument();
@@ -152,6 +155,71 @@ describe('AuctionCard', () => {
 
     expect(screen.getByText(/auction won by another buyer/i)).toBeInTheDocument();
     expect(screen.getByText(/bidding is closed/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText(/bid amount/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /make a bid/i })).not.toBeInTheDocument();
+  });
+
+  it('shows starting price and a first-bid prompt for an active auction with no bids', async () => {
+    const user = userEvent.setup();
+    const noBidAuction: Auction = {
+      ...auction,
+      currentPrice: 25000,
+      bids: [],
+    };
+
+    render(
+      <AuctionCard
+        auction={noBidAuction}
+        csrfToken="token"
+        currentUserId="buyer-1"
+        onBid={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/starting price/i)).toBeInTheDocument();
+    expect(screen.getByText('$25,000.00')).toBeInTheDocument();
+    expect(screen.queryByText(/highest bid/i)).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /go to auction/i }));
+
+    expect(screen.getAllByText(/no bids yet/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/place the first bid to lead this auction/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/bid amount/i)).toBeEnabled();
+    expect(screen.getByRole('button', { name: /make a bid/i })).toBeEnabled();
+  });
+
+  it('shows no winner and no outcome badge for an expired auction with no bids', async () => {
+    const user = userEvent.setup();
+    const endedNoBidAuction: Auction = {
+      ...auction,
+      state: 'ENDED',
+      currentPrice: 25000,
+      bids: [],
+      winnerBuyerId: null,
+      winningBidId: null,
+      endTime: '2029-12-31T12:00:00.000Z',
+    };
+
+    render(
+      <AuctionCard
+        auction={endedNoBidAuction}
+        csrfToken="token"
+        currentUserId="buyer-1"
+        onBid={vi.fn()}
+      />,
+    );
+
+    expect(screen.queryByText('Won')).not.toBeInTheDocument();
+    expect(screen.queryByText('Lost')).not.toBeInTheDocument();
+    expect(screen.getByText(/starting price/i)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /go to auction/i }));
+
+    expect(screen.getAllByText(/auction ended without bids/i).length).toBeGreaterThan(1);
+    expect(screen.getByText(/no winner was assigned/i)).toBeInTheDocument();
+    expect(screen.getByText(/this auction ended without bids/i)).toBeInTheDocument();
+    expect(screen.getByText(/Dec 31, 2029/)).toBeInTheDocument();
+    expect(screen.queryByText(/ended .* ago/i)).not.toBeInTheDocument();
     expect(screen.queryByLabelText(/bid amount/i)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /make a bid/i })).not.toBeInTheDocument();
   });

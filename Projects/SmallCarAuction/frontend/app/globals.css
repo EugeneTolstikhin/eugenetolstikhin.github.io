@@ -286,6 +286,10 @@
     @apply border-amber-300 bg-amber-50;
   }
 
+  .bid-status-tile--neutral {
+    @apply border-slate-300 bg-slate-50;
+  }
+
   .bid-form__row {
     @apply grid grid-cols-[minmax(0,1fr)_44px] gap-2.5;
   }

@@ -70,9 +70,10 @@ Production deployments should set a strong `SESSION_SECRET`, explicit `CORS_ORIG
 { "email": "admin@example.com", "password": "AdminPass123!", "role": "ADMIN" }
 { "email": "buyer@example.com", "password": "BuyerPass123!", "role": "BUYER" }
 { "email": "buyer2@example.com", "password": "BuyerTwoPass123!", "role": "BUYER" }
+{ "email": "demo-bidder@example.com", "password": "DemoBidderPass123!", "role": "BUYER" }
 ```
 
-The seed passwords can be overridden with `SEED_ADMIN_PASSWORD`, `SEED_BUYER_PASSWORD`, and `SEED_BUYER_TWO_PASSWORD` in the API container environment.
+The seed passwords can be overridden with `SEED_ADMIN_PASSWORD`, `SEED_BUYER_PASSWORD`, `SEED_BUYER_TWO_PASSWORD`, and `SEED_DEMO_BIDDER_PASSWORD` in the API container environment.
 
 ## APIs
 

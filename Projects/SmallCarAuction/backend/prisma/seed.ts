@@ -32,6 +32,9 @@ async function main() {
   const buyerTwoPasswordHash = await hashPassword(
     process.env.SEED_BUYER_TWO_PASSWORD ?? 'BuyerTwoPass123!',
   );
+  const demoBidderPasswordHash = await hashPassword(
+    process.env.SEED_DEMO_BIDDER_PASSWORD ?? 'DemoBidderPass123!',
+  );
 
   await prisma.user.upsert({
     where: { email: 'admin@example.com' },
@@ -43,7 +46,7 @@ async function main() {
     },
   });
 
-  const buyer = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: 'buyer@example.com' },
     update: { passwordHash: buyerPasswordHash },
     create: {
@@ -63,7 +66,17 @@ async function main() {
     },
   });
 
-  await seedDemoAuctions(buyer.id);
+  const demoBidder = await prisma.user.upsert({
+    where: { email: 'demo-bidder@example.com' },
+    update: { passwordHash: demoBidderPasswordHash },
+    create: {
+      email: 'demo-bidder@example.com',
+      passwordHash: demoBidderPasswordHash,
+      role: UserRole.BUYER,
+    },
+  });
+
+  await seedDemoAuctions(demoBidder.id);
 }
 
 async function seedDemoAuctions(buyerId: string) {
@@ -75,6 +88,7 @@ async function seedDemoAuctions(buyerId: string) {
       vin: 'JT2MA70L0H0123456',
       startingPrice: 25000,
       currentPrice: 28000,
+      seedBidAmount: 28000,
       endTime: addHours(now, 8),
     },
     {
@@ -83,6 +97,7 @@ async function seedDemoAuctions(buyerId: string) {
       vin: 'WBSBG9321VEY12345',
       startingPrice: 32000,
       currentPrice: 34500,
+      seedBidAmount: 34500,
       endTime: addHours(now, 14),
     },
     {
@@ -91,6 +106,7 @@ async function seedDemoAuctions(buyerId: string) {
       vin: 'WUAC6AFR8FA901234',
       startingPrice: 38000,
       currentPrice: 39750,
+      seedBidAmount: 39750,
       endTime: addHours(now, 20),
     },
     {
@@ -98,7 +114,7 @@ async function seedDemoAuctions(buyerId: string) {
       model: 'C63 AMG',
       vin: 'WDDGF77X88F123456',
       startingPrice: 41000,
-      currentPrice: 43000,
+      currentPrice: 41000,
       endTime: addHours(now, 26),
     },
     {
@@ -106,7 +122,7 @@ async function seedDemoAuctions(buyerId: string) {
       model: 'Cayman S',
       vin: 'WP0AB2A89EK123456',
       startingPrice: 46000,
-      currentPrice: 48500,
+      currentPrice: 46000,
       endTime: addHours(now, 32),
     },
     {
@@ -114,7 +130,7 @@ async function seedDemoAuctions(buyerId: string) {
       model: 'Mustang GT',
       vin: '1FA6P8CF7K5123456',
       startingPrice: 29000,
-      currentPrice: 31250,
+      currentPrice: 29000,
       endTime: addHours(now, 38),
     },
     {
@@ -122,7 +138,7 @@ async function seedDemoAuctions(buyerId: string) {
       model: '370Z Nismo',
       vin: 'JN1AZ4EH3FM123456',
       startingPrice: 27000,
-      currentPrice: 29200,
+      currentPrice: 27000,
       endTime: addHours(now, 44),
     },
     {
@@ -130,7 +146,7 @@ async function seedDemoAuctions(buyerId: string) {
       model: 'Camaro SS',
       vin: '1G1FH1R77H0123456',
       startingPrice: 31000,
-      currentPrice: 33500,
+      currentPrice: 31000,
       endTime: addHours(now, 50),
     },
     {
@@ -138,7 +154,7 @@ async function seedDemoAuctions(buyerId: string) {
       model: 'RC F',
       vin: 'JTHHP5BC1G5123456',
       startingPrice: 36000,
-      currentPrice: 38250,
+      currentPrice: 36000,
       endTime: addHours(now, 56),
     },
     {
@@ -146,7 +162,7 @@ async function seedDemoAuctions(buyerId: string) {
       model: 'WRX STI',
       vin: 'JF1VA2M67G9823456',
       startingPrice: 24000,
-      currentPrice: 26100,
+      currentPrice: 24000,
       endTime: addHours(now, 62),
     },
   ];
@@ -184,20 +200,23 @@ async function seedDemoAuctions(buyerId: string) {
       },
     });
 
-    const existingSeedBid = await prisma.bid.findFirst({
+    await prisma.bid.deleteMany({
       where: {
         auctionId: auction.id,
-        buyerId,
-        amount: demoAuction.currentPrice,
+        buyer: {
+          email: {
+            in: ['buyer@example.com', 'buyer2@example.com', 'demo-bidder@example.com'],
+          },
+        },
       },
     });
 
-    if (!existingSeedBid) {
+    if (demoAuction.seedBidAmount) {
       await prisma.bid.create({
         data: {
           auctionId: auction.id,
           buyerId,
-          amount: demoAuction.currentPrice,
+          amount: demoAuction.seedBidAmount,
         },
       });
     }
