@@ -2,6 +2,8 @@
 
 GitHub project link: https://github.com/EugeneTolstikhin/eugenetolstikhin.github.io/tree/main/Projects/SmallImageLibrary
 
+Runnable solution: Docker Compose locally. A live hosted deployment is not included because the solution intentionally depends on Postgres, Redis, and a NestJS API; it is packaged to run reproducibly as a Docker stack.
+
 ## Architecture Overview
 
 Small Image Library is implemented as a Docker Compose application with four services: Next.js frontend, NestJS API, Postgres, and Redis. Prisma owns schema migrations, typed database access, and seed orchestration. The frontend owns the search experience, while the NestJS service owns API contracts, preprocessing, indexing, analytics, and persistence integration.
@@ -73,3 +75,5 @@ Further work would add full integration tests against live Postgres and Redis, p
 ## Trade-Offs
 
 The architecture is heavier than a single Next.js challenge app, but it better demonstrates service boundaries, persistence, containerization, and backend reasoning. The main limitation is that the search index rebuilds on API startup. That is acceptable for a challenge dataset and explicitly points toward OpenSearch for production scale.
+
+Further work would add a hosted container deployment, real ingestion worker, full integration/e2e tests, production observability, and a dedicated search engine such as OpenSearch, Elasticsearch, or Meilisearch.

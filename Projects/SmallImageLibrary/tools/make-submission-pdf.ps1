@@ -8,6 +8,7 @@ $pages = @(
     "Small Image Library Submission",
     "GitHub project link:",
     "https://github.com/EugeneTolstikhin/eugenetolstikhin.github.io/tree/main/Projects/SmallImageLibrary",
+    "Runnable solution: Docker Compose locally. Live hosted deployment is not included for this multi-service stack.",
     "",
     "Architecture Overview",
     "Docker Compose runs four services: Next.js frontend, NestJS API, Postgres, and Redis.",
@@ -58,7 +59,8 @@ $pages = @(
     "Trade-Offs",
     "This is heavier than a single Next.js app, but it better demonstrates service boundaries and backend",
     "reasoning. The main limitation is startup index rebuild time, which is acceptable here and points",
-    "cleanly to OpenSearch for production scale."
+    "cleanly to OpenSearch for production scale. Further work would add hosted deployment, ingestion,",
+    "integration/e2e tests, observability, and a dedicated search engine."
   )
 )
 

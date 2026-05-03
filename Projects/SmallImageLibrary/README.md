@@ -2,7 +2,18 @@
 
 Dockerized media metadata search demo for the IMAGO-style coding challenge.
 
-GitHub project link: https://github.com/EugeneTolstikhin/eugenetolstikhin.github.io/tree/main/Projects/SmallImageLibrary
+## Submission Links
+
+- GitHub project link: https://github.com/EugeneTolstikhin/eugenetolstikhin.github.io/tree/main/Projects/SmallImageLibrary
+- Runnable solution: Docker Compose locally via the instructions below.
+- Live hosted deployment: not provided for this submission because the solution intentionally depends on a multi-service Docker stack with Postgres, Redis, and a NestJS API. The app is packaged to run reproducibly with one Docker command.
+
+## Assumptions
+
+- A service-oriented architecture is acceptable even though the prompt suggests a lightweight search layer inside Next.js. The decision is documented as a role-aligned trade-off for stronger API, database, Docker, and backend design signal.
+- Generated fixture data may extend the two provided examples as long as the original examples are included.
+- Redis-backed analytics and cache are sufficient for the demo; production analytics would use durable metrics/observability tooling.
+- Invalid metadata should remain searchable where possible instead of being discarded.
 
 ## Architecture
 
@@ -147,6 +158,14 @@ Testing TODOs retained from the risk review:
 - Redis analytics are operationally useful but intentionally lightweight.
 - Invalid dates are not discarded; they remain searchable but are excluded from active date-range filters.
 
+## Limitations And What I Would Do Next
+
+- Add a hosted deployment on Render, Fly.io, Railway, or a similar container platform with managed Postgres/Redis.
+- Replace the in-memory index with OpenSearch, Elasticsearch, or Meilisearch for millions of records and multi-instance API deployments.
+- Add full integration tests against real Postgres/Redis and browser-level tests for the main search workflow.
+- Add an ingestion endpoint or worker for continuous media updates instead of startup-only seeding.
+- Add production observability with structured logs, tracing, dashboards, and alerting.
+
 ## PDF Submission
 
-The PDF content lives in `docs/submission.md`. Export it to PDF using any Markdown-to-PDF tool inside Docker, or print the rendered Markdown from an editor/browser. The content is intentionally written as a concise submission artifact.
+The PDF content lives in `docs/submission.md`, and the generated PDF is included at `docs/submission.pdf`.

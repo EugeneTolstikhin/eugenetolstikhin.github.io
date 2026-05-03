@@ -9,7 +9,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents 4 0 R >>
 endobj
 4 0 obj
-<< /Length 1385 >>
+<< /Length 1521 >>
 stream
 BT
 /F1 20 Tf
@@ -22,6 +22,9 @@ BT
 0 -14 Td
 /F1 10 Tf
 (https://github.com/EugeneTolstikhin/eugenetolstikhin.github.io/tree/main/Projects/SmallImageLibrary) Tj
+0 -14 Td
+/F1 10 Tf
+(Runnable solution: Docker Compose locally. Live hosted deployment is not included for this multi-service stack.) Tj
 0 -14 Td
 0 -18 Td
 /F1 14 Tf
@@ -128,7 +131,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents 8 0 R >>
 endobj
 8 0 obj
-<< /Length 1226 >>
+<< /Length 1372 >>
 stream
 BT
 /F1 20 Tf
@@ -172,7 +175,10 @@ BT
 (reasoning. The main limitation is startup index rebuild time, which is acceptable here and points) Tj
 0 -14 Td
 /F1 10 Tf
-(cleanly to OpenSearch for production scale.) Tj
+(cleanly to OpenSearch for production scale. Further work would add hosted deployment, ingestion,) Tj
+0 -14 Td
+/F1 10 Tf
+(integration/e2e tests, observability, and a dedicated search engine.) Tj
 0 -14 Td
 ET
 endstream
@@ -184,12 +190,12 @@ xref
 0000000058 00000 n 
 0000000129 00000 n 
 0000000304 00000 n 
-0000001741 00000 n 
-0000001916 00000 n 
-0000003621 00000 n 
-0000003796 00000 n 
+0000001877 00000 n 
+0000002052 00000 n 
+0000003757 00000 n 
+0000003932 00000 n 
 trailer
 << /Size 9 /Root 1 0 R >>
 startxref
-5074
+5356
 %%EOF
