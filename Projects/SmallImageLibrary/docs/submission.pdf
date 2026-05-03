@@ -1,0 +1,195 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [ 3 0 R 5 0 R 7 0 R ] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 1385 >>
+stream
+BT
+/F1 20 Tf
+72 760 Td
+/F1 14 Tf
+(Small Image Library Submission) Tj
+0 -22 Td
+/F1 10 Tf
+(GitHub project link:) Tj
+0 -14 Td
+/F1 10 Tf
+(https://github.com/EugeneTolstikhin/eugenetolstikhin.github.io/tree/main/Projects/SmallImageLibrary) Tj
+0 -14 Td
+0 -18 Td
+/F1 14 Tf
+(Architecture Overview) Tj
+0 -22 Td
+/F1 10 Tf
+(Docker Compose runs four services: Next.js frontend, NestJS API, Postgres, and Redis.) Tj
+0 -14 Td
+/F1 10 Tf
+(Prisma owns schema migrations, typed database access, and deterministic seed orchestration.) Tj
+0 -14 Td
+/F1 10 Tf
+(The frontend owns the search workspace. The NestJS API owns contracts, preprocessing, indexing,) Tj
+0 -14 Td
+/F1 10 Tf
+(analytics, cache integration, and persistence. This is a deliberate service-oriented interpretation) Tj
+0 -14 Td
+/F1 10 Tf
+(of the challenge because the target role emphasizes full-stack ownership, REST APIs, database design,) Tj
+0 -14 Td
+/F1 10 Tf
+(Docker, and automated testing.) Tj
+0 -14 Td
+0 -18 Td
+/F1 14 Tf
+(Search Strategy) Tj
+0 -22 Td
+/F1 10 Tf
+(Postgres stores media rows through Prisma. At API startup, NestJS loads normalized rows and builds an in-memory) Tj
+0 -14 Td
+/F1 10 Tf
+(inverted index. suchtext is weighted 5, fotografen is weighted 2, and bildnummer is weighted 8.) Tj
+0 -14 Td
+/F1 10 Tf
+(Token and prefix matching are supported. Results can sort by relevance, newest date, or oldest date.) Tj
+0 -14 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 1653 >>
+stream
+BT
+/F1 20 Tf
+72 760 Td
+/F1 14 Tf
+(Preprocessing) Tj
+0 -22 Td
+/F1 10 Tf
+(Dates are parsed from DD.MM.YYYY into ISO dates. Invalid dates become null, remain searchable,) Tj
+0 -14 Td
+/F1 10 Tf
+(and are excluded from active date-range filters. Text is accent-normalized, lowercased, tokenized,) Tj
+0 -14 Td
+/F1 10 Tf
+(and cleaned of noisy delimiters. Restrictions such as PUBLICATIONxINxGERxSUIxAUTxONLY are extracted) Tj
+0 -14 Td
+/F1 10 Tf
+(as structured filter values.) Tj
+0 -14 Td
+0 -18 Td
+/F1 14 Tf
+(Data And Analytics) Tj
+0 -22 Td
+/F1 10 Tf
+(Postgres is the durable media catalog. Prisma migrations own schema changes. Redis stores total search count, recent timing samples,) Tj
+0 -14 Td
+/F1 10 Tf
+(common keywords, and short-lived cached search responses. The cache uses a simple TTL for the demo.) Tj
+0 -14 Td
+/F1 10 Tf
+(For continuous ingestion, cache keys would include an index version or be invalidated by update events.) Tj
+0 -14 Td
+0 -18 Td
+/F1 14 Tf
+(Security) Tj
+0 -22 Td
+/F1 10 Tf
+(The API validates query parameters with DTO constraints, limits query and page sizes, applies Helmet) Tj
+0 -14 Td
+/F1 10 Tf
+(headers, restricts CORS, returns structured errors, and rate-limits requests. SQL writes use parameterized) Tj
+0 -14 Td
+/F1 10 Tf
+(database access. The frontend uses CSP and renders metadata through React text nodes rather than raw HTML.) Tj
+0 -14 Td
+0 -18 Td
+/F1 14 Tf
+(Continuous Ingestion) Tj
+0 -22 Td
+/F1 10 Tf
+(New items would be inserted into Postgres, normalized by the API or a worker, appended to the search) Tj
+0 -14 Td
+/F1 10 Tf
+(index without blocking readers, and published to the production search index.) Tj
+0 -14 Td
+ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica >> >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 1226 >>
+stream
+BT
+/F1 20 Tf
+72 760 Td
+/F1 14 Tf
+(Scaling To Millions) Tj
+0 -22 Td
+/F1 10 Tf
+(For 10,000 rows, the in-memory index is transparent and fast. For millions of rows, Postgres remains) Tj
+0 -14 Td
+/F1 10 Tf
+(the source of truth and OpenSearch or Elasticsearch owns ranking and retrieval. Redis continues to) Tj
+0 -14 Td
+/F1 10 Tf
+(serve analytics, hot query caching, and operational support.) Tj
+0 -14 Td
+0 -18 Td
+/F1 14 Tf
+(Testing Approach) Tj
+0 -22 Td
+/F1 10 Tf
+(Automated tests cover tokenization, normalization, restriction extraction, invalid dates, weighted) Tj
+0 -14 Td
+/F1 10 Tf
+(prefix scoring, filters, sorting, pagination, and frontend snippet highlighting. Further work would) Tj
+0 -14 Td
+/F1 10 Tf
+(add live Postgres/Redis integration tests and browser tests for debounce, loading, empty, error, and) Tj
+0 -14 Td
+/F1 10 Tf
+(pagination states.) Tj
+0 -14 Td
+0 -18 Td
+/F1 14 Tf
+(Trade-Offs) Tj
+0 -22 Td
+/F1 10 Tf
+(This is heavier than a single Next.js app, but it better demonstrates service boundaries and backend) Tj
+0 -14 Td
+/F1 10 Tf
+(reasoning. The main limitation is startup index rebuild time, which is acceptable here and points) Tj
+0 -14 Td
+/F1 10 Tf
+(cleanly to OpenSearch for production scale.) Tj
+0 -14 Td
+ET
+endstream
+endobj
+xref
+0 9
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000129 00000 n 
+0000000304 00000 n 
+0000001741 00000 n 
+0000001916 00000 n 
+0000003621 00000 n 
+0000003796 00000 n 
+trailer
+<< /Size 9 /Root 1 0 R >>
+startxref
+5074
+%%EOF

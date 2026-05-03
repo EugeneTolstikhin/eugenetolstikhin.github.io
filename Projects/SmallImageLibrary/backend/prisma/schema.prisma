@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model MediaItem {
+  id             BigInt   @id @default(autoincrement())
+  suchtext       String
+  bildnummer     String   @unique
+  fotografen     String
+  datum          String
+  hoehe          String
+  breite         String
+  dateIso        DateTime? @map("date_iso") @db.Date
+  restrictions   String[] @default([])
+  searchableText String   @map("searchable_text")
+  tokens         String[] @default([])
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([fotografen], map: "idx_media_items_credit")
+  @@index([dateIso], map: "idx_media_items_date_iso")
+  @@map("media_items")
+}
