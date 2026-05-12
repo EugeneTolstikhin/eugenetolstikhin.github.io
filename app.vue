@@ -294,7 +294,7 @@ function resetFilters() {
 
       <div class="language-strip" aria-label="Spoken languages">
         <span v-for="language in spokenLanguages" :key="language.language.en">
-          {{ text(language.language) }} / {{ language.level }}
+          {{ text(language.language) }} / {{ text(language.level) }}
         </span>
       </div>
     </aside>

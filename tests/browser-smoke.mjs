@@ -67,6 +67,10 @@ async function verifyViewport(name, viewport, shouldExerciseSearch) {
     failures.push(`[${name}] Removed production signals section is still visible.`);
   }
 
+  if (bodyText.includes('"en":') || bodyText.includes("[object Object]")) {
+    failures.push(`[${name}] Localized object data leaked into visible portfolio UI.`);
+  }
+
   if (horizontalOverflow > 2) {
     failures.push(`[${name}] Horizontal overflow detected: ${horizontalOverflow}px.`);
   }
