@@ -39,6 +39,6 @@ docker run --rm -v "${PWD}:/work" -v eugenetolstikhingithubio_portfolio_node_mod
 
 ## Deployment Readiness
 
-The GitHub Pages workflow is manual-only for now. After local DoD is accepted, run the workflow from GitHub Actions or add a push trigger.
+GitHub Pages must use **GitHub Actions** as the build and deployment source. The workflow runs on pushes to `main` and can also be started manually from GitHub Actions.
 
 The generated artifact is `.output/public`.
