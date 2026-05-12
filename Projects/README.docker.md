@@ -70,6 +70,63 @@ Notes:
 - `admin-panel-tui` is pointed at `bowling-score-tui` automatically.
 - For the cleanest experience, run the TUI profile without the default plain-text `bowling-score` service at the same time.
 
+## Qt/QML mode
+
+`BowlingScore` also has a Qt Quick score-table UI. Docker containers do not own your desktop display, so start an X server first.
+
+Windows setup:
+
+1. Install and start VcXsrv, X410, or another X server.
+2. For VcXsrv, use `Multiple windows`, `Start no client`, and enable `Disable access control`.
+3. Keep the X server running while the container is open.
+
+Run the Qt/QML demo from `Projects`:
+
+```powershell
+docker compose --profile qt up --build bowling-score-qt
+```
+
+The compose service runs with:
+
+- `BOWLING_VIEW=ui`
+- `BOWLING_LISTENER=simulation`
+- sample players `Ada`, `Linus`, and `Grace`
+- `DISPLAY=host.docker.internal:0.0`
+
+You should see a `BowlingScore` desktop window with an animated score table. The simulation plays one full game, then leaves the window open with the final scores. Close the window or press `Ctrl+C` in the terminal to stop it.
+
+Linux note: if your host already exposes X11 through the normal Unix socket, run with your host display instead:
+
+```powershell
+$env:DISPLAY=":0"
+docker compose --profile qt up --build bowling-score-qt
+```
+
+## AdminPanel Qt mode
+
+`AdminPanel` also has a Qt desktop client. It sends the same player-name handshake as the terminal version, but through a small GUI.
+
+Run the BowlingScore TUI server and the Qt AdminPanel together:
+
+```powershell
+docker compose --profile tui --profile qt up -d --build points-generator bowling-score-tui admin-panel-qt
+```
+
+The Qt AdminPanel is published through VNC, not HTTP. Open a VNC viewer and connect to:
+
+```text
+localhost:5901
+```
+
+In the Qt window:
+
+1. Keep `Host` as `bowling-score-tui`.
+2. Keep `Port` as `12003`.
+3. Enter player names, for example `Ada Linus Grace`.
+4. Click `Send Players`.
+
+The status area should show `Server answer: Accepted`, and the BowlingScore TUI container will start the game.
+
 ## Alternative startup
 
 ```powershell

@@ -55,6 +55,30 @@ services:
       - tui
     restart: unless-stopped
 
+  bowling-score-qt:
+    image: et-test-bowling-score:latest
+    build:
+      context: ./BowlingScore
+    container_name: bowling-score-qt
+    environment:
+      BOWLING_LISTENER: simulation
+      BOWLING_VIEW: ui
+      BOWLING_PORT_CLIENT: 12001
+      BOWLING_PORT_SERVER: 12004
+      BOWLING_BUFFER_LENGTH: 256
+      BOWLING_POOL_SIZE: 5
+      DISPLAY: ${DISPLAY:-host.docker.internal:0.0}
+      QT_X11_NO_MITSHM: 1
+      QT_QUICK_BACKEND: software
+      LIBGL_ALWAYS_SOFTWARE: 1
+    ports:
+      - "12004:12004"
+    command: ["Ada", "Linus", "Grace"]
+    stdin_open: true
+    tty: true
+    profiles:
+      - qt
+
   admin-panel:
     image: et-test-admin-panel:latest
     build:
@@ -86,3 +110,126 @@ services:
     tty: true
     profiles:
       - tui
+
+  admin-panel-qt:
+    image: et-test-admin-panel:latest
+    build:
+      context: ./AdminPanel
+    container_name: admin-panel-qt
+    depends_on:
+      - bowling-score-tui
+    environment:
+      ADMIN_PANEL_HOST: bowling-score-tui
+      ADMIN_PANEL_PORT: 12003
+      ADMIN_PANEL_BUFFER_LENGTH: 256
+      ADMIN_PANEL_VIEW: ui
+      QT_QPA_PLATFORM: vnc:size=960x640:port=5901
+      QT_QUICK_BACKEND: software
+      LIBGL_ALWAYS_SOFTWARE: 1
+    ports:
+      - "5901:5901"
+    stdin_open: true
+    tty: true
+    profiles:
+      - qt
+
+  small-car-auction-api:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm install && npx prisma db push && npx prisma generate && npm run prisma:seed && npm run start:dev"
+    environment:
+      DATABASE_URL: postgresql://auction:auction@small-car-auction-postgres:5432/car_auction?schema=public
+      REDIS_URL: redis://small-car-auction-redis:6379
+      SESSION_SECRET: replace-me-with-a-long-random-secret
+      CORS_ORIGINS: http://localhost:3000,http://localhost:5173
+      REQUEST_BODY_LIMIT: 100kb
+      RATE_LIMIT_WINDOW_SECONDS: 60
+      RATE_LIMIT_MAX_REQUESTS: 300
+      AUTH_RATE_LIMIT_WINDOW_SECONDS: 300
+      AUTH_RATE_LIMIT_MAX_REQUESTS: 10
+      SESSION_MAX_AGE_SECONDS: 3600
+      API_DOCS_ENABLED: "true"
+      TRACING_ENABLED: "true"
+      OTEL_SERVICE_NAME: small-car-auction-api
+      OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: http://small-car-auction-jaeger:4318/v1/traces
+      MAIL_SMTP_HOST: small-car-auction-mailpit
+      MAIL_SMTP_PORT: 1025
+      MAIL_FROM: "Small Car Auction <no-reply@small-car-auction.test>"
+      OTP_TTL_SECONDS: 300
+      OTP_MAX_ATTEMPTS: 5
+      PORT: 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./SmallCarAuction/backend:/app
+      - small_car_auction_node_modules:/app/node_modules
+    depends_on:
+      small-car-auction-postgres:
+        condition: service_healthy
+      small-car-auction-redis:
+        condition: service_healthy
+      small-car-auction-mailpit:
+        condition: service_started
+      small-car-auction-jaeger:
+        condition: service_started
+
+  small-car-auction-frontend:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:3000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./SmallCarAuction/frontend:/app
+      - small_car_auction_frontend_node_modules:/app/node_modules
+    depends_on:
+      small-car-auction-api:
+        condition: service_started
+
+  small-car-auction-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: auction
+      POSTGRES_PASSWORD: auction
+      POSTGRES_DB: car_auction
+    ports:
+      - "5432:5432"
+    volumes:
+      - small_car_auction_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auction -d car_auction"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  small-car-auction-redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  small-car-auction-mailpit:
+    image: axllent/mailpit:v1.21
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+  small-car-auction-jaeger:
+    image: jaegertracing/all-in-one:1.57
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
+      - "4318:4318"
+      - "4317:4317"
+
+volumes:
+  small_car_auction_frontend_node_modules:
+  small_car_auction_node_modules:
+  small_car_auction_postgres_data:

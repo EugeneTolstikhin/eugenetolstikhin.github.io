@@ -1,3 +1,46 @@
-.vscode
-build
-bin
+# Local editor and machine files
+.vscode/
+.idea/
+.breakpoints
+.gitcommitmsg.txt
+.replit
+.DS_Store
+Thumbs.db
+
+# Dependencies
+node_modules/
+
+# Build and framework output
+build/
+bin/
+dist
+.nuxt/
+.output/
+.next/
+.turbo/
+.cache/
+coverage/
+*.tsbuildinfo
+Projects/BowlingScore/build-tests/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local test artifacts
+test-results/
+
+# Private CV exports
+/Ievgen Tolstikhin*.pdf
+/Ievgen_Tolstikhin*.html
+
+interview-prep*
